@@ -1,13 +1,16 @@
 #!/bin/bash
 
-PROJECT_DIR="$HOME/babyfoot-jft"
-DB_FILE="$PROJECT_DIR/babyfoot.db"
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DB_FILE="$PROJECT_DIR/instance/babyfoot.db"
 BACKUP_DIR="$PROJECT_DIR/backups"
 
-DATE=$(date +"%Y-%m-%d")
+DATE=$(date +"%Y-%m-%d_%H-%M")
 
 mkdir -p "$BACKUP_DIR"
 
-cp "$DB_FILE" "$BACKUP_DIR/babyfoot_$DATE.db"
-
-echo "Sauvegarde effectuée : $BACKUP_DIR/babyfoot_$DATE.db"
+if [ -f "$DB_FILE" ]; then
+    cp "$DB_FILE" "$BACKUP_DIR/babyfoot_$DATE.db"
+    echo "Sauvegarde créée : $BACKUP_DIR/babyfoot_$DATE.db"
+else
+    echo "Base introuvable"
+fi
