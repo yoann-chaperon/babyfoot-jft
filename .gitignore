@@ -6,7 +6,7 @@ __pycache__/
 *.pyd
 
 # Base de données
-babyfoot.db
+#babyfoot.db
 
 # IDE / Mac
 .DS_Store
