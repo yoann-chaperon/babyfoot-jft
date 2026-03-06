@@ -11,3 +11,6 @@ babyfoot.db
 # IDE / Mac
 .DS_Store
 .vscode/
+
+# Exclure le dossier d’images lourd
+static/img/
