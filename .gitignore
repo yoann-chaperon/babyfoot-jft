@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Base de données
+babyfoot.db
+
+# IDE / Mac
+.DS_Store
+.vscode/

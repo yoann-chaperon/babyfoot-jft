@@ -1,0 +1,55 @@
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+
+    <script src="/static/js/main.js"></script>
+
+</head>
+
+<body>
+
+    <h1>🏆 Classement Club</h1>
+
+    <table>
+
+        <tr>
+
+            <th>Rang</th>
+
+            <th>Joueur</th>
+
+            <th>DUEL</th>
+
+            <th>GOAL</th>
+
+            <th>Total</th>
+
+        </tr>
+
+        {% for p in players %}
+
+        <tr class="rank{{loop.index}}">
+
+            <td>{{loop.index}}</td>
+
+            <td>{{p.name}}</td>
+
+            <td>{{p.duel}}</td>
+
+            <td>{{p.goal}}</td>
+
+            <td>{{p.duel+p.goal}}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</body>
+
+</html>
