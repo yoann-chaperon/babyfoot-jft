@@ -1,0 +1,191 @@
+/* ============================= */
+/* CHBB - Style FIFA / Ultimate Team */
+/* ============================= */
+
+header.topbar {
+    display: none !important;
+}
+
+body.admin_chbb {
+    /* background: #121212; */
+    background-image: url("/static/img/background/background_leffe.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+}
+
+.chbb-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    /* background: #1e1e1e; */
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+.chbb-container h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #ffd700;
+    text-shadow: 0 0 5px #000;
+}
+
+.chbb-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-reset,
+.btn-logout {
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.btn-reset {
+    background: #ff4444;
+    color: #fff;
+}
+
+.btn-reset:hover {
+    background: #ff0000;
+    transform: scale(1.05);
+}
+
+.btn-logout {
+    background: #4444ff;
+    color: #fff;
+}
+
+.btn-logout:hover {
+    background: #0000ff;
+    transform: scale(1.05);
+}
+
+/* Tableau style FIFA */
+.chbb-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.chbb-table th {
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.42);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8.9px);
+    -webkit-backdrop-filter: blur(8.9px);
+    border: 1px solid rgba(255, 255, 255, 0.73);
+    color: #000;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 6px 6px 0 0;
+}
+
+.chbb-table td {
+    /* From https://css.glass */
+    background: rgba(255, 255, 255, 0.42);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8.9px);
+    -webkit-backdrop-filter: blur(8.9px);
+    border: 1px solid rgba(255, 255, 255, 0.73);
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+    border-radius: 6px;
+    vertical-align: middle;
+    transition: transform 0.2s;
+}
+
+.chbb-table tr:hover td {
+    transform: scale(1.02);
+    background: #333;
+    color: #ffd700;
+}
+
+body.admin_chbb .photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.chbb-player-name,
+td {
+    font-weight: bold;
+    color: #000;
+    transition: all 0.2s;
+}
+
+/* Select nombre style */
+.chbb-select {
+    padding: 6px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.42);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8.9px);
+    -webkit-backdrop-filter: blur(8.9px);
+    border: 1px solid rgba(255, 255, 255, 0.73);
+    color: #000;
+    border: 1px solid #444;
+    text-align: center;
+    width: 60px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chbb-select:hover {
+    border-color: #ffd700;
+    transform: scale(1.05);
+}
+
+/* Couleurs selon nombre */
+.chbb-select option[value="3"] {
+    background: #ff4444;
+    color: #fff;
+}
+
+.chbb-select option[value="2"] {
+    background: #ff9900;
+    color: #fff;
+}
+
+.chbb-select option[value="1"] {
+    background: #ffff00;
+    color: #000;
+}
+
+.chbb-select option[value="0"] {
+    background: #00ff00;
+    color: #000;
+}
+
+/* Dates */
+.chbb-table td:nth-child(n+4) {
+    font-size: 13px;
+    color: #000;
+    font-style: italic;
+}

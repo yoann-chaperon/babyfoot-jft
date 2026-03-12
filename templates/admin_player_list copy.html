@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>✏️ Modifier joueurs</h1>
+
+<table class="admin-table">
+
+    <tr>
+        <th>photo</th>
+        <th>Nom</th>
+        <th>Duel</th>
+        <th>Goal</th>
+        <th>Interclub</th>
+        <th>Action</th>
+    </tr>
+
+    {% for p in players %}
+
+    <tr>
+        <td><img src="{{ p.photo }}" class="player-photo"></td>
+        <td>{{ p.name }}</td>
+        <td><span class="{{ 'yes' if p.atelier_duel else 'no' }}">{{ "✔" if p.atelier_duel else "✖" }}</span></td>
+        <td><span class="{{ 'yes' if p.atelier_goal else 'no' }}">{{ "✔" if p.atelier_goal else "✖" }}</span></td>
+        <td><span class="{{ 'yes' if p.interclub else 'no' }}">{{ "✔" if p.interclub else "✖" }}</span></td>
+        <td>
+
+            {% if p.actif %}
+
+            <a href="/admin/player/toggle/{{p.id}}" class="btn-disable">
+                🔴 Désactiver
+            </a>
+
+            {% else %}
+
+            <a href="/admin/player/toggle/{{p.id}}" class="btn-enable">
+                🟢 Réactiver
+            </a>
+
+            {% endif %}
+
+        </td>
+        <td>
+
+            <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">
+                ✏️ Modifier
+            </a>
+
+            |
+
+            <a class="btn-delete" href="/admin/player/delete/{{ p.id }}"
+                onclick="return confirm('Supprimer ce joueur ?')">
+                🗑 Supprimer
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

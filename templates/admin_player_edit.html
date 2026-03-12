@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+
+        margin: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+
+        /* background FIFA clair */
+        color: #1a1a1a;
+        background-image: url("/static/img/background/background-3.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+
+    }
+
+
+    /* container principal */
+
+    .container {
+        width: 1400px;
+        margin: 40px auto;
+        background: rgba(255, 255, 255, 0.46);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(9.1px);
+        -webkit-backdrop-filter: blur(9.1px);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        padding: 40px 60px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* titre */
+    h1 {
+        text-align: center;
+        font-size: 36px;
+        margin-bottom: 40px;
+        color: #00bfff;
+    }
+
+    /* grille */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 80px;
+        align-items: start;
+    }
+
+    /* FORMULAIRE */
+    form {
+        font-size: 16px;
+    }
+
+    label {
+        display: block;
+        margin-top: 18px;
+        font-weight: 600;
+    }
+
+    input[type="text"],
+    select {
+        width: 500px;
+        padding: 12px;
+        margin-top: 6px;
+        border-radius: 8px;
+        border: 1px solid #d8e6f5;
+        background: #f7fbff;
+        font-size: 15px;
+    }
+
+    input[type="file"] {
+        margin-top: 8px;
+    }
+
+    .checkbox-group {
+        margin-top: 15px;
+    }
+
+    .checkbox-group label {
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    /* bouton */
+    .btn-add {
+        margin-top: 30px;
+        padding: 14px 50px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        /* background: #4defc2; */
+        background: linear-gradient(to right, #00b140, #00ff7f);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(to right, #00ff7f, #00b140);
+    }
+
+    /* CARD PREVIEW */
+    .player-card {
+        width: 320px;
+        height: 460px;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
+
+    .player-photo {
+        position: absolute;
+        bottom: 95px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        z-index: 3;
+    }
+
+    .club-logo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 70px;
+        z-index: 4;
+    }
+
+    .player-name {
+        position: absolute;
+        bottom: 25px;
+        width: 100%;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        z-index: 4;
+    }
+</style>
+
+<h1>Modifier joueur</h1>
+
+<div class="form-grid">
+
+    <!-- PREVIEW CARTE -->
+    <div class="card-preview">
+
+        <div class="player-card" id="player_card">
+
+            <img id="card_bg" class="card-bg" src="{{ player.card_background or '/static/img/cards/bronze.png' }}">
+
+            {% if player.external_club %}
+            <img id="club_logo" class="club-logo" src="/static/img/logo/logo_{{ player.external_club }}.png">
+            {% else %}
+            <img id="club_logo" class="club-logo" style="display:none;">
+            {% endif %}
+
+            <img id="photo_preview" class="player-photo" src="{{ player.photo or '/static/img/default.png' }}">
+
+            <div class="player-name" id="player_name_preview">
+                {{ player.name }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FORMULAIRE -->
+    <div>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Nom du joueur</label>
+            <input type="text" name="name" id="player_name_input" value="{{ player.name }}">
+
+            <label>Sexe</label>
+            <select name="sexe">
+
+                <option value="M" {% if player.sexe=='M' %}selected{% endif %}>
+                    Masculin
+                </option>
+
+                <option value="F" {% if player.sexe=='F' %}selected{% endif %}>
+                    Féminin
+                </option>
+
+            </select>
+
+
+            <div class="checkbox-group">
+
+                <label>
+                    <input type="checkbox" name="membre_club" id="membreClubCheckbox" {% if player.membre_club
+                        %}checked{% endif %}>
+                    Membre club
+                </label>
+
+                <label>
+                    <input type="checkbox" name="interclub" {% if player.interclub %}checked{% endif %}>
+                    Interclub
+                </label>
+
+                <label>
+                    <input type="checkbox" name="atelier_duel" id="atelierDuelCheckbox" {% if player.atelier_duel
+                        %}checked{% endif %}>
+                    Duel
+                </label>
+
+                <label>
+                    <input type="checkbox" name="atelier_goal" id="atelierGoalCheckbox" {% if player.atelier_goal
+                        %}checked{% endif %}>
+                    Goal
+                </label>
+                <label>
+                    <input type="checkbox" name="actif" {% if player.actif %}checked{% endif %}>
+                    Actif
+                </label>
+                <label>
+                    <input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>
+                    CHBB
+                </label>
+
+            </div>
+
+
+            <label>Club externe</label>
+            <select name="external_club" id="club_select">
+
+                <option value="">-- Choisir --</option>
+
+                {% for c in clubs %}
+                <option value="{{ c }}" {% if player.external_club==c %}selected{% endif %}>
+                    {{ c }}
+                </option>
+                {% endfor %}
+
+            </select>
+
+
+            <label>Nouveau club</label>
+            <input type="text" name="new_club" id="new_club_input">
+
+
+            <label>Photo joueur</label>
+            <input type="file" name="photo" id="photo_input">
+
+
+            <button class="btn-add">💾 Sauvegarder</button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!--------------------- S C R I P T ----------------------->
+
+<script>
+
+    const membreClubCheckbox = document.getElementById("membreClubCheckbox")
+    const atelierDuel = document.getElementById("atelierDuelCheckbox")
+    const atelierGoal = document.getElementById("atelierGoalCheckbox")
+
+    function updateAteliers() {
+
+        if (!membreClubCheckbox.checked) {
+
+            atelierDuel.checked = false
+            atelierGoal.checked = false
+
+            atelierDuel.disabled = true
+            atelierGoal.disabled = true
+
+        } else {
+
+            atelierDuel.disabled = false
+            atelierGoal.disabled = false
+
+        }
+
+    }
+
+    updateAteliers()
+
+    membreClubCheckbox.addEventListener("change", updateAteliers)
+
+
+
+    // preview photo
+    document.getElementById("photo_input").addEventListener("change", function (e) {
+
+        const file = e.target.files[0]
+
+        if (file) {
+
+            document.getElementById("photo_preview").src =
+                URL.createObjectURL(file)
+
+        }
+
+    })
+
+
+
+    // preview nom
+    document.getElementById("player_name_input").addEventListener("input", function () {
+
+        document.getElementById("player_name_preview").innerText =
+            this.value || "Nom joueur"
+
+    })
+
+
+
+    function updateClubPreview(club) {
+
+        const logo = document.getElementById("club_logo")
+        const card = document.getElementById("card_bg")
+
+        if (!club) {
+            logo.style.display = "none"
+            updateCardPreview()
+            return
+        }
+
+        const logoPath = "/static/img/logo/logo_" + club + ".png"
+        const cardPath = "/static/img/cards_ext/card_" + club + ".png"
+
+        logo.src = logoPath
+        logo.style.display = "block"
+
+        // force reload image
+        card.src = ""
+        setTimeout(() => {
+            card.src = cardPath
+        }, 10)
+    }
+
+
+
+    // select club
+    document.getElementById("club_select").addEventListener("change", function () {
+
+        updateClubPreview(this.value)
+
+    })
+
+
+
+    // nouveau club
+    document.getElementById("new_club_input").addEventListener("input", function () {
+
+        updateClubPreview(this.value)
+
+    })
+
+
+
+    function updateCardPreview() {
+
+        const club = document.getElementById("club_select").value
+        const newClub = document.getElementById("new_club_input").value
+
+        if (club || newClub) {
+            return
+        }
+
+        const sexe = document.querySelector('[name="sexe"]').value
+        const interclub = document.querySelector('[name="interclub"]').checked
+
+        let bg = "/static/img/cards/bronze.png"
+
+        if (sexe === "F") {
+            bg = "/static/img/cards/rose.png"
+        }
+        else if (interclub) {
+            bg = "/static/img/cards/argent.png"
+        }
+
+        document.getElementById("card_bg").src = bg
+    }
+
+
+
+    document.querySelector('[name="sexe"]').addEventListener("change", updateCardPreview)
+    document.querySelector('[name="interclub"]').addEventListener("change", updateCardPreview)
+
+    updateCardPreview()
+
+    document.getElementById("club_select").addEventListener("change", function () {
+        updateClubPreview(this.value)
+    })
+    document.getElementById("new_club_input").addEventListener("input", function () {
+        updateClubPreview(this.value)
+    })
+
+</script>
+
+{% endblock %}

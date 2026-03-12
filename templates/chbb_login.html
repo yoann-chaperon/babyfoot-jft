@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CHBB Login</title>
+    <style>
+        body {
+            background-image: url("/static/img/background/background_leffe.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chbb-login-container {
+            background: rgba(255, 255, 255, 0.42);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8.9px);
+            -webkit-backdrop-filter: blur(8.9px);
+            border: 1px solid rgba(255, 255, 255, 0.73);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+
+        h2 {
+            font-size: 47px;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #000;
+        }
+
+        p {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .chbb-login-form input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+
+        .chbb-login-form button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #ff9900;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chbb-login-form button:hover {
+            background: #ff7700;
+        }
+
+        .error {
+            color: #ff4444;
+            margin-top: 10px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #fff;
+            text-decoration: none;
+            background: #4444ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            background: #0000ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chbb-login-container">
+
+        <h2>🍻 Accès CHBB</h2>
+        <p>Seuls les joueurs autorisés peuvent accéder au tableau.</p>
+
+        <!-- Bouton retour admin -->
+        <a href="/admin" class="btn-back">← Retour Admin</a>
+
+        <!-- Formulaire de login -->
+        <form method="post" class="chbb-login-form">
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <br>
+            <button type="submit">Connexion</button>
+        </form>
+
+        <!-- Message d'erreur si mot de passe incorrect -->
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

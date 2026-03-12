@@ -1,0 +1,176 @@
+/* PAGE */
+
+.admin_dettes{
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    min-height:100vh;
+    color:white;
+}
+
+/* CONTAINER */
+
+.admin_dettes .dettes-container{
+    width:1100px;
+    margin:auto;
+    padding:40px 0;
+}
+
+.admin_dettes h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+/* TABLE */
+
+.admin_dettes .dettes-table-admin{
+    width:100%;
+    border-collapse:collapse;
+    background:rgba(0,0,0,0.4);
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.admin_dettes .dettes-table-admin th{
+    background:#111;
+    padding:12px;
+}
+
+.admin_dettes .dettes-table-admin td{
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+/* PHOTO */
+
+.admin_dettes .dettes-player-photo{
+    width:148px;
+    height:148px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid rgba(255,255,255,0.4);
+}
+
+/* NOM */
+
+.admin_dettes .dettes-player-name{
+    font-weight:bold;
+}
+
+/* DETTE */
+
+.admin_dettes .dettes-player-amount{
+    font-size:18px;
+    font-weight:bold;
+    color:#ff4b2b;
+}
+
+/* BOUTON +1 */
+
+.admin_dettes .dettes-btn-add{
+    background:#00ffb7;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* INPUT */
+
+.admin_dettes .dettes-form input{
+    width:80px;
+    padding:4px;
+    border-radius:4px;
+    border:none;
+}
+
+/* AJOUT */
+
+.admin_dettes .dettes-form button{
+    background:#3498db;
+    border:none;
+    padding:6px 10px;
+    color:white;
+    border-radius:6px;
+}
+
+/* HISTORIQUE */
+
+.admin_dettes .dettes-btn-history{
+    background:#9b59b6;
+    padding:6px 12px;
+    color:white;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+.admin_dettes .dette-positive{
+color:#ff4b2b;
+font-weight:bold;
+}
+
+.admin_dettes .dette-negative{
+color:#2ecc71;
+font-weight:bold;
+}
+
+.admin_dettes .dettes-top{
+background:#111;
+padding:15px;
+border-radius:8px;
+margin-bottom:20px;
+}
+
+.admin_dettes .dettes-top li{
+padding:4px 0;
+}
+
+.admin_dettes .dettes-total{
+margin-top:20px;
+font-size:22px;
+font-weight:bold;
+text-align:right;
+}
+
+.admin_dettes .dettes-btn-reset{
+background:#e74c3c;
+color:white;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.admin_dettes .dettes-history-table{
+width:100%;
+border-collapse:collapse;
+}
+
+.admin_dettes .dettes-history-table td,
+.admin_dettes .dettes-history-table th{
+padding:8px;
+border-bottom:1px solid #333;
+}
+
+.admin_dettes .plus{
+color:#ff4b2b;
+font-weight:bold;
+}
+
+.admin_dettes .moins{
+color:#2ecc71;
+font-weight:bold;
+}
+
+/* BOUTON DECONNEXION STYLE FIFA */
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: #fff;
+            text-decoration: none;
+            background: #4444ff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="chbb-container">
+
+    <h1>🍺 Comité d'hygiène Bac à Bière</h1>
+
+    <div class="chbb-actions">
+
+        <a href="/admin/chbb/reset" class="btn-reset">
+            Reset
+        </a>
+
+        <a href="/admin/chbb/logout" class="btn-logout">
+            Déconnexion
+        </a>
+
+    </div>
+
+    <table class="chbb-table">
+
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Nom</th>
+                <th>Nombre</th>
+                <th>Date 1</th>
+                <th>Date 2</th>
+                <th>Date 3</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for player in players %}
+
+            <tr>
+
+                <td>
+                    <img src="{{ player.photo }}" class="photo">
+                </td>
+
+                <td class="chbb-player-name">
+                    {{ player.name }}
+                </td>
+
+                <td>
+
+                    <select class="chbb-select" data-id="{{ player.id }}">
+
+                        <option value="3" {% if player.chbb_count==3 %}selected{% endif %}>3</option>
+                        <option value="2" {% if player.chbb_count==2 %}selected{% endif %}>2</option>
+                        <option value="1" {% if player.chbb_count==1 %}selected{% endif %}>1</option>
+                        <option value="0" {% if player.chbb_count==0 %}selected{% endif %}>0</option>
+
+                    </select>
+
+                </td>
+
+                <td>{{ player.chbb_date1 or "" }}</td>
+                <td>{{ player.chbb_date2 or "" }}</td>
+                <td>{{ player.chbb_date3 or "" }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+    document.querySelectorAll(".chbb-select").forEach(select => {
+
+        select.addEventListener("change", function () {
+
+            fetch("/admin/chbb/update", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+
+                body:
+                    "player_id=" + this.dataset.id +
+                    "&value=" + this.value
+
+            }).then(() => location.reload())
+
+        })
+
+    })
+
+</script>
+
+{% endblock %}

@@ -1,69 +1,224 @@
-<html>
+{% extends "base.html" %}
 
-<head>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
-    <script src="/static/js/main.js"></script>
-</head>
+{% block content %}
 
-<body>
+<div class="podium">
 
-    <h1>⚽ Babyfoot JFT</h1>
+<div class="podium-player second">
 
-    <div class="card">
-    <h2>Ajouter joueur</h2>
-    <form action="/add_player" method="post" enctype="multipart/form-data">
-        <input name="name" placeholder="Nom joueur" required>
-        <input type="file" name="photo" accept="image/*">
-        <button>Ajouter</button>
-    </form>
+<h3>🥈</h3>
+<p id="p2-name"></p>
+
 </div>
 
-    <div class="card">
-        <h2>Saisir match</h2>
+<div class="podium-player first">
 
-        <form action="/add_match" method="post">
+<h3>🥇</h3>
+<p id="p1-name"></p>
 
-            <select name="p1" required>
-                <option value="" disabled selected>Joueur 1</option>
-                {% for p in players %}
-                <option value="{{p.id}}">{{p.name}}</option>
+</div>
+
+<div class="podium-player third">
+
+<h3>🥉</h3>
+<p id="p3-name"></p>
+
+</div>
+
+</div>
+
+<div class="dashboard-grid">
+
+<!-- ================= DUEL ================= -->
+
+<div class="ranking-box">
+
+<h2>CLASSEMENT DUEL</h2>
+
+<!-- HEADER FIXE -->
+
+<table class="ranking-table">
+<thead>
+<tr>
+<th>N°</th>
+<th>Joueur</th>
+<th>Matchs</th>
+<th>Pts</th>
+</tr>
+</thead>
+</table>
+
+<!-- ZONE SCROLL -->
+
+<div class="ranking-window">
+
+<table class="ranking-table scroll-ranking">
+
+<tbody>
+
+{% for p in duel %}
+
+<tr>
+
+<td>{{loop.index}}</td>
+
+<td class="player">
+<img src="{{p.photo}}">
+{{p.name}}
+</td>
+
+<td>{{p.matches}}</td>
+
+<td class="points">{{p.duel}}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= GOAL ================= -->
+
+<div class="ranking-box">
+
+<h2>CLASSEMENT GOAL vs GOAL</h2>
+
+<!-- HEADER FIXE -->
+
+<table class="ranking-table">
+<thead>
+<tr>
+<th>N°</th>
+<th>Joueur</th>
+<th>Matchs</th>
+<th>Pts</th>
+</tr>
+</thead>
+</table>
+
+<!-- ZONE SCROLL -->
+
+<div class="ranking-window">
+
+<table class="ranking-table scroll-ranking">
+
+<tbody>
+
+{% for p in duel %}
+
+<tr>
+
+<td>{{loop.index}}</td>
+
+<td class="player">
+<img src="{{p.photo}}">
+{{p.name}}
+</td>
+
+<td>{{p.matches}}</td>
+
+<td class="points">{{p.goal}}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= ELO ================= -->
+
+<div class="ranking-box">
+    
+    <h2>CLASSEMENT ELO</h2>
+    
+    <!-- HEADER FIXE -->
+    
+    <table class="ranking-table">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Joueur</th>
+                <th>Matchs</th>
+                <th>Pts</th>
+            </tr>
+        </thead>
+    </table>
+    
+    <!-- ZONE SCROLL -->
+    
+    <div class="ranking-window">
+        
+        <table class="ranking-table scroll-ranking">
+            
+            <tbody>
+                
+                {% for p in duel %}
+                
+                <tr>
+                    
+                    <td>{{loop.index}}</td>
+                    
+                    <td class="player">
+                        <img src="{{p.photo}}">
+                        {{p.name}}
+                    </td>
+                    
+                    <td>{{p.matches}}</td>
+                    
+                    <td class="points">{{p.wins - p.losses}}</td>
+                    
+                </tr>
+                
                 {% endfor %}
-            </select>
+                
+            </tbody>
+            
+        </table>
+        
+    </div>
+    
+</div>
+</div>
+</div>
 
-            <input type="number" name="s1" min="0" max="3">
+<!-- tableau historique des rencontres -->
 
-            <select name="p2" required>
-                <option value="" disabled selected>Joueur 2</option>
-                {% for p in players %}
-                <option value="{{p.id}}">{{p.name}}</option>
-                {% endfor %}
-            </select>
+<div class="history-container">
 
-            <input type="number" name="s2" min="0" max="3">
+    <div class="history-box">
+        <div class="history-title">DUEL</div>
 
-            <select name="type">
-                <option value="DUEL">DUEL</option>
-                <option value="GOAL">GOAL vs GOAL</option>
-            </select>
-
-            <button type="submit">Enregistrer match</button>
-
-        </form>
+        <div class="history-window">
+            <table>
+                <tbody id="duelHistory"></tbody>
+            </table>
+        </div>
     </div>
 
-    <h2>Fiches joueurs</h2>
-    {% for p in players %}
-    <div class="card">
-        <img class="player-photo" src="{{p.photo}}">
-        <h3>{{p.name}}</h3>
-        <p>DUEL points: {{p.duel_points}}</p>
-        <p>GOAL points: {{p.goal_points}}</p>
-        <p>Matches: {{p.matches}} | Wins: {{p.wins}} | Losses: {{p.losses}}</p>
-        <a href="/player/{{p.id}}"><button>Voir détails</button></a>
+    <div class="history-box">
+        <div class="history-title">GOAL vs GOAL</div>
+
+        <div class="history-window">
+            <table>
+                <tbody id="goalHistory"></tbody>
+            </table>
+        </div>
     </div>
-    {% endfor %}
 
-</body>
+</div>
 
-</html>
+{% endblock %}

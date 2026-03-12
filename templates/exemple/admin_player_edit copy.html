@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>✏️ Modifier joueur</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+Nom<br>
+<input type="text" name="name" value="{{ player.name }}"><br><br>
+
+Sexe<br>
+<select name="sexe">
+<option value="M" {% if player.sexe=="M" %}selected{% endif %}>Homme</option>
+<option value="F" {% if player.sexe=="F" %}selected{% endif %}>Femme</option>
+</select><br><br>
+
+Photo actuelle<br>
+<img src="{{ player.photo }}" width="120"><br><br>
+
+Changer photo<br>
+<input type="file" name="photo"><br><br>
+
+<label>
+<input type="checkbox" name="membre_club" {% if player.membre_club %}checked{% endif %}>
+Membre du club
+</label><br>
+
+<label>
+<input type="checkbox" name="interclub" {% if player.interclub %}checked{% endif %}>
+Interclub
+</label><br>
+
+<label>
+<input type="checkbox" name="actif" {% if player.actif %}checked{% endif %}>
+Joueur actif
+</label><br>
+
+<label>
+<input type="checkbox" name="force_team_b" {% if player.force_team_b %}checked{% endif %}>
+Forcer en équipe B
+</label><br><br>
+
+<button>💾 Sauvegarder</button>
+
+</form>
+
+{% endblock %}

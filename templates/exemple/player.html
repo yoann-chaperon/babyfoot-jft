@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fiche {{ joueur.nom }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.fifa-card {
+
+width:260px;
+height:420px;
+
+position:relative;
+
+padding:20px;
+
+color:white;
+
+text-align:center;
+
+font-family:Arial;
+
+clip-path: polygon(
+6% 0%,
+94% 0%,
+100% 6%,
+100% 92%,
+50% 100%,
+0% 92%,
+0% 6%
+);
+
+border:4px solid;
+
+overflow:hidden;
+
+transition:0.3s;
+
+}
+
+.fifa-card:hover{
+transform:scale(1.05);
+}
+
+/* BRILLANCE FUT */
+
+.card-shine{
+
+position:absolute;
+top:-50%;
+left:-50%;
+
+width:200%;
+height:200%;
+
+background:linear-gradient(
+120deg,
+transparent,
+rgba(255,255,255,0.35),
+transparent
+);
+
+animation:shine 5s linear infinite;
+}
+
+@keyframes shine{
+
+0%{transform:rotate(0deg)}
+100%{transform:rotate(360deg)}
+
+}
+
+/* NOTE */
+
+.rating{
+
+position:absolute;
+top:10px;
+left:15px;
+
+font-size:48px;
+font-weight:bold;
+
+}
+
+/* PHOTO */
+
+.player-photo{
+
+width:130px;
+margin-top:50px;
+
+border-radius:10px;
+
+}
+
+/* NOM */
+
+.player-name{
+
+margin-top:10px;
+
+font-size:22px;
+font-weight:bold;
+
+}
+
+/* STATS */
+
+.stats{
+
+margin-top:15px;
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:8px;
+
+font-size:13px;
+
+}
+
+.stat span{
+
+display:block;
+opacity:0.8;
+
+}
+
+.stat b{
+
+font-size:16px;
+
+}
+
+/* POINTS */
+
+.points{
+
+margin-top:10px;
+
+font-size:20px;
+font-weight:bold;
+
+}
+
+/* TEAM GOLD */
+
+.teamA{
+
+background:linear-gradient(180deg,#f9e27d,#c89b3c);
+
+border-color:#ffd700;
+
+box-shadow:0 0 25px #ffd700;
+
+}
+
+/* TEAM SILVER */
+
+.teamB{
+
+background:linear-gradient(180deg,#eeeeee,#9f9f9f);
+
+border-color:#c0c0c0;
+
+box-shadow:0 0 20px #c0c0c0;
+
+}
+</style>
+</head>
+<body>
+<div class="fifa-card big-card {{ 'teamA' if player.team == 'A' else 'teamB' }}">
+
+<div class="card-shine"></div>
+
+<div class="rating">
+{{ player.duel + player.goal }}
+</div>
+
+<img src="{{ player.photo }}" class="player-photo">
+
+<div class="player-name">
+{{ player.name }}
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<span>Matchs</span>
+<b>{{ player.matches }}</b>
+</div>
+
+<div class="stat">
+<span>Victoires</span>
+<b>{{ player.wins }}</b>
+</div>
+
+<div class="stat">
+<span>Défaites</span>
+<b>{{ player.losses }}</b>
+</div>
+
+<div class="stat">
+<span>Duels</span>
+<b>{{ player.duel }}</b>
+</div>
+
+<div class="stat">
+<span>Goal vs Goal</span>
+<b>{{ player.goal }} / {{ player.goal_won }}</b>
+</div>
+
+<div class="stat">
+<span>Interclub</span>
+<b style="color: {{ 'lime' if player.interclub else 'red' }}">
+{{ '✔' if player.interclub else '✖' }}
+</b>
+</div>
+
+<div class="stat">
+<span>Vic. Interclub</span>
+<b>{{ player.interclub_wins }}</b>
+</div>
+
+</div>
+
+<div class="points">
+{{ player.duel + player.goal }} pts
+</div>
+
+</div>
+<a href="/">Retour</a>
+</body>
+</html>

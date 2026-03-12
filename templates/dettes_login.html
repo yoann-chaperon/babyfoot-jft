@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login Dettes</title>
+    <style>
+        body {
+            background-image: url("/static/img/background/background-2.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .dette-login-container {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 40px;
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #000;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .dette-login-form input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+
+        .dette-login-form button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #0073e6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .dette-login-form button:hover {
+            background: #005bb5;
+        }
+
+        .error {
+            color: #ff4444;
+            margin-top: 10px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #fff;
+            text-decoration: none;
+            background: #4444ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-back:hover {
+            background: #0000ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dette-login-container">
+
+        <h2>💰 Accès Dettes</h2>
+        <p>Seul l'administrateur peut accéder à cette page.</p>
+
+        <!-- Bouton retour admin -->
+        <a href="/admin" class="btn-back">← Retour Admin</a>
+
+        <!-- Formulaire de login -->
+        <form method="post" class="dette-login-form">
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <br>
+            <button type="submit">Connexion</button>
+        </form>
+
+        <!-- Message d'erreur si mot de passe incorrect -->
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

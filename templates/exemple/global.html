@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Tableau Club JFT</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+body { font-family: 'Arial', sans-serif; background:linear-gradient(135deg,#0f0f0f,#1f1f1f); color:#fff; margin:0; }
+h1 { text-align:center; margin-top:20px; font-size:2em; text-shadow: 2px 2px #000; }
+.container { display:flex; justify-content:space-around; flex-wrap:wrap; padding:20px; }
+.section { background:#1c1c1c; border-radius:15px; padding:20px; margin:10px; flex:1 1 400px; box-shadow:0 0 20px rgba(0,0,0,0.5); transition: transform 0.5s ease; }
+.table { width:100%; border-collapse: collapse; margin-top:10px; }
+.table th, .table td { padding:8px; text-align:center; border-bottom:1px solid #333; }
+.gold { color: gold; font-weight:bold; }
+.silver { color: silver; font-weight:bold; }
+.bronze { color: #cd7f32; font-weight:bold; }
+.alert { background:#ff5722; padding:12px; border-radius:8px; text-align:center; margin:10px auto; width:90%; font-weight:bold; font-size:1.2em; display:none; animation: flash 1s infinite; }
+@keyframes flash { 0%,50%,100%{opacity:1;}25%,75%{opacity:0.5;} }
+/* animation du classement */
+.highlight { animation: highlight 1.5s ease; }
+@keyframes highlight { 0%{background:#ffeb3b;color:#000;}50%{background:#fff;color:#000;}100%{background:#1c1c1c;color:#fff;} }
+</style>
+</head>
+<body>
+
+<h1>🏆 Tableau Club JFT – Écran Club</h1>
+<div id="alert" class="alert">⚡ Nouveau match enregistré !</div>
+
+<div class="container">
+  <div class="section" id="duel-section">
+    <h2>⚔️ Classement DUEL</h2>
+    <table class="table" id="duel-table">
+      <tr><th>Rang</th><th>Joueur</th><th>Points</th></tr>
+      {% for i,(nom,pts) in enumerate(duel_points.items(),1) %}
+      <tr>
+        <td>{{ i }}</td>
+        <td>{{ nom }}</td>
+        <td class="{% if i==1 %}gold{% elif i==2 %}silver{% elif i==3 %}bronze{% endif %}">{{ pts }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section" id="goal-section">
+    <h2>🎯 Classement GOAL vs GOAL</h2>
+    <table class="table" id="goal-table">
+      <tr><th>Rang</th><th>Joueur</th><th>Points</th></tr>
+      {% for i,(nom,pts) in enumerate(goal_points.items(),1) %}
+      <tr>
+        <td>{{ i }}</td>
+        <td>{{ nom }}</td>
+        <td class="{% if i==1 %}gold{% elif i==2 %}silver{% elif i==3 %}bronze{% endif %}">{{ pts }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section" id="elo-section">
+    <h2>🧠 Classement ELO</h2>
+    <table class="table" id="elo-table">
+      <tr><th>Rang</th><th>Joueur</th><th>Elo</th></tr>
+      {% for i,(nom,elo) in enumerate(elo_points.items(),1) %}
+      <tr>
+        <td>{{ i }}</td>
+        <td>{{ nom }}</td>
+        <td class="{% if i==1 %}gold{% elif i==2 %}silver{% elif i==3 %}bronze{% endif %}">{{ elo }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="section" id="tireur-section">
+    <h2>🎯 Meilleur tireur arrière</h2>
+    <table class="table" id="tireur-table">
+      <tr><th>Rang</th><th>Joueur</th><th>Buts</th></tr>
+      {% for i,(nom,pts) in enumerate(goal_points.items(),1) %}
+      <tr>
+        <td>{{ i }}</td>
+        <td>{{ nom }}</td>
+        <td>{{ pts }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <h3>⚡ Dernier match</h3>
+    {% for match in dernier_match %}
+    <p>{{ match['atelier'] }} : {{ match['joueur1'] }} {{ match['score1'] }} – {{ match['joueur2'] }} {{ match['score2'] }}</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// Affiche le bandeau d'alerte pendant 3s
+function showAlert() {
+  const alert = document.getElementById('alert');
+  alert.style.display = 'block';
+  setTimeout(()=>{ alert.style.display='none'; },3000);
+}
+
+// Fonction highlight pour animation lignes
+function highlightRow(tableId, rowIndex) {
+  const table = document.getElementById(tableId);
+  if(table && table.rows[rowIndex]) {
+    table.rows[rowIndex].classList.add('highlight');
+    setTimeout(()=>{ table.rows[rowIndex].classList.remove('highlight'); },1500);
+  }
+}
+
+// Exemple: simuler animation pour le 1er joueur DUEL
+document.addEventListener('DOMContentLoaded', ()=>{
+  showAlert();
+  highlightRow('duel-table',1); // met en surbrillance la ligne du 2e joueur
+});
+</script>
+
+</body>
+</html>

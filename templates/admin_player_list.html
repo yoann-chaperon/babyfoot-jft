@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>✏️ Liste des joueurs</h1>
+
+<!-- Joueurs du club -->
+<h2>Joueurs du club</h2>
+<div class="tabs">
+    <button class="tab-button active" data-tab="club-actif">Actifs</button>
+    <button class="tab-button" data-tab="club-inactif">Inactifs</button>
+</div>
+
+<div class="tab-content active" id="club-actif">
+    <table class="admin-table">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Duel</th>
+            <th>Goal</th>
+            <th>Interclub</th>
+            <th>Action</th>
+        </tr>
+        {% for p in players if p.membre_club and p.actif %}
+        <tr>
+            <td><img src="{{ p.photo }}" class="player-photo-admin-player-list"></td>
+            <td>{{ p.name }}</td>
+            <td><span class="{{ 'yes' if p.atelier_duel else 'no' }}">{{ "✔" if p.atelier_duel else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.atelier_goal else 'no' }}">{{ "✔" if p.atelier_goal else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.interclub else 'no' }}">{{ "✔" if p.interclub else "✖" }}</span></td>
+            <td>
+                {% if p.actif %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-disable">🔴 Désactiver</a>
+                {% else %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-enable">🟢 Réactiver</a>
+                {% endif %}
+                |
+                <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">✏️ Modifier</a>
+                |
+                <a class="btn-delete" href="/admin/player/delete/{{ p.id }}" onclick="return confirm('Supprimer ce joueur ?')">🗑 Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="tab-content" id="club-inactif">
+    <table class="admin-table">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Duel</th>
+            <th>Goal</th>
+            <th>Interclub</th>
+            <th>Action</th>
+        </tr>
+        {% for p in players if p.membre_club and not p.actif %}
+        <tr>
+            <td><img src="{{ p.photo }}" class="player-photo-admin-player-list"></td>
+            <td>{{ p.name }}</td>
+            <td><span class="{{ 'yes' if p.atelier_duel else 'no' }}">{{ "✔" if p.atelier_duel else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.atelier_goal else 'no' }}">{{ "✔" if p.atelier_goal else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.interclub else 'no' }}">{{ "✔" if p.interclub else "✖" }}</span></td>
+            <td>
+                {% if p.actif %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-disable">🔴 Désactiver</a>
+                {% else %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-enable">🟢 Réactiver</a>
+                {% endif %}
+                |
+                <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">✏️ Modifier</a>
+                |
+                <a class="btn-delete" href="/admin/player/delete/{{ p.id }}" onclick="return confirm('Supprimer ce joueur ?')">🗑 Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- Joueurs clubs extérieurs -->
+{% for club, joueurs_ext in clubs_exterieurs.items() %}
+<h2>Club extérieur : {{ club }}</h2>
+<div class="tabs">
+    <button class="tab-button active" data-tab="{{ club }}-actif">Actifs</button>
+    <button class="tab-button" data-tab="{{ club }}-inactif">Inactifs</button>
+</div>
+
+<div class="tab-content active" id="{{ club }}-actif">
+    <table class="admin-table">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Duel</th>
+            <th>Goal</th>
+            <th>Interclub</th>
+            <th>Action</th>
+        </tr>
+        {% for p in joueurs_ext if p.actif %}
+        <tr>
+            <td><img src="{{ p.photo }}" class="player-photo-admin-player-list"></td>
+            <td>{{ p.name }}</td>
+            <td><span class="{{ 'yes' if p.atelier_duel else 'no' }}">{{ "✔" if p.atelier_duel else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.atelier_goal else 'no' }}">{{ "✔" if p.atelier_goal else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.interclub else 'no' }}">{{ "✔" if p.interclub else "✖" }}</span></td>
+            <td>
+                {% if p.actif %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-disable">🔴 Désactiver</a>
+                {% else %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-enable">🟢 Réactiver</a>
+                {% endif %}
+                |
+                <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">✏️ Modifier</a>
+                |
+                <a class="btn-delete" href="/admin/player/delete/{{ p.id }}" onclick="return confirm('Supprimer ce joueur ?')">🗑 Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="tab-content" id="{{ club }}-inactif">
+    <table class="admin-table">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Duel</th>
+            <th>Goal</th>
+            <th>Interclub</th>
+            <th>Action</th>
+        </tr>
+        {% for p in joueurs_ext if not p.actif %}
+        <tr>
+            <td><img src="{{ p.photo }}" class="player-photo-admin-player-list"></td>
+            <td>{{ p.name }}</td>
+            <td><span class="{{ 'yes' if p.atelier_duel else 'no' }}">{{ "✔" if p.atelier_duel else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.atelier_goal else 'no' }}">{{ "✔" if p.atelier_goal else "✖" }}</span></td>
+            <td><span class="{{ 'yes' if p.interclub else 'no' }}">{{ "✔" if p.interclub else "✖" }}</span></td>
+            <td>
+                {% if p.actif %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-disable">🔴 Désactiver</a>
+                {% else %}
+                <a href="/admin/player/toggle/{{p.id}}" class="btn-enable">🟢 Réactiver</a>
+                {% endif %}
+                |
+                <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">✏️ Modifier</a>
+                |
+                <a class="btn-delete" href="/admin/player/delete/{{ p.id }}" onclick="return confirm('Supprimer ce joueur ?')">🗑 Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endfor %}
+
+<!-- JS onglets -->
+<script>
+document.querySelectorAll(".tabs").forEach(tabGroup => {
+    const buttons = tabGroup.querySelectorAll(".tab-button");
+    const parent = tabGroup.parentElement;
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Désactiver tous les boutons de ce groupe
+            buttons.forEach(b => b.classList.remove("active"));
+            // Désactiver tous les contenus de ce groupe
+            const contentId = btn.dataset.tab;
+            tabGroup.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+            tabGroup.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+
+            btn.classList.add("active");
+            // masquer tous les contenus de ce groupe
+            tabGroup.parentElement.querySelectorAll(".tab-content").forEach(tc => {
+                if(tc.id === contentId){
+                    tc.classList.add("active");
+                } else {
+                    tc.classList.remove("active");
+                }
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}

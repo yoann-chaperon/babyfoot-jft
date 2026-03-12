@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Historique buvette</h1>
+
+<table class="dettes-history-table">
+
+<tr>
+<th>Date</th>
+<th>Joueur</th>
+<th>Montant</th>
+<th>Description</th>
+</tr>
+
+{% for t in transactions %}
+
+<tr>
+
+<td>
+{{ t.date.strftime("%d/%m %H:%M") }}
+</td>
+
+<td>
+{{ t.joueur.name }}
+</td>
+
+<td class="{% if t.montant > 0 %}plus{% else %}moins{% endif %}">
+{{ "%.2f"|format(t.montant) }} €
+</td>
+
+<td>
+{{ t.description }}
+</td>
+
+</tr>
+
+{% endblock %}

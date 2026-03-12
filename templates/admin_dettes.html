@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .admin_dettes header.topbar {
+        display: none !important;
+    }
+</style>
+<div class="dettes-container">
+
+    <h1>Dettes Joueurs</h1>
+
+    <!-- BOUTON DECONNEXION -->
+    <div style="margin-bottom: 20px;">
+        <a href="/admin/dettes/logout" class="btn-back">← Déconnexion</a>
+    </div>
+
+    <!-- TOTAL DETTES CLUB -->
+    <div class="dettes-total">
+        Total dettes club :
+        <span>{{ "%.2f"|format(total_dettes) }} €</span>
+    </div>
+
+    <!-- TOP DETTES / MEILLEURS CLIENTS -->
+    <div class="dettes-top-columns" style="display:flex; gap:40px; margin-bottom:30px;">
+
+        <!-- Top dettes positives -->
+        <div class="dettes-top" style="flex:1; background: rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
+            <h2>Top 5 dettes</h2>
+            <ul>
+                {% for j in top_dettes if j.dette > 0 %}
+                <li>{{ j.name }} — {{ "%.2f"|format(j.dette) }} €</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Top crédits négatifs -->
+        <div class="dettes-credit" style="flex:1; background: rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
+            <h2>Meilleurs clients (crédit)</h2>
+            <ul>
+                {% for j in top_credits %}
+                <li>{{ j.name }} — {{ "%.2f"|format(j.dette) }} €</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- TABLEAU DETTES -->
+    <table class="dettes-table-admin">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Joueur</th>
+                <th>Dette</th>
+                <th>+1€</th>
+                <th>Ajouter montant</th>
+                <th>Payer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for joueur in joueurs %}
+            <tr>
+                <td>
+                    <img src="{{ joueur.photo }}" class="dettes-player-photo">
+                </td>
+                <td class="dettes-player-name">{{ joueur.name }}</td>
+                <td class="dettes-player-amount
+                    {% if joueur.dette > 0 %}dette-positive{% elif joueur.dette < 0 %}dette-negative{% endif %}">
+                    {{ "%.2f"|format(joueur.dette or 0) }} €
+                </td>
+                <!-- +1€ -->
+                <td>
+                    <form method="POST" action="/admin/dettes/add_one/{{ joueur.id }}">
+                        <button class="dettes-btn-add">+1</button>
+                    </form>
+                </td>
+                <!-- Ajouter montant -->
+                <td>
+                    <form method="POST" action="/admin/dettes/add/{{ joueur.id }}" class="dettes-form">
+                        <input type="number" name="montant" step="0.01" placeholder="ex: 34.75 ou -20" required>
+                        <button type="submit">Ajouter</button>
+                    </form>
+                </td>
+                <!-- PAYER -->
+                <td>
+                    <form method="POST" action="/admin/dettes/pay/{{ joueur.id }}">
+                        <button class="dettes-btn-reset">PAYER</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

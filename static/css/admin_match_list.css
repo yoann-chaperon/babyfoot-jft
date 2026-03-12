@@ -1,0 +1,67 @@
+body.admin_match_list {
+    background: url("/static/img/background/background-4.png") center/cover no-repeat fixed;
+}
+
+.admin_match_list {
+    color: white;
+}
+.tables-container{
+    display:flex;
+    gap:25px;
+}
+
+.table-box{
+    width:50%;
+}
+
+.table-scroll{
+    max-height:520px;
+    overflow-y:auto;
+}
+
+.stats-box{
+    display:flex;
+    gap:25px;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+
+.search-player{
+    margin-bottom:20px;
+    padding:8px;
+    width:250px;
+}
+
+/* score stylé */
+.score-duel{
+    background:#00d4ff33;
+    padding:4px 8px;
+    border-radius:6px;
+    font-weight:bold;
+    color:#ffd700;
+}
+
+.score-goal{
+    background:#c77dff33;
+    padding:4px 8px;
+    border-radius:6px;
+    font-weight:bold;
+    color:#ffd700;
+}
+
+/* pagination */
+.pagination{
+    margin-top:10px;
+    text-align:center;
+}
+.pagination a{
+    margin:0 3px;
+    padding:5px 10px;
+    border-radius:5px;
+    text-decoration:none;
+    background:#444;
+    color:white;
+}
+.pagination a:hover{
+    background:#00d4ff;
+}

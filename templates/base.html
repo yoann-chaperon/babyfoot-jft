@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Babyfoot JFT</title>
+
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="/static/js/main.js"></script>
+
+    <!-- CSS commun à toutes les pages -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- CSS spécifique à la page selon la route -->
+    <link rel="stylesheet" href="{{ 
+        url_for('static', filename='css/' + request.endpoint + '.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+    {% set css_path = request.path.strip('/').rsplit('/', 1)[0] %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/' + css_path + '.css') }}">
+</head>
+
+<body class="{{ request.endpoint }}">
+    <header class="topbar">
+        <div class="logo">⚽ Tableau Joueur JFT</div>
+        <nav class="menu">
+            <a href="/" class="btn">🏠 Tableau de Bord</a>
+            <a href="/player" class="btn">👤 Joueurs</a>
+            <a href="/equipe" class="btn">👥 Équipes</a>
+            <a href="/statistique" class="btn">📊 Statistiques</a>
+            <a href="/add_match" class="btn">🔒 Ajouter Match</a>
+            <a href="/export" class="btn">📤 Export</a>
+            <a href="/admin" class="btn">👤 Admin</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="match-toast"></div>
+</body>
+
+</html>

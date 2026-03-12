@@ -1,0 +1,179 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0b0c10;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+}
+
+h1,
+h2 {
+    color: #00d4ff;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin-top: 50px;
+    margin-bottom: 15px;
+}
+
+.container {
+    width: 50%;
+    margin: 0 auto 20px;
+
+}
+
+.admin-table {
+    width: 100%;
+    margin: 0 auto 20px;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: #1f1f1f;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-table td img,
+.admin-table td a,
+.admin-table td span {
+    display: inline-block;
+    margin: 0 auto;
+}
+
+.admin-table th {
+    background: #00d4ff;
+    color: #000;
+}
+
+.admin-table tr:nth-child(even) {
+    background: #2a2a2a;
+}
+
+.player-photo-admin-player-list {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid gold;
+    margin-bottom: 10px;
+}
+
+/* Oui / Non */
+.yes {
+    color: #00ff94;
+    font-weight: bold;
+}
+
+.no {
+    color: #ff3c3c;
+    font-weight: bold;
+}
+
+/* Boutons actions */
+a.btn-edit,
+a.btn-delete,
+a.btn-enable,
+a.btn-disable {
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-right: 3px;
+    transition: 0.2s;
+}
+
+a.btn-edit {
+    background: #00d4ff;
+    color: #000;
+}
+
+a.btn-delete {
+    background: #ff3c3c;
+    color: #fff;
+}
+
+a.btn-enable {
+    background: #00ff00;
+    color: #000;
+}
+
+a.btn-disable {
+    background: #ff0000;
+    color: #fff;
+}
+
+a.btn-edit:hover {
+    opacity: 0.8;
+}
+
+a.btn-delete:hover {
+    opacity: 0.8;
+}
+
+a.btn-enable:hover {
+    opacity: 0.8;
+}
+
+a.btn-disable:hover {
+    opacity: 0.8;
+}
+
+/* Onglets */
+.tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.tab-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px 5px 0 0;
+    background: #1f1f1f;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tab-button.active {
+    background: #00d4ff;
+    color: #000;
+}
+
+.tab-content {
+    display: none;
+    border-radius: 1%;
+    border: 3px solid #27ae60;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .admin-table th,
+    .admin-table td {
+        padding: 6px 8px;
+        font-size: 0.85rem;
+    }
+
+    .player-photo-admin-player-list {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+.admin-table th,
+.admin-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}

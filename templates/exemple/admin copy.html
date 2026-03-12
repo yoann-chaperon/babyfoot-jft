@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+
+    <h1>⚙️ Administration Babyfoot</h1>
+
+    <!-- ---------------- ACTIONS ---------------- -->
+
+    <div class="admin-actions">
+
+        <a href="/admin/player/new" class="btn btn-add">➕ Ajouter joueur</a>
+        <a href="/admin/player/list" class="btn btn-edit">✏️ Modifier joueur</a>
+        <a href="/admin/match/new" class="btn btn-add">⚽ Ajouter match</a>
+        <a href="/admin/match/list" class="btn btn-edit">📝 Modifier score</a>
+
+    </div>
+    <!-- ---------------- PLANNING RESTANT ---------------- -->
+    <h2>📅 Planning des matchs restants ({{ remaining_matches|length }})</h2>
+    <div class="planning-wrapper">
+
+        <table class="admin-table">
+
+            <tr>
+                <th>Joueur A</th>
+                <th>Joueur B</th>
+                <th>Type</th>
+            </tr>
+
+            {% for m in remaining_matches %}
+
+            <tr>
+
+                <td>
+                    {{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else '-' }}
+                </td>
+
+                <td>
+                    {{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else '-' }}
+                </td>
+
+                <td>{{ m.type }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+    <!-- ---------------- JOUEURS ---------------- -->
+    <h2>👥 Joueurs</h2>
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>⚔ Duel</th>
+                    <th>🥅 Goal</th>
+                    <th>🏆 Interclub</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in players %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td class="center">{{ "✅" if p.atelier_duel else "❌" }}</td>
+                    <td class="center">{{ "✅" if p.atelier_goal else "❌" }}</td>
+                    <td class="center">{{ "✅" if p.interclub else "❌" }}</td>
+                    <td>
+                        <a class="btn-edit" href="/admin/player/edit/{{ p.id }}">✏️ Modifier</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ---------------- MATCHS EXISTANTS ---------------- -->
+    <h2>⚽ Matchs existants</h2>
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Joueur A</th>
+                    <th>Score</th>
+                    <th>Joueur B</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in matches %}
+                <tr>
+                    <td>{{ m.date }}</td>
+                    <td>{{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else '-' }}</td>
+                    <td class="score">{{ m.scoreA }} - {{ m.scoreB }}</td>
+                    <td>{{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else '-' }}</td>
+                    <td>{{ m.type }}</td>
+                    <td>
+                        <a class="btn-edit" href="/admin/match/edit/{{ m.id }}">✏️</a>
+                        <a class="btn-delete" href="/admin/match/delete/{{ m.id }}"
+                            onclick="return confirm('Supprimer ce match ?')">🗑</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- ---------------- CSS STYLE FIFA ---------------- -->
+<style>
+    .admin-container {
+        /* width: 95%; */
+        /* max-width: 1200px; */
+        /* margin: 30px auto; */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+        background-image: url("/static/img/background/background-8.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .admin-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-add {
+        background: linear-gradient(to right, #00b140, #00ff7f);
+    }
+
+    .btn-add:hover {
+        background: linear-gradient(to right, #00ff7f, #00b140);
+    }
+
+    .btn-edit {
+        background: linear-gradient(to right, #0073e6, #00bfff);
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(to right, #00bfff, #0073e6);
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 50px;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1c1c1c;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 12px 15px;
+        text-align: center;
+    }
+
+    .admin-table th {
+        background: linear-gradient(to right, #0a7cff, #00d4ff);
+        color: #fff;
+    }
+
+    .admin-table tr:nth-child(even) {
+        background: #2a2a2a;
+    }
+
+    .admin-table tr:nth-child(odd) {
+        background: #1f1f1f;
+    }
+
+    .admin-table tr:hover {
+        background: #00d4ff33;
+    }
+
+    .btn-delete {
+        background: #ff4c4c;
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-delete:hover {
+        background: #ff1c1c;
+    }
+
+    .score {
+        font-weight: bold;
+        color: #ffd700;
+    }
+
+    .planning-wrapper {
+        max-height: 420px;
+        /* environ 10 lignes */
+        overflow-y: auto;
+        border-radius: 10px;
+    }
+
+    /* scroll style FIFA */
+
+    .planning-wrapper::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .planning-wrapper::-webkit-scrollbar-track {
+        background: #1c1c1c;
+    }
+
+    .planning-wrapper::-webkit-scrollbar-thumb {
+        background: #00d4ff;
+        border-radius: 10px;
+    }
+</style>
+
+{% endblock %}

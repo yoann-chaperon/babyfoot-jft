@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="admin-container">
+
+    <h2>Modifier match</h2>
+
+    <div class="match-edit-card">
+
+        <form method="POST" class="score-form">
+
+            <div class="players">
+
+                <div class="player">
+                    <img src="{{ players_dict[match.playerA_id].photo }}">
+                    <h3>{{ players_dict[match.playerA_id].name }}</h3>
+
+                    <input type="number" name="scoreA" value="{{ match.scoreA }}" min="0" max="3" required>
+                </div>
+
+                <div class="vs">VS</div>
+
+                <div class="player">
+                    <img src="{{ players_dict[match.playerB_id].photo }}">
+                    <h3>{{ players_dict[match.playerB_id].name }}</h3>
+
+                    <input type="number" name="scoreB" value="{{ match.scoreB }}" min="0" max="3" required>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-save">
+                Sauvegarder
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

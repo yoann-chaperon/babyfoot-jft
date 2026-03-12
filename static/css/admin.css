@@ -1,0 +1,204 @@
+body.admin {
+    background: url("/static/img/background/background-9.png") center/cover no-repeat fixed;
+}
+
+/* Effet de lumière */
+body.admin::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.7));
+    pointer-events: none;
+}
+
+body.admin::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.2), transparent 60%);
+    animation: controlLight 6s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes controlLight {
+    0% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+}
+
+/* Container sombre lisible */
+.container {
+    border-radius: 10px;
+    padding: 20px;
+    color: #fff;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-add {
+    background: linear-gradient(to right, #00b140, #00ff7f);
+}
+.btn-add:hover {
+    background: linear-gradient(to right, #00ff7f, #00b140);
+}
+
+.btn-edit {
+    background: linear-gradient(to right, #0073e6, #00bfff);
+}
+.btn-edit:hover {
+    background: linear-gradient(to right, #00bfff, #0073e6);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 50px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1c1c1c;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.admin-table th {
+    background: linear-gradient(to right, #0a7cff, #00d4ff);
+    color: #fff;
+}
+
+.admin-table tr:nth-child(even) {
+    background: #2a2a2a;
+}
+
+.admin-table tr:nth-child(odd) {
+    background: #1f1f1f;
+}
+
+.admin-table tr:hover {
+    background: #00d4ff33;
+}
+
+.btn-delete {
+    background: #ff4c4c;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-delete:hover {
+    background: #ff1c1c;
+}
+
+.score {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+/* ---------------- PLANNING ---------------- */
+.planning-container {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+.planning-block {
+    flex: 1;
+    min-width: 300px;
+}
+
+.planning-wrapper {
+    max-height: 420px; /* scroll ~10 lignes */
+    overflow-y: auto;
+    border-radius: 10px;
+    position: relative;
+}
+
+/* Tableau avec tbody scrollable et thead fixe */
+.planning-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Header fixe */
+.planning-wrapper thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.planning-wrapper tbody {
+    display: block;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.planning-wrapper tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Style des cellules */
+.planning-wrapper th,
+.planning-wrapper td {
+    padding: 12px 15px;
+    text-align: center;
+    background: #1c1c1c;
+    color: #fff;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+/* Ligne paire/impair */
+.planning-wrapper tbody tr:nth-child(even) {
+    background: #2a2a2a;
+}
+.planning-wrapper tbody tr:nth-child(odd) {
+    background: #1f1f1f;
+}
+
+/* Scrollbar style FIFA */
+.planning-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.planning-wrapper::-webkit-scrollbar-track {
+    background: #1c1c1c;
+}
+.planning-wrapper::-webkit-scrollbar-thumb {
+    background: #00d4ff;
+    border-radius: 10px;
+}
+
+/* Header fixe */
+.planning-wrapper thead th {
+    background: linear-gradient(to right, #0a7cff, #00d4ff);
+    color: #fff;
+    z-index: 10; /* plus élevé pour éviter d’être masqué */
+}

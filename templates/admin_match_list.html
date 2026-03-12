@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>🏆 Gestion des matchs</h1>
+
+<div class="stats-box">
+    <span>Matchs : {{ total_matches }}</span>
+    <span>DUEL : {{ duel_count }}</span>
+    <span>GOAL : {{ goal_count }}</span>
+    {% if top_elo %}
+    <span>#1 ELO : {{ top_elo.name }} ({{ top_elo.elo }})</span>
+    {% endif %}
+</div>
+
+<input type="text" id="searchPlayer" placeholder="🔎 Rechercher joueur" class="search-player">
+
+<div class="tables-container">
+    <!-- DUEL -->
+    <div class="table-box">
+        <h2 class="title-duel">⚔️ DUEL</h2>
+        <div class="table-scroll">
+            <table class="admin-table" id="duelTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('duelTable',0)">Date</th>
+                        <th onclick="sortTable('duelTable',1)">Joueur A</th>
+                        <th>Score</th>
+                        <th onclick="sortTable('duelTable',3)">Joueur B</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in duel_matches %}
+                    <tr>
+                        <td>{{ m.date }}</td>
+                        <td>{{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else "-" }}</td>
+                        <td><span class="score-duel">{{ m.scoreA }} - {{ m.scoreB }}</span></td>
+                        <td>{{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else "-" }}</td>
+                        <td>
+                            <a class="btn-edit" href="/admin/match/edit/{{ m.id }}">✏️</a>
+                            <a class="btn-delete" href="/admin/match/delete/{{ m.id }}" onclick="return confirm('Supprimer ce match ?')">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- pagination -->
+        <div class="pagination">
+            {% for p in duel_pagination.iter_pages() %}
+                {% if p %}
+                    <a href="?page={{ p }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- GOAL -->
+    <div class="table-box">
+        <h2 class="title-goal">🥅 GOAL</h2>
+        <div class="table-scroll">
+            <table class="admin-table" id="goalTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('goalTable',0)">Date</th>
+                        <th onclick="sortTable('goalTable',1)">Joueur A</th>
+                        <th>Score</th>
+                        <th onclick="sortTable('goalTable',3)">Joueur B</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in goal_matches %}
+                    <tr>
+                        <td>{{ m.date }}</td>
+                        <td>{{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else "-" }}</td>
+                        <td><span class="score-goal">{{ m.scoreA }} - {{ m.scoreB }}</span></td>
+                        <td>{{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else "-" }}</td>
+                        <td>
+                            <a class="btn-edit" href="/admin/match/edit/{{ m.id }}">✏️</a>
+                            <a class="btn-delete" href="/admin/match/delete/{{ m.id }}" onclick="return confirm('Supprimer ce match ?')">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            {% for p in goal_pagination.iter_pages() %}
+                {% if p %}
+                    <a href="?page={{ p }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

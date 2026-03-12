@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+
+    <h1>⚙️ Administration Babyfoot</h1>
+
+    <!-- ---------------- ACTIONS ---------------- -->
+    <div class="admin-actions">
+        <a href="/admin/player/new" class="btn btn-add">➕ Ajouter joueur</a>
+        <a href="/admin/player/list" class="btn btn-edit">✏️ Modifier joueur</a>
+        <a href="/admin/match/new" class="btn btn-add">⚽ Ajouter match</a>
+        <a href="/admin/match/list" class="btn btn-edit">📝 Modifier score</a>
+        <a href="/admin/dettes" class="btn btn-add">💶 Dettes</a>
+        <a href="/admin/chbb/login" class="btn btn-edit">🍻 CHBB</a>
+    </div>
+
+    <!-- ---------------- PLANNING RESTANT ---------------- -->
+    <h2 class="planning-title">📅 Planning des matchs restants ({{ remaining_matches|length }})</h2>
+
+    <div class="planning-container">
+
+        <!-- DUEL -->
+        <div class="planning-block">
+            <h3 class="planning-subtitle">⚔ Duel ({{ duel_remaining|length }})</h3>
+            <div class="planning-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Joueur A</th>
+                            <th>Joueur B</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in duel_remaining %}
+                        <tr>
+                            <td>{{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else '-' }}</td>
+                            <td>{{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GOAL -->
+        <div class="planning-block">
+            <h3 class="planning-subtitle">🥅 Goal vs Goal ({{ goal_remaining|length }})</h3>
+            <div class="planning-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Joueur A</th>
+                            <th>Joueur B</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in goal_remaining %}
+                        <tr>
+                            <td>{{ players_dict[m.playerA_id].name if m.playerA_id in players_dict else '-' }}</td>
+                            <td>{{ players_dict[m.playerB_id].name if m.playerB_id in players_dict else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

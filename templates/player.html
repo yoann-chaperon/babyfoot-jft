@@ -1,31 +1,329 @@
-<html>
+{% extends "base.html" %}
 
-<head>
+{% block content %}
 
-<link rel="stylesheet" href="/static/css/style.css">
+<h1 class="player-page-title">{{ player.name }}</h1>
 
-</head>
+<div class="player-profile">
 
-<body>
+    <!-- ========================= -->
+    <!-- CARTE JOUEUR -->
+    <!-- ========================= -->
 
-<div class="card">
 
-<img src="{{player.photo}}" width="120">
+        <di class="fut-card">
 
-<h2>{{player.name}}</h2>
+            <img src="{{ card_image }}" class="card-bg">
 
-<p>⚽ DUEL {{player.duel}}</p>
+            <img src="{{ player.photo }}" class="player-photo">
 
-<p>🎯 GOAL {{player.goal}}</p>
+            <div class="player-name">
+                {{ player.name }}
+            </div>
 
-<p>🏆 Victoires {{player.wins}}</p>
 
-<p>❌ Défaites {{player.losses}}</p>
+            <div class="stats">
 
-<p>🎮 Matchs {{player.matches}}</p>
+                <div class="stat">
+                    <span>Matchs</span>
+                    <b>{{ player.matches }}</b>
+                </div>
+
+                <div class="stat">
+                    <span>Victoires</span>
+                    <b>{{ player.wins }}</b>
+                </div>
+
+                <div class="stat">
+                    <span>Défaites</span>
+                    <b>{{ player.losses }}</b>
+                </div>
+
+                <div class="stat">
+                    <span>Duels</span>
+                    <b>{{ player.duel }}</b>
+                </div>
+
+                <div class="stat">
+                    <span>Goal</span>
+                    <b>{{ player.goal }} / {{ player.goal_won }}</b>
+                </div>
+
+            </div>
+
+    <!-- ========================= -->
+    <!-- SAISIE RESULTAT -->
+    <!-- ========================= -->
+
+    <div class="result-form">
+
+        <h2>Ajouter un résultat</h2>
+
+        <form method="POST" action="/add_match" class="match-form">
+
+            <input type="hidden" name="p1" value="{{ player.id }}">
+
+            <label>Atelier</label>
+
+            <select name="type" id="atelier-select">
+
+                {% if player.atelier_duel %}
+                <option value="DUEL">DUEL</option>
+                {% endif %}
+
+                {% if player.atelier_goal %}
+                <option value="GOAL">GOAL vs GOAL</option>
+                {% endif %}
+
+            </select>
+
+            <label>Adversaire</label>
+
+            <select name="p2" id="opponent-select">
+
+                {% for p in duel_remaining %}
+                <option value="{{ p.id }}" data-type="DUEL">
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+
+                {% for p in goal_remaining %}
+                <option value="{{ p.id }}" data-type="GOAL">
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+
+            </select>
+
+            <label>Score {{ player.name }}</label>
+
+            <input type="number" name="s1" id="score-self" min="0" max="3" required>
+
+            <label>Score adversaire</label>
+
+            <input type="number" name="s2" id="score-opponent" min="0" max="3" required>
+
+            <button type="submit">
+                Enregistrer
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- MATCHS RESTANTS -->
+    <!-- ========================= -->
+
+    <div class="matches-remaining">
+
+        <h2>Matchs DUEL restants</h2>
+
+        <table class="interactive-table">
+
+            <thead>
+                <tr>
+                    <th>Adversaire</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for p in duel_remaining %}
+
+                <tr>
+
+                    <td class="player-cell">
+
+                        <div class="mini-player">
+
+                            <div class="mini-name">
+                                {{ p.name }}
+                            </div>
+
+                            <span class="badge team-{{ p.team }}">
+                                Equipe {{ p.team }}
+                            </span>
+
+                            <span class="badge stat-duel">
+                                DUEL {{ p.duel }}
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+        <h2>Matchs GOAL vs GOAL restants</h2>
+
+        <table class="interactive-table">
+
+            <thead>
+                <tr>
+                    <th>Adversaire</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for p in goal_remaining %}
+
+                <tr>
+
+                    <td class="player-cell">
+
+                        <div class="mini-player">
+
+                            <div class="mini-name">
+                                {{ p.name }}
+                            </div>
+
+                            <span class="badge team-{{ p.team }}">
+                                Equipe {{ p.team }}
+                            </span>
+
+                            <span class="badge stat-goal">
+                                GvG {{ p.goal }}
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- HISTORIQUE GOAL -->
+    <!-- ========================= -->
+
+    <h2>Historique GOAL vs GOAL</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Adversaire</th>
+                <th>Score</th>
+                <th>Résultat</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for m in goal_history %}
+
+            {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
+            {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
+            {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
+
+            <tr>
+
+                <td>{{ m.date }}</td>
+
+                <td>{{ opponent.name }}</td>
+
+                <td>{{ s1 }} - {{ s2 }}</td>
+
+                <td>
+                    {% if s1 > s2 %}
+                    <span class="win">Victoire</span>
+                    {% else %}
+                    <span class="loss">Défaite</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
 
 </div>
 
-</body>
+</div>
 
-</html>
+
+<!-- ========================= -->
+<!-- SCRIPTS -->
+<!-- ========================= -->
+
+<script>
+
+    /* filtrage adversaire selon atelier */
+
+    const atelier = document.getElementById("atelier-select")
+    const opponent = document.getElementById("opponent-select")
+
+    function filterOpponents() {
+
+        let type = atelier.value
+
+        for (let opt of opponent.options) {
+
+            opt.style.display = (opt.dataset.type === type) ? "block" : "none"
+
+        }
+
+    }
+
+    atelier.addEventListener("change", filterOpponents)
+
+    filterOpponents()
+
+
+    /* score automatique */
+
+    const scoreSelf = document.getElementById("score-self")
+    const scoreOpponent = document.getElementById("score-opponent")
+
+    function updateScore() {
+
+        let s1 = parseInt(scoreSelf.value)
+        let s2 = parseInt(scoreOpponent.value)
+
+        if (!isNaN(s1) && s1 < 3) {
+            scoreOpponent.value = 3
+        }
+
+        if (!isNaN(s2) && s2 < 3) {
+            scoreSelf.value = 3
+        }
+
+    }
+
+    scoreSelf.addEventListener("input", updateScore)
+    scoreOpponent.addEventListener("input", updateScore)
+
+</script>
+
+
+{% endblock %}
+
+<!--TODO tu peux voir sur l'image ci-dessus on voit pas equipe A ou B on voit juste equipe ?
+fficher dans ces tableaux les adversaires les plus dangereux en rouge
+et les plus faibles en vert (style matchmaking FIFA).
+-faire un petit script JS qui met à jour la liste d’adversaires automatiquement après chaque saisie de match sans recharger la page
+-améliorer la liste déroulante des adversaires pour qu’elle mette automatiquement à jour l’atelier disponible, style “FIFA Manager”
+
+-->

@@ -1,85 +1,102 @@
-body{
-
-background:#0b0b0b;
-
-color:white;
-
-font-family:Arial;
-
-text-align:center;
-
+body {
+    margin: 0;
+    font-family: Arial;
 }
 
-.card{
+/*ANCHOR  BARRE DU MENU */
 
-background:#1c1c1c;
-
-width:320px;
-
-margin:20px auto;
-
-padding:20px;
-
-border-radius:12px;
-
-box-shadow:0 0 10px #00ff9c;
-
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(#1e3b5c, #0f243d);
+    padding: 10px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-button{
-
-background:#00ff9c;
-
-border:none;
-
-padding:10px 20px;
-
-font-weight:bold;
-
-border-radius:6px;
-
-cursor:pointer;
-
+.logo {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
 }
 
-table{
-
-width:80%;
-
-margin:auto;
-
-border-collapse:collapse;
-
+.menu {
+    display: flex;
+    gap: 10px;
 }
 
-td,th{
-
-padding:10px;
-
-border-bottom:1px solid #333;
-
+/* BOUTONS */
+.btn {
+    background: linear-gradient(#3b5d87, #223a5c);
+    padding: 10px 16px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 3px 6px rgba(0, 0, 0, 0.4);
+    transition: 0.2s;
 }
 
-.rank1{
-
-color:gold;
-
-font-size:22px;
-
+.btn:hover {
+    background: linear-gradient(#4c76a8, #2d4c73);
+    transform: translateY(-2px);
 }
 
-.rank2{
-
-color:silver;
-
+/* ANCHOR CSS ULTRA FUT PLAYER */
+.fut-card {
+    position: relative;
+    width: 280px;
+    font-family: Arial;
+    text-align: center;
+    color: black;
 }
 
-.rank3{
+.card-bg {
+    width: 100%;
+    display: block;
+}
 
-color:#cd7f32;
-
+.rating {
+    position: absolute;
+    top: 35px;
+    left: 40px;
+    font-size: 42px;
+    font-weight: bold;
+    color: #222;
 }
 
 .player-photo {
-    width: 160px;
+    position: absolute;
+    top: 85px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+}
+
+.player-name {
+    position: absolute;
+    top: 230px;
+    left: 0;
+    right: 0;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* STATS */
+.stats {
+    position: absolute;
+    top: 260px;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.stat span {
+    display: block;
+    font-size: 12px;
 }

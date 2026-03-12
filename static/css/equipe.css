@@ -1,0 +1,202 @@
+/* background-equipe  */
+.container-teams {
+    background-image: url("/static/img/background/background-10.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* titre */
+
+.teams-title {
+
+    text-align: center;
+    font-size: 60px;
+    margin-bottom: 30px;
+    letter-spacing: 4px;
+
+}
+
+/* arena layout */
+
+.arena {
+
+    display: grid;
+
+    grid-template-columns: 1fr 250px 1fr;
+
+    gap: 40px;
+
+    align-items: start;
+
+}
+
+/* colonnes */
+
+.team-column {
+
+    padding: 30px;
+    border-radius: 15px;
+
+}
+
+/* team A */
+
+.team-a {
+
+    background: linear-gradient(135deg, #0f5132, #198754);
+
+    box-shadow: 0 0 40px rgba(46, 204, 113, 0.5);
+
+}
+
+/* team B */
+
+.team-b {
+
+    background: linear-gradient(135deg, #1b263b, #0d6efd);
+
+    box-shadow: 0 0 40px rgba(52, 152, 219, 0.5);
+
+}
+
+.team-column h2 {
+
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 32px;
+
+}
+
+/* grille cards */
+
+.players-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+
+    gap: 20px;
+
+}
+
+/* VS central */
+
+.vs-center {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.vs-text {
+
+    font-size: 120px;
+    font-weight: 900;
+
+    text-shadow: 0 0 30px red;
+
+    animation: pulse 2s infinite;
+
+}
+
+@keyframes pulse {
+
+    0% {
+        transform: scale(1)
+    }
+
+    50% {
+        transform: scale(1.2)
+    }
+
+    100% {
+        transform: scale(1)
+    }
+
+}
+
+/* animation entrée */
+
+.slide-left {
+
+    animation: slideLeft 1s ease;
+
+}
+
+.slide-right {
+
+    animation: slideRight 1s ease;
+
+}
+
+@keyframes slideLeft {
+
+    from {
+        transform: translateX(-200px);
+        opacity: 0
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1
+    }
+
+}
+
+@keyframes slideRight {
+
+    from {
+        transform: translateX(200px);
+        opacity: 0
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1
+    }
+
+}
+
+/* hover cards */
+
+.fifa-card:hover {
+
+    transform: scale(1.1);
+
+    box-shadow: 0 0 25px gold;
+
+    transition: 0.3s;
+
+}
+
+/* power bar */
+
+.power-bar {
+
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    font-size: 24px;
+
+}
+
+.teamA-power {
+
+    color: #2ecc71;
+
+}
+
+.teamB-power {
+
+    color: #3498db;
+
+}
+
+.player-link {
+
+    text-decoration: none;
+    color: inherit;
+
+}
