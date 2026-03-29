@@ -1,294 +1,215 @@
-/* GRID DASHBOARD */
+/* ================= RESET GLOBAL ================= */
+body.index {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: url("/static/img/background/background-13.png") center/cover no-repeat;
+}
 
-.dashboard-grid {
-
+/* ================= LAYOUT ================= */
+.main-grid {
     display: grid;
-
-    grid-template-columns: 1fr 1fr 1fr;
-
+    grid-template-columns: 1fr 350px;
     gap: 25px;
-
-    margin-top: 20px;
-
-}
-
-/* BOX */
-
-.ranking-box {
-
-    background: linear-gradient(145deg, #203a5c, #0f1c2e);
-
-    padding: 15px;
-
-    border-radius: 8px;
-
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-
-    color: white;
-
-}
-
-/* TITRE */
-
-.ranking-box h2 {
-
-    margin-bottom: 10px;
-
-    font-size: 18px;
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-
-    padding-bottom: 5px;
-
-}
-
-/* TABLE */
-
-.ranking-table {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-}
-
-.ranking-table th {
-
-    text-align: left;
-
-    padding: 8px;
-
-    background: rgba(255, 255, 255, 0.1);
-
-}
-
-.ranking-table td {
-
-    padding: 8px;
-
-}
-
-/* JOUEUR */
-
-.player {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-}
-
-.player img {
-
-    width: 28px;
-
-    height: 28px;
-
-    border-radius: 50%;
-
-}
-
-/* PODIUM */
-
-.rank1 {
-
-    background: linear-gradient(90deg, #2ecc71, #27ae60);
-
-    font-weight: bold;
-
-}
-
-.rank2 {
-
-    background: linear-gradient(90deg, #e67e22, #d35400);
-
-    font-weight: bold;
-
-}
-
-.rank3 {
-
-    background: linear-gradient(90deg, #f1c40f, #f39c12);
-
-    font-weight: bold;
-
-}
-
-.rankx {
-
-    background: rgba(255, 255, 255, 0.05);
-
-}
-
-/* POINTS */
-
-.points {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    text-align: right;
-}
-
-/* défilement classement */
-
-.ranking-window {
-
-    height: 200px;
-    /* 5 lignes */
-
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
     overflow: hidden;
-
 }
 
-/* TABLE */
-
-.ranking-table {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-    table-layout: fixed;
-
-}
-
-.ranking-table th,
-.ranking-table td {
-
+/* ================= COLONNE GAUCHE ================= */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow-y: auto;
     padding: 10px;
-
-    text-align: left;
-
 }
 
-/* HEADER */
+/* ================= PODIUM ================= */
+.podium {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.podium .players-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+/* Forcer l’ordre des cards */
+.card_legend {
+    order: 1;
+    /* toujours en haut */
+}
+
+.card_buteur {
+    order: 2;
+    /* juste en dessous de Legend */
+}
+
+.card_goal {
+    order: 3;
+    /* juste en dessous de Buteur */
+}
+
+/* Les cards génériques viennent après */
+.card_generic {
+    order: 4;
+}
+/* ================= DASHBOARD ================= */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* ================= BOX ================= */
+.ranking-box {
+    background: linear-gradient(145deg, #203a5c, #0f1c2e);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(224, 209, 47, 0.5);
+    color: white;
+}
+
+/* ================= TABLE HEAD ================= */
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
 
 .ranking-table thead {
-
     background: #0f2a44;
-
 }
 
-/* SCROLL */
+/* ================= TOP 3 ================= */
+.top-ranking td {
+    padding: 10px 0px;
+    border-bottom: 4px solid rgba(255,255,255,0.05);
+}
 
+/* ================= SCROLL ZONE ================= */
+.ranking-window {
+    height: 250px; /* 3 lignes parfaites */
+    overflow: hidden;
+    position: relative;
+}
+
+/* ================= TABLE SCROLL ================= */
 .scroll-ranking {
-
-    animation: scrollRank 10s linear infinite;
-
+    width: 100%;
+    border-collapse: collapse;
 }
 
-@keyframes scrollRank {
-
-    0% {
-        transform: translateY(0);
-    }
-
-    100% {
-        transform: translateY(-50%);
-    }
-
+.scroll-ranking tbody {
+    will-change: transform;
 }
 
-/*  podium */
-
-.podium {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: flex-end;
-
-    gap: 20px;
-
-    margin: 40px 0;
-
+/* ================= LIGNES ================= */
+.scroll-ranking tr {
+    border-bottom: 4px solid rgba(255,255,255,0.05);
 }
 
-.podium-player {
+/* ================= CELLULES ================= */
+.scroll-ranking td {
+    /* height: 90px; */
+    padding: 10px 0px;
+    vertical-align: middle;
+    border: none;
+}
 
-    background: #1e3a5f;
-
-    padding: 15px;
-
-    border-radius: 8px;
-
+/* ================= COLONNES ================= */
+td.nbrMatchs,
+th.nbrMatchs {
+    width: 60px;
     text-align: center;
+}
 
-    width: 120px;
+th.classement,
+td.classement,
+td.points,
+th.points {
+    width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
 
+.ranking-box td.player,
+.ranking-box th.player {
+    width: auto;
+}
+/* ================= PLAYER ================= */
+.ranking-box .player {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.ranking-box .player img {
+    width: 88px;
+    height: 57px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.ranking-box .player span {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ================= MEDALS ================= */
+.medal-gold {
+    background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,215,0,0.1));
+}
+
+.medal-silver {
+    background: linear-gradient(90deg, rgba(192,192,192,0.9), rgba(192,192,192,0.1));
+}
+
+.medal-bronze {
+    background: linear-gradient(90deg, rgba(205,127,50,0.9), rgba(205,127,50,0.1));
+}
+
+/* ================= HISTORIQUE ================= */
+.history-global {
+    background: linear-gradient(145deg, #203a5c, #0f1c2e);
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.history-global-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
     color: white;
-
-    transform: translateY(40px);
-
-    opacity: 0;
-
+    margin-bottom: 10px;
+    letter-spacing: 1px;
 }
 
-.first {
-
-    height: 140px;
-
-    background: linear-gradient(#2ecc71, #27ae60);
-
+.history-container td {
+    padding: 0;
+    height: 150px;
 }
 
-.second {
-
-    height: 110px;
-
-    background: linear-gradient(#e67e22, #d35400);
-
-}
-
-.third {
-
-    height: 90px;
-
-    background: linear-gradient(#f1c40f, #f39c12);
-
-}
-
-/* animation match ajouter */
-#match-toast {
-
-    position: fixed;
-
-    bottom: 30px;
-
-    right: 30px;
-
-    background: #27ae60;
-
-    color: white;
-
-    padding: 20px;
-
-    border-radius: 8px;
-
-    font-size: 18px;
-
-    opacity: 0;
-
-    transform: translateY(50px);
-
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-
-}
-
-/* ANCHOR tableau historique des rencontres */
 .history-container {
     display: flex;
     gap: 20px;
 }
 
 .history-box {
-    width: 320px;
-    background: #101722;
+    flex: 1;
+    background:  #0f1c2e;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -301,23 +222,45 @@
 }
 
 .history-window {
-    height: 84px;
-    /* 2 lignes */
+    height: 150px;
     overflow: hidden;
     position: relative;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.history-window tr {
+    height: 150px;
 }
 
-tbody {
-    transition: transform 0.6s ease;
+.history-container td {
+    padding: 0;
+    height: 150px;
+    vertical-align: middle;
 }
 
-td {
+
+.history-global .img-player {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    margin: auto;
+}
+
+/* IMPORTANT : isoler les td ici */
+.history-container td {
     padding: 10px;
     color: white;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 4px solid rgba(255,255,255,0.05);
+}
+
+/* ================= BACKGROUNDS ================= */
+.history-box.duel {
+    background: url("/static/img/background/background-history-duel.png") center/cover;
+}
+
+.history-box.goal {
+    background: url("/static/img/background/background-wc.png");
+    background-size: 500px auto;
+    background-position: 50% 25%;
 }

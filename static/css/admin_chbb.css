@@ -1,13 +1,8 @@
-/* ============================= */
-/* CHBB - Style FIFA / Ultimate Team */
-/* ============================= */
-
 header.topbar {
     display: none !important;
 }
 
 body.admin_chbb {
-    /* background: #121212; */
     background-image: url("/static/img/background/background_leffe.png");
     background-size: cover;
     background-position: center;

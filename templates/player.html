@@ -2,270 +2,242 @@
 
 {% block content %}
 
-<h1 class="player-page-title">{{ player.name }}</h1>
+<!-- <h1 class="player-page-title">{{ player.name }}</h1> -->
+<div class="contain_player">
+    <div class="colonne-droite">
+        <div class="player-profile">
 
-<div class="player-profile">
+            <!-- ========================= -->
+            <!-- CARTE JOUEUR -->
+            <!-- ========================= -->
+            <di class="fut-card">
+                <img src="{{ card_image }}" class="card-bg">
+                <img src="{{ player.photo }}" class="player-photo">
+                <div class="player-name">
+                    {{ player.name }}
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <span>Matchs</span>
+                        <b>{{ player.matches }}</b>
+                    </div>
+                    <div class="stat">
+                        <span>Victoires</span>
+                        <b>{{ player.wins }}</b>
+                    </div>
+                    <div class="stat">
+                        <span>Défaites</span>
+                        <b>{{ player.losses }}</b>
+                    </div>
+                    <div class="stat">
+                        <span>Duels</span>
+                        <b>{{ player.duel }}</b>
+                    </div>
+                    <div class="stat">
+                        <span>Goal</span>
+                        <b>{{ player.goal }} / {{ player.goal_won }}</b>
+                    </div>
+                </div>
 
-    <!-- ========================= -->
-    <!-- CARTE JOUEUR -->
-    <!-- ========================= -->
+                <!-- ========================= -->
+                <!-- SAISIE RESULTAT -->
+                <!-- ========================= -->
+                <div class="result-form">
+                    <h2>Ajouter un résultat</h2>
+                    <form method="POST" action="/add_match" class="match-form">
+                        <input type="hidden" name="p1" value="{{ player.id }}">
+                        <label>Atelier</label>
+                        <select name="type" id="atelier-select">
+                            {% if player.atelier_duel %}
+                            <option value="DUEL">DUEL</option>
+                            {% endif %}
+                            {% if player.atelier_goal %}
+                            <option value="GOAL">GOAL vs GOAL</option>
+                            {% endif %}
+                        </select>
+                        <label>Adversaire</label>
+                        <select name="p2" id="opponent-select">
+                            {% for p in duel_remaining %}
+                            <option value="{{ p.id }}" data-type="DUEL">
+                                {{ p.name }}
+                            </option>
+                            {% endfor %}
+                            {% for p in goal_remaining %}
+                            <option value="{{ p.id }}" data-type="GOAL">
+                                {{ p.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label>Score {{ player.name }}</label>
+                        <input type="number" name="s1" id="score-self" min="0" max="3" required>
+                        <label>Score adversaire</label>
+                        <input type="number" name="s2" id="score-opponent" min="0" max="3" required>
+                        <button type="submit">
+                            Enregistrer
+                        </button>
+                    </form>
+                </div>
+        </div>
+    </div>
+    <div class="colonne-gauche">
+        <!-- ========================= -->
+        <!-- MATCHS RESTANTS -->
+        <!-- ========================= -->
+        <div class="matches-remaining">
+            <div class="tab-duel-rencontres">
+                <h2>Matchs DUEL restants</h2>
+                <table class="interactive-table">
+                    <thead>
+                        <tr>
+                            <th>Adversaire</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in duel_remaining %}
+                        <tr>
+                            <td class="player-cell">
+                                <div class="mini-player">
+                                    <div class="mini-name">
+                                        {{ p.name }}
+                                    </div>
+                                    <span class="badge team-{{ p.team }}">
+                                        Equipe {{ p.team }}
+                                    </span>
+                                    <span class="badge stat-duel">
+                                        DUEL {{ p.duel }}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-goal-rencontres">
+                <h2>Matchs GOAL vs GOAL restants</h2>
+                <table class="interactive-table">
+                    <thead>
+                        <tr>
+                            <th>Adversaire</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in goal_remaining %}
+                        <tr>
+                            <td class="player-cell">
+                                <div class="mini-player">
+                                    <div class="mini-name">
+                                        {{ p.name }}
+                                    </div>
+                                    <span class="badge team-{{ p.team }}">
+                                        Equipe {{ p.team }}
+                                    </span>
+                                    <span class="badge stat-goal">
+                                        GvG {{ p.goal }}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
+        <!-- ========================= -->
+        <!-- HISTORIQUE GOAL -->
+        <!-- ========================= -->
 
-        <di class="fut-card">
+        <div class="history-window">
+            <div class="tab-goal-historique">
+                <h2>Historique GOAL vs GOAL</h2>
+                <table class="interactive-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Adversaire</th>
+                            <th>Score</th>
+                            <th>Résultat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="goal-history-body">
+                        {% for m in goal_history %}
+                        {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
+                        {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
+                        {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
 
-            <img src="{{ card_image }}" class="card-bg">
+                        <tr>
+                            <td class="date">{{ m.date }}</td>
 
-            <img src="{{ player.photo }}" class="player-photo">
+                            <td class="player-cell">
+                                <div class="mini-player">
+                                    <img src="{{ opponent.photo }}" class="mini-avatar">
+                                    <div class="mini-name">{{ opponent.name }}</div>
+                                </div>
+                            </td>
 
-            <div class="player-name">
-                {{ player.name }}
+                            <td class="score">{{ s1 }} - {{ s2 }}</td>
+
+                            <td>
+                                {% if s1 > s2 %}
+                                <span class="win">🏆 Victoire</span>
+                                {% else %}
+                                <span class="loss">😔 Défaite</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
+            <div class="tab-duel-historique">
+                <h2>Historique DUEL</h2>
+                <table class="interactive-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Adversaire</th>
+                            <th>Score</th>
+                            <th>Résultat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="duel-history-body">
+                        {% for m in duel_history %}
+                        {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
+                        {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
+                        {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
 
-            <div class="stats">
+                        <tr>
+                            <td class="date">{{ m.date }}</td>
 
-                <div class="stat">
-                    <span>Matchs</span>
-                    <b>{{ player.matches }}</b>
-                </div>
+                            <td class="player-cell">
+                                <div class="mini-player">
+                                    <img src="{{ opponent.photo }}" class="mini-avatar">
+                                    <div class="mini-name">{{ opponent.name }}</div>
+                                </div>
+                            </td>
 
-                <div class="stat">
-                    <span>Victoires</span>
-                    <b>{{ player.wins }}</b>
-                </div>
+                            <td class="score">{{ s1 }} - {{ s2 }}</td>
 
-                <div class="stat">
-                    <span>Défaites</span>
-                    <b>{{ player.losses }}</b>
-                </div>
-
-                <div class="stat">
-                    <span>Duels</span>
-                    <b>{{ player.duel }}</b>
-                </div>
-
-                <div class="stat">
-                    <span>Goal</span>
-                    <b>{{ player.goal }} / {{ player.goal_won }}</b>
-                </div>
-
+                            <td>
+                                {% if s1 > s2 %}
+                                <span class="win">🏆 Victoire</span>
+                                {% else %}
+                                <span class="loss">😔 Défaite</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-
-    <!-- ========================= -->
-    <!-- SAISIE RESULTAT -->
-    <!-- ========================= -->
-
-    <div class="result-form">
-
-        <h2>Ajouter un résultat</h2>
-
-        <form method="POST" action="/add_match" class="match-form">
-
-            <input type="hidden" name="p1" value="{{ player.id }}">
-
-            <label>Atelier</label>
-
-            <select name="type" id="atelier-select">
-
-                {% if player.atelier_duel %}
-                <option value="DUEL">DUEL</option>
-                {% endif %}
-
-                {% if player.atelier_goal %}
-                <option value="GOAL">GOAL vs GOAL</option>
-                {% endif %}
-
-            </select>
-
-            <label>Adversaire</label>
-
-            <select name="p2" id="opponent-select">
-
-                {% for p in duel_remaining %}
-                <option value="{{ p.id }}" data-type="DUEL">
-                    {{ p.name }}
-                </option>
-                {% endfor %}
-
-                {% for p in goal_remaining %}
-                <option value="{{ p.id }}" data-type="GOAL">
-                    {{ p.name }}
-                </option>
-                {% endfor %}
-
-            </select>
-
-            <label>Score {{ player.name }}</label>
-
-            <input type="number" name="s1" id="score-self" min="0" max="3" required>
-
-            <label>Score adversaire</label>
-
-            <input type="number" name="s2" id="score-opponent" min="0" max="3" required>
-
-            <button type="submit">
-                Enregistrer
-            </button>
-
-        </form>
-
+        </div>
     </div>
-
-
-    <!-- ========================= -->
-    <!-- MATCHS RESTANTS -->
-    <!-- ========================= -->
-
-    <div class="matches-remaining">
-
-        <h2>Matchs DUEL restants</h2>
-
-        <table class="interactive-table">
-
-            <thead>
-                <tr>
-                    <th>Adversaire</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for p in duel_remaining %}
-
-                <tr>
-
-                    <td class="player-cell">
-
-                        <div class="mini-player">
-
-                            <div class="mini-name">
-                                {{ p.name }}
-                            </div>
-
-                            <span class="badge team-{{ p.team }}">
-                                Equipe {{ p.team }}
-                            </span>
-
-                            <span class="badge stat-duel">
-                                DUEL {{ p.duel }}
-                            </span>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-
-        <h2>Matchs GOAL vs GOAL restants</h2>
-
-        <table class="interactive-table">
-
-            <thead>
-                <tr>
-                    <th>Adversaire</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for p in goal_remaining %}
-
-                <tr>
-
-                    <td class="player-cell">
-
-                        <div class="mini-player">
-
-                            <div class="mini-name">
-                                {{ p.name }}
-                            </div>
-
-                            <span class="badge team-{{ p.team }}">
-                                Equipe {{ p.team }}
-                            </span>
-
-                            <span class="badge stat-goal">
-                                GvG {{ p.goal }}
-                            </span>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- HISTORIQUE GOAL -->
-    <!-- ========================= -->
-
-    <h2>Historique GOAL vs GOAL</h2>
-
-    <table>
-
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Adversaire</th>
-                <th>Score</th>
-                <th>Résultat</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {% for m in goal_history %}
-
-            {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
-            {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
-            {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
-
-            <tr>
-
-                <td>{{ m.date }}</td>
-
-                <td>{{ opponent.name }}</td>
-
-                <td>{{ s1 }} - {{ s2 }}</td>
-
-                <td>
-                    {% if s1 > s2 %}
-                    <span class="win">Victoire</span>
-                    {% else %}
-                    <span class="loss">Défaite</span>
-                    {% endif %}
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-
 </div>
-
-</div>
-
 
 <!-- ========================= -->
-<!-- SCRIPTS -->
+<!-- ANCHOR SCRIPTS -->
 <!-- ========================= -->
 
 <script>
@@ -314,7 +286,67 @@
 
     scoreSelf.addEventListener("input", updateScore)
     scoreOpponent.addEventListener("input", updateScore)
+    // ANCHOR - preview background carte
+    function updateCardPreview() {
 
+        let card = "/static/img/cards/bronze.png"   // masculin défaut
+
+        const sexe = document.querySelector('[name="sexe"]').value
+        const interclub = document.querySelector('[name="interclub"]').checked
+
+
+        // FEMININ
+        if (sexe === "F") {
+            card = "/static/img/cards/rose.png"
+        }
+
+        // MASCULIN INTERCLUB
+        else if (sexe === "M" && interclub) {
+            card = "/static/img/cards/argent.png"
+        }
+
+        // MASCULIN NON INTERCLUB
+        else if (sexe === "M" && !interclub) {
+            card = "/static/img/cards/bronze.png"
+        }
+
+        document.getElementById("card_bg").src = card
+
+    }
+
+    function autoScrollHistory(tableId) {
+        const tbody = document.getElementById(tableId)
+        if (!tbody) return
+
+        let scroll = 0
+
+        setInterval(() => {
+            scroll += 1
+            tbody.style.transform = `translateY(-${scroll}px)`
+
+            if (scroll > tbody.scrollHeight / 2) {
+                scroll = 0
+            }
+        }, 40)
+    }
+    // dupliquer les lignes du tableau HISTORIQUE pour créer un effet de défilement infini
+    // function duplicateTable(tableId) {
+    //     const tbody = document.getElementById(tableId)
+    //     if (!tbody) return
+
+    //     tbody.innerHTML += tbody.innerHTML
+    // }
+
+    // // GOAL
+    // duplicateTable("goal-history-body")
+    // autoScrollHistory("goal-history-body")
+
+    // // DUEL
+    // duplicateTable("duel-history-body")
+    // autoScrollHistory("duel-history-body")
+
+    // // init
+    // autoScrollHistory("goal-history-body")
 </script>
 
 

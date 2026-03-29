@@ -10,14 +10,21 @@ body {
     align-items: center;
     justify-content: space-between;
     background: linear-gradient(#1e3b5c, #0f243d);
-    padding: 10px 20px;
+    padding: 0px 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
-
-.logo {
+.topbar_left {
+    display:flex;
+    align-items: center;
+}
+.topbar_left .club-logo {
+    width:120px;
+}
+.topbar_left .title_menu {
     color: white;
     font-size: 22px;
     font-weight: bold;
+    margin-left: 15px;
 }
 
 .menu {
@@ -45,7 +52,7 @@ body {
 }
 
 /* ANCHOR CSS ULTRA FUT PLAYER */
-.fut-card {
+/* .fut-card {
     position: relative;
     width: 280px;
     font-family: Arial;
@@ -69,7 +76,7 @@ body {
 
 .player-photo {
     position: absolute;
-    top: 85px;
+    top: 63px;
     left: 50%;
     transform: translateX(-50%);
     width: 140px;
@@ -77,17 +84,16 @@ body {
 
 .player-name {
     position: absolute;
-    top: 230px;
+    top: 210px;
     left: 0;
     right: 0;
     font-size: 22px;
     font-weight: bold;
 }
 
-/* STATS */
 .stats {
     position: absolute;
-    top: 260px;
+    top: 250px;
     left: 0;
     right: 0;
     display: grid;
@@ -99,4 +105,6 @@ body {
 .stat span {
     display: block;
     font-size: 12px;
-}
+} */
+
+/* ANCHOR card-generic ------------------------- */

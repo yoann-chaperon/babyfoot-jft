@@ -1,0 +1,57 @@
+<div class="player-card card_buteur">
+    <video class="card-bg" autoplay muted loop playsinline>
+        <source src="/static/videos/buteur.mp4" type="video/mp4">
+    </video>
+
+    <!-- 🔢 Badge classement -->
+    {% if rang %}
+        <div class="rank-badge">
+            #{{ rang }}
+        </div>
+    {% endif %}
+
+    <div class="card-avatar">
+        <img src="{{ joueur.photo }}">
+    </div>
+
+    <div class="card-stats">
+        <span>Duel : {{ joueur.duel }}</span>
+        <span>Goals : {{ joueur.goal }}</span>
+        <span>Matchs : {{ joueur.matches }}</span>
+    </div>
+
+</div>
+
+<style>
+    .card_buteur .card-bg {
+        position: absolute;
+        top: -41px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 118%;
+        object-fit: cover;
+        z-index: 0;
+        border-radius: 12px;
+    }
+
+    .card_buteur .card-header {
+        position: relative;
+        z-index: 1;
+        margin-top: 86px;
+    }
+
+    .rank-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: gold;
+    color: #000;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(255,215,0,0.7);
+}
+</style>

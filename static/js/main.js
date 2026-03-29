@@ -30,188 +30,183 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 //ANCHOR - Animation d'apparition des cartes joueurs END
 
-//ANCHOR - INDEX classement des joueurs START
+// ANCHOR - INDEX classement des joueurs START
+
 document.addEventListener("DOMContentLoaded", () => {
 
-    const rows = document.querySelectorAll(".ranking-table tr")
-
-    rows.forEach((row, i) => {
-
-        row.style.opacity = 0
-        row.style.transform = "translateX(-20px)"
-
-        setTimeout(() => {
-
-            row.style.transition = "0.4s"
-
-            row.style.opacity = 1
-
-            row.style.transform = "translateX(0)"
-
-        }, i * 80)
-
-    })
-
-})
-// défilement automatique du classement
-document.querySelectorAll(".scroll-ranking").forEach(table => {
-
-    const body = table.querySelector("tbody")
-
-    body.innerHTML += body.innerHTML
-
-})
-
-// podium animation
-function animatePodium() {
-
-    const rows = document.querySelectorAll(".scroll-ranking tbody tr")
-
-    if (rows.length < 3) return
-
-    document.getElementById("p1-name").innerText = rows[0].children[1].innerText
-    document.getElementById("p2-name").innerText = rows[1].children[1].innerText
-    document.getElementById("p3-name").innerText = rows[2].children[1].innerText
-
-    const podium = document.querySelectorAll(".podium-player")
-
-    podium.forEach((p, i) => {
-
-        setTimeout(() => {
-
-            p.style.transition = "0.6s"
-            p.style.opacity = 1
-            p.style.transform = "translateY(0)"
-
-        }, i * 300)
-
-    })
-
-}
-
-document.addEventListener("DOMContentLoaded", animatePodium)
-
-// ANCHOR tableau historique des rencontres
-
-const matches = [
-    { date: "14/04", adv: "Michel", score: "3-2" },
-    { date: "13/04", adv: "Paul", score: "2-1" },
-    { date: "12/04", adv: "Julien", score: "1-0" },
-    { date: "11/04", adv: "Lucas", score: "2-2" },
-    { date: "10/04", adv: "Nico", score: "4-3" }
-];
-
-function initHistory(id) {
-
-    const tbody = document.getElementById(id);
-
-    matches.forEach(m => {
-        tbody.innerHTML += `
-        <tr>
-            <td>${m.date}</td>
-            <td>${m.adv}</td>
-            <td>${m.score}</td>
-        </tr>`;
+    // ================= FIX PLAYER SPAN =================
+    document.querySelectorAll(".player").forEach(cell => {
+        if (!cell.querySelector("span")) {
+            const text = cell.textContent.trim();
+            cell.textContent = "";
+            const s = document.createElement("span");
+            s.textContent = text;
+            cell.appendChild(s);
+        }
+        const span = cell.querySelector("span");
+        span.style.whiteSpace = "nowrap";
+        span.style.overflow = "hidden";
+        span.style.textOverflow = "ellipsis";
+        span.style.display = "block";
+        span.style.width = "100%";
     });
 
-    // clone pour boucle infinie
-    matches.slice(0, 2).forEach(m => {
-        tbody.innerHTML += `
-        <tr>
-            <td>${m.date}</td>
-            <td>${m.adv}</td>
-            <td>${m.score}</td>
-        </tr>`;
-    });
+    // ================= SCROLL ULTRA SMOOTH =================
+    document.querySelectorAll(".scroll-ranking").forEach(table => {
 
-}
+        const container = table.closest(".ranking-window");
+        const tbody = table.querySelector("tbody");
+        if (!tbody || !container) return;
 
-initHistory("duelHistory");
-initHistory("goalHistory");
+        let rows = Array.from(tbody.children);
+        if (rows.length <= 3) return;
 
-function animateTable(id) {
+        // CLONAGE DES LIGNES pour scroll infini
+        rows.forEach(row => {
+            const clone = row.cloneNode(true);
 
-    const tbody = document.getElementById(id);
+            // Fix span joueur dans clone
+            const playerSpan = clone.querySelector(".player span");
+            if (playerSpan) {
+                playerSpan.style.whiteSpace = "nowrap";
+                playerSpan.style.overflow = "hidden";
+                playerSpan.style.textOverflow = "ellipsis";
+                playerSpan.style.display = "block";
+                playerSpan.style.width = "100%";
+            }
 
-    let index = 0;
-    const rowHeight = 42;
+            tbody.appendChild(clone);
+        });
 
-    setInterval(() => {
+        // SCROLL variables
+        let scrollY = 0;
+        let speed = 0.5; // ajuste la vitesse
+        const rowHeight = rows[0].offsetHeight; // hauteur d'une ligne
+        const totalHeight = rowHeight * rows.length;
 
-        index++;
-
-        tbody.style.transform =
-            `translateY(-${index * rowHeight}px)`;
-
-        if (index === matches.length) {
-
-            setTimeout(() => {
-
-                tbody.style.transition = "none";
-                tbody.style.transform = "translateY(0)";
-                index = 0;
-
-                setTimeout(() => {
-                    tbody.style.transition = "transform 0.6s ease";
-                }, 50);
-
-            }, 600);
-
+        function animate() {
+            scrollY += speed;
+            if (scrollY >= totalHeight) scrollY = 0;
+            container.scrollTop = scrollY;
+            requestAnimationFrame(animate);
         }
 
-    }, 2500);
+        animate();
 
-}
+        // PAUSE AU HOVER
+        container.addEventListener("mouseenter", () => speed = 0);
+        container.addEventListener("mouseleave", () => speed = 0.5);
 
-animateTable("duelHistory");
-animateTable("goalHistory");
+    });
 
-// ANCHOR - preview background carte
-function updateCardPreview() {
+    // ================= PODIUM =================
+    function animatePodium() {
+        const rows = document.querySelectorAll(".top-ranking tbody tr");
+        if (rows.length < 3) return;
 
-    let card = "/static/img/cards/bronze.png"   // masculin défaut
+        const p1El = document.getElementById("p1-name");
+        const p2El = document.getElementById("p2-name");
+        const p3El = document.getElementById("p3-name");
 
-    const sexe = document.querySelector('[name="sexe"]').value
-    const interclub = document.querySelector('[name="interclub"]').checked
+        if (p1El) p1El.innerText = rows[0].querySelector(".player span")?.innerText || "";
+        if (p2El) p2El.innerText = rows[1].querySelector(".player span")?.innerText || "";
+        if (p3El) p3El.innerText = rows[2].querySelector(".player span")?.innerText || "";
 
-
-    // FEMININ
-    if (sexe === "F") {
-        card = "/static/img/cards/rose.png"
+        const podium = document.querySelectorAll(".podium-player");
+        podium.forEach((p, i) => {
+            setTimeout(() => {
+                p.style.transition = "0.6s";
+                p.style.opacity = 1;
+                p.style.transform = "translateY(0)";
+            }, i * 300);
+        });
     }
 
-    // MASCULIN INTERCLUB
-    else if (sexe === "M" && interclub) {
-        card = "/static/img/cards/argent.png"
+    animatePodium();
+
+});
+// ================= HISTORIQUE DES MATCHS =================
+// matches est injecté depuis Flask dans index.html :
+// <script>const matches = {{ matches | tojson }};</script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // ================= INIT TABLE =================
+    function initHistory(id, data) {
+        const tbody = document.getElementById(id);
+        if (!tbody) return; // sécurité anti-crash
+
+        let html = "";
+
+        // contenu principal
+        data.forEach(m => {
+            html += `
+            <tr>
+                <img src="${m.playerA_photo}" class="img-player">
+                <td class="score-history">${m.scoreA} vs ${m.scoreB}</td>
+                <img src="${m.playerB_photo}" class="img-player">
+            </tr>`;
+        });
+
+        //<td>${m.playerA_name}</td>
+        //<td>${m.playerB_name}</td>
+
+        // duplication pour effet boucle infinie
+        data.slice(0, 2).forEach(m => {
+            html += `
+            <tr>
+                <img src="${m.playerA_photo}" class="img-player">
+                <td class="score-history">${m.scoreA} vs ${m.scoreB}</td>
+                <img src="${m.playerB_photo}" class="img-player">
+            </tr>`;
+        });
+        //<td>${m.playerA_name}</td>
+        // <td>${m.playerB_name}</td>
+
+        tbody.innerHTML = html;
     }
 
-    // MASCULIN NON INTERCLUB
-    else if (sexe === "M" && !interclub) {
-        card = "/static/img/cards/bronze.png"
+    // ================= ANIMATION =================
+    function animateTable(id, dataLength) {
+        const tbody = document.getElementById(id);
+        if (!tbody) return;
+
+        // Calculer dynamiquement la hauteur réelle de la première ligne
+        const firstRow = tbody.querySelector("tr");
+        const rowHeight = firstRow ? firstRow.offsetHeight : 150;
+
+        let index = 0;
+        const maxIndex = dataLength;
+
+        tbody.style.transition = "transform 0.6s ease";
+
+        setInterval(() => {
+            index++;
+            tbody.style.transform = `translateY(-${index * rowHeight}px)`;
+
+            if (index >= maxIndex) {
+                setTimeout(() => {
+                    tbody.style.transition = "none";
+                    tbody.style.transform = "translateY(0)";
+                    index = 0;
+
+                    // réactive transition
+                    requestAnimationFrame(() => {
+                        tbody.style.transition = "transform 0.6s ease";
+                    });
+
+                }, 600);
+            }
+
+        }, 2500);
     }
 
-    document.getElementById("card_bg").src = card
+    // ================= INITIALISATION =================
+    // Historiques séparés : duel / goal
+    initHistory("duelHistory", matchesDuel);
+    initHistory("goalHistory", matchesGoal);
 
-}
+    animateTable("duelHistory", matchesDuel.length);
+    animateTable("goalHistory", matchesGoal.length);
 
-// ANCHOR chbb
-document.querySelectorAll(".chbb-select").forEach(select => {
-
-    select.addEventListener("change", function () {
-
-        fetch("/admin/chbb/update", {
-
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-
-            body:
-            "player_id="+this.dataset.id +
-                "&value=" + this.value
-
-        }).then(() => location.reload())
-
-    })
-
-})
+});

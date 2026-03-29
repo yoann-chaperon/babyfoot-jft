@@ -17,15 +17,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 
     {% set css_path = request.path.strip('/').rsplit('/', 1)[0] %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/' + css_path + '.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/' + css_path + '.css') }}"> -->
 </head>
 
 <body class="{{ request.endpoint }}">
     <header class="topbar">
-        <div class="logo">⚽ Tableau Joueur JFT</div>
+        <div class="topbar_left">
+            <img src="/static/img/logo/logo_Javené4.png" class="club-logo">
+            <div class="title_menu">Club Manager JFT</div>
+        </div>
         <nav class="menu">
             <a href="/" class="btn">🏠 Tableau de Bord</a>
-            <a href="/player" class="btn">👤 Joueurs</a>
+            <a href="/players" class="btn">👤 Joueurs</a>
             <a href="/equipe" class="btn">👥 Équipes</a>
             <a href="/statistique" class="btn">📊 Statistiques</a>
             <a href="/add_match" class="btn">🔒 Ajouter Match</a>
@@ -40,5 +43,4 @@
 
     <div id="match-toast"></div>
 </body>
-
 </html>

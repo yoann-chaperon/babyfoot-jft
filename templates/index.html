@@ -2,223 +2,265 @@
 
 {% block content %}
 
-<div class="podium">
+<div class="main-grid">
 
-<div class="podium-player second">
+    <!-- ================= COLONNE GAUCHE ================= -->
+    <div class="left-column">
 
-<h3>🥈</h3>
-<p id="p2-name"></p>
+        <!-- ================= DASHBOARD ================= -->
+        <div class="dashboard-grid">
 
-</div>
+            <!-- ================= DUEL ================= -->
+            <div class="ranking-box">
+                <h2>CLASSEMENT DUEL</h2>
 
-<div class="podium-player first">
+                <!-- Top 3 -->
+                <table class="ranking-table top-ranking">
+                    <thead>
+                        <tr>
+                            <th class="classement">N°</th>
+                            <th>Joueur</th>
+                            <th class="nbrMatchs">Matchs</th>
+                            <th class="points">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in duel[:3] %}
+                        <tr
+                            class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
+                            <td class="classement">{{ loop.index }}</td>
+                            <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="points">{{ p.duel }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-<h3>🥇</h3>
-<p id="p1-name"></p>
+                <!-- Scrollable part -->
+                <div class="ranking-window">
+                    <div class="scroll-wrapper">
+                        <table class="ranking-table scroll-ranking">
+                            <tbody>
+                                {% for p in duel[3:] %}
+                                <tr>
+                                    <td class="classement">{{ loop.index + 3 }}</td>
+                                    <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="points">{{ p.duel }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-</div>
+                </div>
+            </div>
 
-<div class="podium-player third">
+            <!-- ================= GOAL ================= -->
+            <div class="ranking-box">
+                <h2>CLASSEMENT GOAL vs GOAL</h2>
 
-<h3>🥉</h3>
-<p id="p3-name"></p>
+                <table class="ranking-table top-ranking">
+                    <thead>
+                        <tr>
+                            <th class="classement">N°</th>
+                            <th>Joueur</th>
+                            <th class="nbrMatchs">Matchs</th>
+                            <th class="points">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in goal[:3] %}
+                        <tr
+                            class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
+                            <td class="classement">{{ loop.index }}</td>
+                            <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="points">{{ p.goal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-</div>
+                <div class="ranking-window">
+                    <div class="scroll-wrapper">
+                        <table class="ranking-table scroll-ranking">
+                            <tbody>
+                                {% for p in goal[3:] %}
+                                <tr>
+                                    <td class="classement">{{ loop.index + 3 }}</td>
+                                    <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="points">{{ p.goal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-</div>
+                </div>
+            </div>
 
-<div class="dashboard-grid">
+            <!-- ================= ELO ================= -->
+            <div class="ranking-box">
+                <h2>CLASSEMENT ELO</h2>
 
-<!-- ================= DUEL ================= -->
+                <table class="ranking-table top-ranking">
+                    <thead>
+                        <tr>
+                            <th class="classement">N°</th>
+                            <th>Joueur</th>
+                            <th class="nbrMatchs">Matchs</th>
+                            <th class="points">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in duel[:3] %}
+                        <tr
+                            class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
+                            <td class="classement">{{ loop.index }}</td>
+                            <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="points">{{ p.wins - p.losses }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-<div class="ranking-box">
+                <div class="ranking-window">
+                    <div class="scroll-wrapper">
+                        <table class="ranking-table scroll-ranking">
+                            <tbody>
+                                {% for p in duel[3:] %}
+                                <tr>
+                                    <td class="classement">{{ loop.index + 3 }}</td>
+                                    <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="points">{{ p.wins - p.losses }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-<h2>CLASSEMENT DUEL</h2>
+                </div>
+            </div>
 
-<!-- HEADER FIXE -->
+            <!-- ================= CLASSEMENT TOTAL ================= -->
+            <div class="ranking-box">
+                <h2>CLASSEMENT TOTAL</h2>
 
-<table class="ranking-table">
-<thead>
-<tr>
-<th>N°</th>
-<th>Joueur</th>
-<th>Matchs</th>
-<th>Pts</th>
-</tr>
-</thead>
-</table>
+                <table class="ranking-table top-ranking">
+                    <thead>
+                        <tr>
+                            <th class="classement">N°</th>
+                            <th>Joueur</th>
+                            <th class="nbrMatchs">Matchs</th>
+                            <th class="points">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in classement_club[:3] %}
+                        <tr
+                            class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
+                            <td class="classement">{{ loop.index }}</td>
+                            <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="points">{{ p.duel + p.goal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-<!-- ZONE SCROLL -->
+                <div class="ranking-window">
+                    <div class="scroll-wrapper">
+                        <table class="ranking-table scroll-ranking">
+                            <tbody>
+                                {% for p in classement_club[3:] %}
+                                <tr>
+                                    <td class="classement">{{ loop.index + 3 }}</td>
+                                    <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
+                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="points">{{ p.duel + p.goal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-<div class="ranking-window">
+                </div>
+            </div>
 
-<table class="ranking-table scroll-ranking">
-
-<tbody>
-
-{% for p in duel %}
-
-<tr>
-
-<td>{{loop.index}}</td>
-
-<td class="player">
-<img src="{{p.photo}}">
-{{p.name}}
-</td>
-
-<td>{{p.matches}}</td>
-
-<td class="points">{{p.duel}}</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-<!-- ================= GOAL ================= -->
-
-<div class="ranking-box">
-
-<h2>CLASSEMENT GOAL vs GOAL</h2>
-
-<!-- HEADER FIXE -->
-
-<table class="ranking-table">
-<thead>
-<tr>
-<th>N°</th>
-<th>Joueur</th>
-<th>Matchs</th>
-<th>Pts</th>
-</tr>
-</thead>
-</table>
-
-<!-- ZONE SCROLL -->
-
-<div class="ranking-window">
-
-<table class="ranking-table scroll-ranking">
-
-<tbody>
-
-{% for p in duel %}
-
-<tr>
-
-<td>{{loop.index}}</td>
-
-<td class="player">
-<img src="{{p.photo}}">
-{{p.name}}
-</td>
-
-<td>{{p.matches}}</td>
-
-<td class="points">{{p.goal}}</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-<!-- ================= ELO ================= -->
-
-<div class="ranking-box">
-    
-    <h2>CLASSEMENT ELO</h2>
-    
-    <!-- HEADER FIXE -->
-    
-    <table class="ranking-table">
-        <thead>
-            <tr>
-                <th>N°</th>
-                <th>Joueur</th>
-                <th>Matchs</th>
-                <th>Pts</th>
-            </tr>
-        </thead>
-    </table>
-    
-    <!-- ZONE SCROLL -->
-    
-    <div class="ranking-window">
-        
-        <table class="ranking-table scroll-ranking">
-            
-            <tbody>
-                
-                {% for p in duel %}
-                
-                <tr>
-                    
-                    <td>{{loop.index}}</td>
-                    
-                    <td class="player">
-                        <img src="{{p.photo}}">
-                        {{p.name}}
-                    </td>
-                    
-                    <td>{{p.matches}}</td>
-                    
-                    <td class="points">{{p.wins - p.losses}}</td>
-                    
-                </tr>
-                
-                {% endfor %}
-                
-            </tbody>
-            
-        </table>
-        
-    </div>
-    
-</div>
-</div>
-</div>
-
-<!-- tableau historique des rencontres -->
-
-<div class="history-container">
-
-    <div class="history-box">
-        <div class="history-title">DUEL</div>
-
-        <div class="history-window">
-            <table>
-                <tbody id="duelHistory"></tbody>
-            </table>
         </div>
+
+        <!-- ================= HISTORIQUE ================= -->
+        <div class="history-global">
+            <div class="history-global-title">MATCH EN DIRECT</div>
+            <div class="history-container">
+                <div class="history-box duel">
+                    <div class="history-title">DUEL</div>
+                    <div class="history-window">
+                        <table>
+                            <tbody id="duelHistory"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="history-box goal">
+                    <div class="history-title">GOAL vs GOAL</div>
+                    <div class="history-window">
+                        <table>
+                            <tbody id="goalHistory"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- end history-container -->
+        </div> <!-- end left-column -->
     </div>
 
-    <div class="history-box">
-        <div class="history-title">GOAL vs GOAL</div>
 
-        <div class="history-window">
-            <table>
-                <tbody id="goalHistory"></tbody>
-            </table>
+    <!-- ================= COLONNE DROITE ================= -->
+    <div class="podium">
+
+        <!-- LEGENDAIRE -->
+        <h3 class="title-section">Légendaire</h3>
+        <div class="players-grid">
+            {% set joueur = legend %}
+            {% include "cards/card_legend.html" %}
         </div>
-    </div>
 
-</div>
+        <!-- DUEL -->
+        <h3 class="card-badge badge-buteur">Duel</h3>
+        <div class="players-grid">
+            {% set joueur = meilleur_buteur %}
+            {% include "cards/card_buteur.html" %}
+        </div>
 
+        <!-- GOAL -->
+        <h3 class="title-section">Goal</h3>
+        <div class="players-grid">
+            {% set joueur = meilleur_goal %}
+            {% include "cards/card_goal.html" %}
+        </div>
+
+    </div> <!-- end podium -->
+
+</div> <!-- end main-grid -->
+<script>
+    const matchesDuel = {{ matches_duel | tojson }}
+    const matchesGoal = {{ matches_goal | tojson }}
+</script>
+<style>
+    /* Bloquer le scroll global pour la borne */
+    html,
+    body {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+        /* si écran tactile */
+        user-select: none;
+        /* empêcher sélection accidentelle */
+    }
+</style>
 {% endblock %}

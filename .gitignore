@@ -7,11 +7,11 @@ __pycache__/
 
 # Base de données
 babyfoot.db
-backup
+#backup
 
 # IDE / Mac
 .DS_Store
 .vscode/
 
 # Exclure le dossier d’images lourd
-static/img/
+#static/img/

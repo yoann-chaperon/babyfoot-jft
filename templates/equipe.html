@@ -34,61 +34,50 @@
 
             <h2>🔥 ÉQUIPE A</h2>
 
-            <div class="players-grid">
+            <table class="team-table">
 
-                {% for p in teamA %}
+                <tr>
 
-                <a href="/player/{{ p.id }}" class="player-link">
+                    {% for p in teamA %}
 
-                    <div class="fifa-card">
+                    <td>
 
-                        <div class="rank">#{{ loop.index }}</div>
+                        <a href="/player/{{ p.id }}" class="player-link">
 
-                        <img src="{{ p.photo }}" class="player-photo">
-
-                        <div class="player-name">
-                            {{ p.name }}
-                        </div>
-
-                        <div class="stats">
-
-                            <div class="stat">
-                                <span>M</span>
-                                <b>{{ p.matches }}</b>
+                            <div class="fifa-card">
+                                <img src="/static/img/cards/gold.png" class="card-bg">
+                                <div class="rank">#{{ loop.index }}</div>
+                                <img src="{{ p.photo }}" class="player-photo">
+                                <div class="player-name">
+                                    {{ p.name }}
+                                </div>
+                                <div class="stats">
+                                    <div class="stat">
+                                        <span>Duel: {{ p.duel }} pts</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span>Goal: {{ p.goal }} pts</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span>Gagner: {{ p.wins }}</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span>Perdu : {{ p.losses }}</span>
+                                    </div>
+                                </div>
+                                <div class="points">
+                                    {{ p.duel + p.goal }} pts
+                                </div>
+                                <div class="block glow"></div>
                             </div>
+                        </a>
+                    </td>
 
-                            <div class="stat">
-                                <span>W</span>
-                                <b>{{ p.wins }}</b>
-                            </div>
+                    {% endfor %}
 
-                            <div class="stat">
-                                <span>L</span>
-                                <b>{{ p.losses }}</b>
-                            </div>
+                </tr>
 
-                        </div>
-
-                        <div class="points">
-                            {{ p.duel + p.goal }} pts
-                        </div>
-
-                    </div>
-
-                </a>
-
-                {% endfor %}
-
-            </div>
-
-        </div>
-
-
-        <!-- VS -->
-
-        <div class="vs-center">
-
-            <div class="vs-text">VS</div>
+            </table>
 
         </div>
 
@@ -99,46 +88,59 @@
 
             <h2>⚡ ÉQUIPE B</h2>
 
-            <div class="players-grid">
+            <table class="team-table">
 
-                {% for p in teamB %}
+                <tr>
 
-                <div class="fifa-card">
+                    {% for p in teamB[:8] %}
 
-                    <div class="rank">#{{ loop.index }}</div>
+                    <td>
 
-                    <img src="{{ p.photo }}" class="player-photo">
+                        <a href="/player/{{ p.id }}" class="player-link">
 
-                    <div class="player-name">{{ p.name }}</div>
+                            <div class="fifa-card">
 
-                    <div class="stats">
+                                <img src="/static/img/cards/argent.png" class="card-bg">
 
-                        <div class="stat">
-                            <span>M</span>
-                            <b>{{ p.matches }}</b>
-                        </div>
+                                <div class="rank">#{{ loop.index }}</div>
 
-                        <div class="stat">
-                            <span>W</span>
-                            <b>{{ p.wins }}</b>
-                        </div>
+                                <img src="{{ p.photo }}" class="player-photo">
 
-                        <div class="stat">
-                            <span>L</span>
-                            <b>{{ p.losses }}</b>
-                        </div>
+                                <div class="player-name">{{ p.name }}</div>
 
-                    </div>
+                                <div class="stats">
 
-                    <div class="points">
-                        {{ p.duel + p.goal }} pts
-                    </div>
+                                    <div class="stat">
+                                        <span>Duel: {{ p.duel }} pts</span>
+                                    </div>
 
-                </div>
+                                    <div class="stat">
+                                        <span>Goal: {{ p.goal }} pts</span>
+                                    </div>
 
-                {% endfor %}
+                                    <div class="stat">
+                                        <span>Gagner: {{ p.wins }}</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span>Perdu: {{ p.losses }}</span>
+                                    </div>
 
-            </div>
+                                </div>
+
+                                <div class="points">
+                                    {{ p.duel + p.goal }} pts
+                                </div>
+                            </div>
+
+                        </a>
+
+                    </td>
+
+                    {% endfor %}
+
+                </tr>
+
+            </table>
 
         </div>
 

@@ -5,6 +5,7 @@ from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 from itertools import combinations
 from datetime import datetime
+from collections import defaultdict
 import datetime, os
 
 # ----------------------------
@@ -45,7 +46,9 @@ class Player(db.Model):
     force_team_b = db.Column(db.Boolean, default=False)
 
     card_background = db.Column(db.String(200))
-
+    
+    card_video = db.Column(db.String(200), nullable=True)
+    
     duel = db.Column(db.Integer, default=0)
 
     goal = db.Column(db.Integer, default=0)
@@ -105,6 +108,7 @@ class Match(db.Model):
     scoreB = db.Column(db.Integer)
 
     type = db.Column(db.String(10))
+    
 class DetteTransaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -143,7 +147,8 @@ with app.app_context():
         'ALTER TABLE joueur ADD COLUMN chbb_count INTEGER DEFAULT 3',
         'ALTER TABLE joueur ADD COLUMN chbb_date1 TEXT',
         'ALTER TABLE joueur ADD COLUMN chbb_date2 TEXT',
-        'ALTER TABLE joueur ADD COLUMN chbb_date3 TEXT'
+        'ALTER TABLE joueur ADD COLUMN chbb_date3 TEXT',
+        'ALTER TABLE player ADD COLUMN card_video TEXT'
 
     ]
 
@@ -192,28 +197,96 @@ def update_elo(p1, p2, score1, score2):
 # ANCHOR index
 @app.route("/")
 def index():
+    # Récupérer TOUS les joueurs actifs (sans filtres supplémentaires)
+    interclub_actifs = Player.query.filter_by(actif=True).all()
 
-    duel = Player.query.filter_by(actif=True).order_by(Player.duel.desc()).limit(5).all()
+    # ================= CLASSEMENTS =================
+    # DUEL : membre_club=true ET atelier_duel=true
+    joueurs_duel = [j for j in interclub_actifs if j.membre_club and j.atelier_duel]
+    classement_duel = sorted(joueurs_duel, key=lambda j: j.duel, reverse=True)
+    
+    # GOAL : membre_club=true ET atelier_goal=true
+    joueurs_goal = [j for j in interclub_actifs if j.membre_club and j.atelier_goal]
+    classement_goal = sorted(joueurs_goal, key=lambda j: j.goal, reverse=True)
 
-    goal = Player.query.filter_by(actif=True).order_by(Player.goal.desc()).limit(5).all()
+    # ================= CLASSEMENT TOTAL (DUEL + GOAL) - MEMBRE CLUB UNIQUEMENT =================
+    joueurs_membre_club = [j for j in interclub_actifs if j.membre_club]
+    classement_total = sorted(
+        joueurs_membre_club,
+        key=lambda j: (j.duel + j.goal),
+        reverse=True
+    )
+    legend = classement_total[0] if classement_total else None
 
-    elo = Player.query.filter_by(actif=True).order_by(Player.elo.desc()).limit(5).all()
+    # ================= MEILLEUR BUTEUR =================
+    meilleur_buteur = None
+    rang_buteur = None
 
-    last_duel = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).first()
+    for i, j in enumerate(classement_duel):
+        if legend and j.id != legend.id:
+            meilleur_buteur = j
+            rang_buteur = i + 1
+            break
 
-    last_goal = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).first()
+    # ================= MEILLEUR GOAL =================
+    meilleur_goal = None
+    rang_goal = None
 
+    ids_exclus = set()
+    if legend:
+        ids_exclus.add(legend.id)
+    if meilleur_buteur:
+        ids_exclus.add(meilleur_buteur.id)
+
+    for i, j in enumerate(classement_goal):
+        if j.id not in ids_exclus:
+            meilleur_goal = j
+            rang_goal = i + 1
+            break
+
+    # ================= MATCHS (IMPORTANT 🔥) =================
+    # ⚠️ adapte les champs selon ton modèle Match
+    matchs_duel = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).limit(10).all()
+    matchs_goal = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).limit(10).all()
+
+    def format_matches(matchs):
+        matches_data = []
+        for m in matchs:
+            if isinstance(m.date, str):
+                date_str = m.date
+            else:
+                date_str = m.date.strftime("%d/%m/%Y") if m.date else ""
+
+            matches_data.append({
+                "date": date_str,
+                "playerA_name": m.playerA.name if m.playerA else "J1",
+                "playerA_photo": m.playerA.photo if m.playerA else "/static/img/default.png",
+                "playerB_name": m.playerB.name if m.playerB else "J2", 
+                "playerB_photo": m.playerB.photo if m.playerB else "/static/img/default.png",
+                "scoreA": m.scoreA,
+                "scoreB": m.scoreB
+            })
+        return matches_data
+
+    matches_duel_data = format_matches(matchs_duel)
+    matches_goal_data = format_matches(matchs_goal)
+
+    # ================= RENDER =================
     return render_template(
         "index.html",
-        duel=duel,
-        goal=goal,
-        elo=elo,
-        last_duel=last_duel,
-        last_goal=last_goal
+        duel=classement_duel,
+        goal=classement_goal,
+        classement_club=classement_total,
+        legend=legend,
+        meilleur_buteur=meilleur_buteur,
+        meilleur_goal=meilleur_goal,
+        rang_buteur=rang_buteur,
+        rang_goal=rang_goal,
+        matches_duel=matches_duel_data,
+        matches_goal=matches_goal_data
     )
 
 
-from itertools import combinations
 
 # ANCHOR admin
 @app.route("/admin")
@@ -256,6 +329,42 @@ def admin():
         remaining_matches=remaining_matches,
         duel_remaining=duel_remaining,
         goal_remaining=goal_remaining
+    )
+# ANCHOR players
+@app.route("/players")
+def players():
+
+    joueurs = Player.query.order_by(Player.name).all()
+
+    club_javene = []
+    clubs_ext = defaultdict(list)
+
+    for j in joueurs:
+
+        if j.membre_club:
+            club_javene.append(j)
+
+        else:
+            club = j.external_club or "Autre"
+            clubs_ext[club].append(j)
+
+    # tri JAVENÉ
+    club_javene.sort(
+        key=lambda x: (
+            not x.interclub,
+            -(x.elo or 0),
+            x.name
+        )
+    )
+
+    # tri clubs ext
+    for club in clubs_ext:
+        clubs_ext[club].sort(key=lambda x: x.name)
+
+    return render_template(
+        "players.html",
+        club_javene=club_javene,
+        clubs_ext=clubs_ext
     )
 
 # ANCHOR toggle player
@@ -367,8 +476,10 @@ def player(id):
     p = Player.query.get_or_404(id)
 
     all_players = Player.query.filter(
-        Player.id != id,
-        Player.actif == True
+    Player.id != id,
+    Player.actif == True,
+    Player.membre_club == True,
+    Player.interclub == True
     ).all()
 
     matches = Match.query.filter(
@@ -378,9 +489,30 @@ def player(id):
     duel_history = [m for m in matches if m.type == "DUEL"]
     goal_history = [m for m in matches if m.type == "GOAL"]
 
-    duel_remaining = sorted(all_players, key=lambda pl: pl.duel, reverse=True)
+    # récupérer tous les matchs du joueur
+    played_pairs = {
+        (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
+        for m in matches
+    }
 
-    goal_remaining = sorted(all_players, key=lambda pl: pl.goal, reverse=True)
+    duel_remaining = []
+    goal_remaining = []
+
+    for pl in all_players:
+
+        pair = (min(p.id, pl.id), max(p.id, pl.id))
+
+        # DUEL
+        if (pair[0], pair[1], "DUEL") not in played_pairs:
+            duel_remaining.append(pl)
+
+        # GOAL
+        if (pair[0], pair[1], "GOAL") not in played_pairs:
+            goal_remaining.append(pl)
+
+    # tri style FIFA
+    duel_remaining = sorted(duel_remaining, key=lambda x: abs(x.elo - p.elo))
+    goal_remaining = sorted(goal_remaining, key=lambda x: abs(x.elo - p.elo))
 
     if not p.membre_club and p.card_background:
         card_image = p.card_background

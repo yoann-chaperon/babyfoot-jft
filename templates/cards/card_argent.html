@@ -1,0 +1,156 @@
+<div class="player-card card_argent">
+
+    <div class="card-gloss"></div>
+
+    {% if joueur.card_video %}
+    <video class="card-bg" autoplay muted loop playsinline>
+        <source src="{{ joueur.card_video }}" type="video/mp4">
+    </video>
+    {% else %}
+    <div class="card-bg" style="background-image:url('/static/img/cards/argent.png');"></div>
+    {% endif %}
+
+    <div class="card-header">
+        {% if joueur.external_club %}
+        <img class="club-logo" src="{{ joueur.club_logo }}">
+        {% endif %}
+    </div>
+
+    <div class="card-avatar">
+        <img src="{{ joueur.photo }}">
+    </div>
+
+    <div class="card-stats">
+        <span>Duel : {{ joueur.duel }}</span>
+        <span>Goals : {{ joueur.goal }}</span>
+        <span>Matchs : {{ joueur.matches }}</span>
+    </div>
+
+</div>
+
+<!-- ANCHOR CSS -->
+<style>
+    /* ======================= */
+/* PLAYER CARD BASE */
+/* ======================= */
+
+.player-card {
+
+    position: relative;
+    width: 350px;
+    height: 350px;
+
+    border-radius: 12px;
+    overflow: hidden;
+
+    text-align: center;
+
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+    transition: transform .3s ease, box-shadow .3s ease;
+
+}
+
+.player-card:hover {
+
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255,255,255,0.8);
+
+}
+
+
+/* ======================= */
+/* CARD ARGENT */
+/* ======================= */
+
+.card_argent .card-bg {
+
+    position: absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background-size:cover;
+    background-position:center;
+
+    z-index:0;
+
+}
+
+.card_argent .card-header {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 60px;
+
+}
+
+.card_argent .club-logo {
+
+    width: 60px;
+
+}
+
+.card_argent .card-avatar {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin: 10px auto;
+
+    width: 180px;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+
+}
+
+.card_argent .card-avatar img {
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.card_argent .card-stats {
+
+    display:flex;
+
+    flex-direction:column;
+
+    position:relative;
+
+    z-index:2;
+
+    font-size:1.3em;
+
+    margin-top:15px;
+
+    color:#e6e6e6;
+
+}
+.card-gloss {
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        120deg,
+        rgba(255,255,255,0.2) 0%,
+        rgba(255,255,255,0.05) 40%,
+        rgba(255,255,255,0.2) 100%
+    );
+    mix-blend-mode:overlay;
+    pointer-events:none;
+}
+
+
+</style>
+

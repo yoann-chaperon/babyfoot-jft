@@ -4,105 +4,229 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    width: 100vw;
+    min-height: 100vh;
 }
 
 /* titre */
 
 .teams-title {
-
     text-align: center;
-    font-size: 60px;
+    font-size: 40px;
     margin-bottom: 30px;
+    margin-top: 0px;
     letter-spacing: 4px;
+    color: white;
+    padding-top: 20px;
+}
 
+.team-a h2 {
+    color: gold;
 }
 
 /* arena layout */
 
 .arena {
-
-    display: grid;
-
-    grid-template-columns: 1fr 250px 1fr;
-
-    gap: 40px;
-
-    align-items: start;
-
+    display: block;
+    height: 100%;
 }
 
 /* colonnes */
 
 .team-column {
-
-    padding: 30px;
     border-radius: 15px;
+    height: 500px;
+    overflow: auto;
 
 }
 
 /* team A */
 
 .team-a {
-
-    background: linear-gradient(135deg, #0f5132, #198754);
-
-    box-shadow: 0 0 40px rgba(46, 204, 113, 0.5);
-
+    background: #1e1d16;
+    box-shadow: 0 0 40px rgba(231, 187, 11, 0.5);
+    margin-bottom: 20px;
 }
 
 /* team B */
 
 .team-b {
 
-    background: linear-gradient(135deg, #1b263b, #0d6efd);
+    background: linear-gradient(135deg, silver, #c0c0c0);
 
-    box-shadow: 0 0 40px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 0 40px rgba(192, 192, 192, 0.5);
 
 }
 
 .team-column h2 {
 
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 32px;
+    margin-bottom: 16px;
+    font-size: 30px;
 
 }
 
 /* grille cards */
 
-.players-grid {
+.team-table {
 
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+.team-table td {
+
+    border: none;
+    text-align: center;
+
+}
+
+/* fifa card */
+
+.fifa-card {
+
+    position: relative;
+
+    width: 204px;
+
+    height: 300px;
+
+    margin: 0 auto;
+
+    overflow: hidden;
+
+    text-align: center;
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+}
+
+/* Team A cards larger */
+.team-b .fifa-card,
+.team-a .fifa-card {
+
+    width: 245px;
+
+    height: 360px;
+
+    margin-left: 0px;
+
+    margin-right: 0px;
+
+}
+
+.card-bg {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    z-index: 0;
+
+    border-radius: 12px;
+
+}
+
+
+
+.rank {
+
+    position: absolute;
+
+    top: 10px;
+
+    left: 10px;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    color: gold;
+
+    z-index: 1;
+
+}
+
+.player-photo {
+    position: absolute;
+    top: 63px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 174px;
+    z-index: 1;
+}
+
+.player-name {
+
+    position: absolute;
+
+    bottom: 142px;
+
+    left: 0;
+
+    right: 0;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    color: gold;
+
+    z-index: 1;
+
+}
+
+.stats {
+    position: absolute;
+    bottom: 82px;
+    left: 0;
+    right: 0;
     display: grid;
-
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-
-    gap: 20px;
-
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    color: gold;
+    font-weight: bold;
+    z-index: 1;
+    padding: 0 34px;
 }
 
-/* VS central */
-
-.vs-center {
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+.stat span {
+    display: block;
+    font-size: 13px;
+    line-height: 2.2;
 }
 
-.vs-text {
+.stat b {
+    display: block;
+    font-size: 10px;
+}
 
-    font-size: 120px;
-    font-weight: 900;
+.points {
+    position: absolute;
+    bottom: 57px;
+    left: 0;
+    right: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: gold;
+    z-index: 1;
+}
 
-    text-shadow: 0 0 30px red;
-
-    animation: pulse 2s infinite;
-
+/* Team B card text colors */
+.team-b .player-name,
+.team-b .stats,
+.team-b .points,
+.team-b .rank {
+    color: #0d3176;
 }
 
 @keyframes pulse {
-
     0% {
         transform: scale(1)
     }
@@ -114,7 +238,6 @@
     100% {
         transform: scale(1)
     }
-
 }
 
 /* animation entrée */
@@ -177,20 +300,20 @@
 
     display: flex;
     justify-content: space-between;
-    margin-bottom: 40px;
-    font-size: 24px;
+    margin-bottom: 20px;
+    font-size: 18px;
 
 }
 
 .teamA-power {
 
-    color: #2ecc71;
+    color: gold;
 
 }
 
 .teamB-power {
 
-    color: #3498db;
+    color: silver;
 
 }
 
@@ -199,4 +322,49 @@
     text-decoration: none;
     color: inherit;
 
+}
+
+/* ANIMATION CARDS TEAM A */
+.block {
+    position: absolute;
+    top: -35px;
+    left: 19px;
+    width: 206px;
+    height: 368px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    clip-path: polygon(40% 16%, 54% 15%, 100% 24%, 100% 91%, 55% 100%, 45% 100%, 0% 91%, 0% 25%);
+    z-index: -110;
+}
+
+.glow::before,
+.glow::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: 36px;
+    background: linear-gradient(90deg, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #7a00ff, #002bff, #00ffd5, #48ff00);
+    background-size: 400%;
+    width: calc(100% + 2px);
+    height: calc(100% + -4px);
+    animation: glow 20s linear infinite;
+    filter: blur(2px);
+    z-index: -1000;
+}
+
+.glow::after {
+    animation: glow 2s linear infinite;
+}
+
+@keyframes glow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
 }

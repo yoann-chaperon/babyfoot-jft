@@ -1,0 +1,247 @@
+body.players {
+    background-image: url("/static/img/background/background-12.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+}
+
+.players-page {
+    /* max-width:1200px; */
+    margin: 10px 20px;
+}
+
+/* CLUB */
+
+.club-section {
+    margin-bottom: 40px;
+}
+
+.club-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 10px;
+    background: #141f3a;
+}
+
+.club-logo-banner {
+    width: 120px;
+}
+
+.club-title {
+    font-size: 50px;
+    font-weight: bold;
+}
+
+.club-count {
+    font-size: 30px;
+    opacity: 0.7;
+    margin-left: 10px;
+}
+
+.club-toggle {
+    margin-left: auto;
+}
+
+/* CONTENT */
+
+.club-content {
+    display: none;
+    margin-top: 20px;
+}
+
+.club-content.open {
+    display: block;
+}
+
+/* Header / logo club */
+.card-header {
+    position: relative;
+    z-index: 1;
+    margin-top: 60px;
+}
+
+/* PLAYERS */
+
+.players-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.players-subtitle {
+    margin: 20px 0 10px;
+}
+
+.players-inactive {
+    opacity: 0.6;
+}
+
+/******* STYLE CARDS_BACKGROUND  *******/
+/* Fond vidéo ou image */
+.players .card-bg {
+    position: absolute;
+    border-radius: 12px;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.players .player-card {
+    width: 350px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transform: scale(1.05);
+}
+
+.player-card .club-logo {
+    position: absolute;
+    left: 40px;
+    width: 70px;
+    object-fit: contain;
+    z-index: 4;
+}
+
+.card-name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 5px 12px;
+    border-radius: 8px;
+
+    pointer-events: none;
+}
+
+.player-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.player-card {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Stats */
+.player-card .card-stats {
+    position: absolute;
+    left: 36%;
+    bottom: 16%;
+    z-index: 1;
+    font-size: 1.2em;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+}
+
+/* ======================= */
+/* CARD JAVENE             */
+/* ======================= */
+.club-section.Javene .club-header {
+    background: #08035a;
+}
+
+.player-card.card_javene .club-logo {
+    left: 49px;
+    width: 89px;
+}
+
+.player-card.card_javene .block {
+    position: absolute;
+    margin: 10% auto 0;
+    top: 0;
+    left: 32px;
+    width: 294px;
+    height: 372px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.player-card.card_javene .glow::before,
+.player-card.card_javene .glow::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: 36px;
+    background: linear-gradient(90deg, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8);
+    background-size: 400%;
+    width: calc(100% + 2px);
+    height: calc(100% + -4px);
+    animation: glow 20s linear infinite;
+    filter: blur(2px);
+    z-index: -1000;
+}
+
+.player-card.card_javene .glow::after {
+    animation: glow 2s linear infinite;
+}
+
+@keyframes glow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ==== CARD RENNES ==== */
+.club-section.Rennes .club-header {
+    background: #fc4302;
+}
+
+.club-section.Rennes .card-name {
+    color: #f9f9f9;
+}
+
+/* ==== CARD NOUVOITOU ==== */
+.club-section.Nouvoitou .club-header {
+    background: #e3020a;
+}
+
+/* ==== CARD LARCHAMP ==== */
+.club-section.Larchamp .club-header {
+    background: #678dbd;
+}
+
+.club-section.Larchamp .player-card .club-logo {
+    width: 80px;
+}
+
+/* ==== CARD BRUZ ==== */
+.club-section.Bruz .club-header {
+    background: white;
+    color: black;
+}
+
+/* ==== CARD CHEVAIGNE ==== */
+.club-section.Chevaigne .club-header {
+    background: #f9925a;
+    color: #232436;
+}
+
+.club-section.Chevaigne .player-card .club-logo {
+    left: 52px;
+}

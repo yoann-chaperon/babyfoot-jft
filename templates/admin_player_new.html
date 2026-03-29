@@ -124,28 +124,26 @@
 
     .player-photo {
         position: absolute;
-        bottom: 95px;
+        top: 70px;
         left: 50%;
         transform: translateX(-50%);
         width: 180px;
         height: 180px;
-        border-radius: 50%;
         object-fit: cover;
-        border: 4px solid white;
         z-index: 3;
     }
 
     .club-logo {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 65px;
+        left: 32px;
         width: 70px;
         z-index: 4;
     }
 
     .player-name {
         position: absolute;
-        bottom: 25px;
+        bottom: 177px;
         width: 100%;
         text-align: center;
         font-size: 28px;
@@ -187,7 +185,8 @@
         <form method="POST" enctype="multipart/form-data">
 
             <label>Nom du joueur</label>
-            <input type="text" name="name" id="player_name_input">
+            <!-- <input type="text" name="name" id="player_name_input"> -->
+            <input type="text" name="name" required placeholder="Nom du joueur">
 
             <label>Sexe</label>
             <select name="sexe">
@@ -203,7 +202,7 @@
                 <label><input type="checkbox" name="atelier_goal" id="atelierGoalCheckbox"> Goal</label>
                 <label><input type="checkbox" name="actif" {% if player.actif %}checked{% endif %}>Actif</label>
                 <label>
-    <input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>CHBB</label>
+                    <input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>CHBB</label>
 
             </div>
 

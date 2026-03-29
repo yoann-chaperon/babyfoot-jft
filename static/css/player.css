@@ -1,3 +1,9 @@
+.contain_player {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 30px;
+    padding: 20px;
+}
 /* Container joueur */
 .player-profile {
     display: flex;
@@ -6,7 +12,14 @@
     gap: 30px;
     font-family: Arial, sans-serif;
 }
-
+.history-window,
+.matches-remaining {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
 /* Carte joueur style FIFA */
 .fifa-card.big-card {
     background: #1c1c1c;
@@ -15,15 +28,13 @@
     padding: 20px;
     width: 350px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .player-photo {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid gold;
-    margin-bottom: 10px;
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
 }
 
 .player-name {
@@ -38,7 +49,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     text-align: left;
-    margin-bottom: 15px;
+    margin: 0 auto;
+
+    width: 100px;
+
 }
 
 .stat span {
@@ -68,7 +82,9 @@
     font-weight: bold;
 }
 
-.match-form input, .match-form select, .match-form button {
+.match-form input,
+.match-form select,
+.match-form button {
     padding: 5px 10px;
     font-size: 14px;
     border-radius: 5px;
@@ -102,7 +118,8 @@
     min-width: 600px;
 }
 
-.matches-played th, .matches-played td {
+.matches-played th,
+.matches-played td {
     border: 1px solid #ccc;
     padding: 8px;
     text-align: center;
@@ -131,28 +148,31 @@
 }
 
 /* Result form title */
-.result-form h2, .matches-played h2 {
+.result-form h2,
+.matches-played h2 {
     text-align: center;
     margin-bottom: 10px;
     color: #222;
 }
 
 /* Responsive */
-@media (max-width: 500px) {
-    .fifa-card.big-card, .match-form {
+/* @media (max-width: 500px) {
+
+    .fifa-card.big-card,
+    .match-form {
         width: 90%;
     }
 
     .stats {
         grid-template-columns: 1fr;
     }
-}
+} */
 
 /* ANCHOR tableau adversaire restant fiche joueur */
 /* ========================= */
 /* TABLEAU FIFA STYLE */
 /* ========================= */
-
+.history-window table,
 .matches-remaining table {
     width: 100%;
     border-collapse: collapse;
@@ -164,11 +184,11 @@
 }
 
 /* header */
-
+.history-window thead,
 .matches-remaining thead {
     background: linear-gradient(90deg, #1f1f1f, #2d2d2d);
 }
-
+.history-window th,
 .matches-remaining th {
     padding: 14px;
     text-align: left;
@@ -179,14 +199,14 @@
 }
 
 /* lignes */
-
+.history-window td,
 .matches-remaining td {
     padding: 16px;
     border-bottom: 1px solid #2a2a2a;
 }
 
 /* hover */
-
+.history-window tbody tr:hover,
 .matches-remaining tbody tr:hover {
     background: linear-gradient(90deg, #1c1c1c, #292929);
     transform: scale(1.01);
@@ -196,7 +216,7 @@
 /* ========================= */
 /* PLAYER CELL */
 /* ========================= */
-
+.contain_player .date,
 .player-cell {
     font-size: 14px;
     color: white;
@@ -221,7 +241,7 @@
 /* ========================= */
 /* BADGES */
 /* ========================= */
-
+.history-window .score
 .badge {
     padding: 4px 10px;
     border-radius: 6px;
@@ -242,12 +262,12 @@
 }
 
 /* stats */
-
+.tab-duel-historique .score,
 .stat-duel {
     background: #333;
     color: #00e5ff;
 }
-
+.tab-goal-historique .score,
 .stat-goal {
     background: #333;
     color: #00ff88;
@@ -257,9 +277,61 @@
 /* TITRES */
 /* ========================= */
 
-.matches-remaining h2 {
+/* .matches-remaining h2 {
     margin-top: 40px;
     margin-bottom: 10px;
     color: #fff;
     letter-spacing: 1px;
+} */
+.history-window tbody,
+.interactive-table tbody {
+    display: block;
+    max-height: 260px; /* ~5 lignes */
+    overflow-y: auto;
+}
+.history-window thead,
+.history-window tbody tr,
+.interactive-table thead,
+.interactive-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* scrollbar stylée */
+.interactive-table tbody::-webkit-scrollbar {
+    width: 6px;
+}
+
+.interactive-table tbody::-webkit-scrollbar-thumb {
+    background: #00bfff;
+    border-radius: 10px;
+}
+
+/* HISTORIQUE */
+.history-window {
+    max-height: 260px; /* ~5 lignes */
+    overflow: hidden;
+    position: relative;
+}
+
+.mini-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.mini-player {
+    display: flex;
+    align-items: center;
+}
+
+.history-window  .win {
+    color:green;
+    font-weight: bold;
+}
+.history-window  .loss {
+    color:red;
+    font-weight: bold;
 }
