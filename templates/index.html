@@ -358,13 +358,17 @@ const datasets = DATA.players.map((player) => ({
 const playersChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: DATA.labels,  // [1, 2, 3, ... 37]
+        // ✅ labels = le joueur avec le plus de matchs, pour dimensionner l'axe
+        labels: Array.from(
+            { length: Math.max(...DATA.players.map(p => p.data.length)) },
+            (_, i) => i
+        ),
         datasets: DATA.players.map((player, index) => ({
             label: player.name,
-            data: player.data,   // tableau aligné avec null aux matchs non joués
+            data: player.data,   // chaque joueur a son propre tableau de longueur variable
             borderWidth: 2,
             tension: 0.4,
-            spanGaps: true,      // ✅ relie les points en sautant les null
+            spanGaps: false,     // ✅ pas de null, donc pas besoin
         }))
     },
     options: {
@@ -373,15 +377,11 @@ const playersChart = new Chart(ctx, {
         plugins: {
             legend: { display: false },
             tooltip: {
+                mode: 'index',
+                intersect: false,
                 callbacks: {
-                    // Affiche seulement les points joués
-                    label: function(context) {
-                        if (context.raw === null) return null;
-                        return `${context.dataset.label} : ${context.raw}`;
-                    }
-                },
-                filter: function(item) {
-                    return item.raw !== null; // ✅ cache les null dans le tooltip
+                    title: items => `Match n°${items[0].dataIndex}`,
+                    label: ctx => `${ctx.dataset.label} : ${ctx.raw} ELO`
                 }
             }
         },
@@ -390,11 +390,9 @@ const playersChart = new Chart(ctx, {
         },
         scales: {
             x: {
-                ticks: { color: "#FFF" },
-                title: {
-                    display: true,
-                    text: `Matchs joués (total : ${DATA.labels.length})`,
-                    color: "#FFF"
+                ticks: {
+                    color: "#FFF",
+                    callback: (val, i) => i === 0 ? 'Départ' : `M${i}`
                 }
             },
             y: { ticks: { color: "#FFF" } }

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+from itertools import chain
 from sqlalchemy import func, case
 from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
@@ -32,100 +33,63 @@ socketio = SocketIO(app)
 # ----------------------------
 class Player(db.Model):
 
-        id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    photo = db.Column(db.String(200), default="/static/img/default.png")
+    sexe = db.Column(db.String(1), default="M")
+    actif = db.Column(db.Boolean, default=True)
+    force_team_b = db.Column(db.Boolean, default=False)
+    card_background = db.Column(db.String(200))
+    card_video = db.Column(db.String(200), nullable=True)
+    duel = db.Column(db.Integer, default=0)
+    goal = db.Column(db.Integer, default=0)
+    goal_won = db.Column(db.Integer, default=0)
+    matches = db.Column(db.Integer, default=0)
+    wins = db.Column(db.Integer, default=0)
+    losses = db.Column(db.Integer, default=0)
+    elo = db.Column(db.Integer, default=1000)
+    membre_club = db.Column(db.Boolean, default=True)
+    interclub = db.Column(db.Boolean, default=False)
+    interclub_wins = db.Column(db.Integer, default=0)
+    atelier_duel = db.Column(db.Boolean, default=True)
+    atelier_goal = db.Column(db.Boolean, default=True)
+    external_club = db.Column(db.String(100))
+    club_logo = db.Column(db.String(200))
+    dette = db.Column(db.Float, default=0)
+    chbb = db.Column(db.Boolean, default=False)
+    chbb_count = db.Column(db.Integer, default=3)
+    chbb_date1 = db.Column(db.String(50))
+    chbb_date2 = db.Column(db.String(50))
+    chbb_date3 = db.Column(db.String(50))
 
-        name = db.Column(db.String(100))
-
-        photo = db.Column(db.String(200), default="/static/img/default.png")
-
-        sexe = db.Column(db.String(1), default="M")
-
-        actif = db.Column(db.Boolean, default=True)
-
-        force_team_b = db.Column(db.Boolean, default=False)
-
-        card_background = db.Column(db.String(200))
-        
-        card_video = db.Column(db.String(200), nullable=True)
-        
-        duel = db.Column(db.Integer, default=0)
-
-        goal = db.Column(db.Integer, default=0)
-
-        goal_won = db.Column(db.Integer, default=0)
-
-        matches = db.Column(db.Integer, default=0)
-
-        wins = db.Column(db.Integer, default=0)
-
-        losses = db.Column(db.Integer, default=0)
-
-        elo = db.Column(db.Integer, default=1000)
-
-        membre_club = db.Column(db.Boolean, default=True)
-
-        interclub = db.Column(db.Boolean, default=False)
-
-        interclub_wins = db.Column(db.Integer, default=0)
-
-        atelier_duel = db.Column(db.Boolean, default=True)
-
-        atelier_goal = db.Column(db.Boolean, default=True)
-
-        external_club = db.Column(db.String(100))
-
-        club_logo = db.Column(db.String(200))
-
-        dette = db.Column(db.Float, default=0)
-        
-        chbb = db.Column(db.Boolean, default=False)
-        
-        chbb_count = db.Column(db.Integer, default=3)
-
-        chbb_date1 = db.Column(db.String(50))
-
-        chbb_date2 = db.Column(db.String(50))
-
-        chbb_date3 = db.Column(db.String(50))
 
 class Match(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-
     date = db.Column(db.String(20))
-
     playerA_id = db.Column(db.Integer, db.ForeignKey('player.id'))
-
     playerB_id = db.Column(db.Integer, db.ForeignKey('player.id'))
-
     playerA = db.relationship("Player", foreign_keys=[playerA_id])
-
     playerB = db.relationship("Player", foreign_keys=[playerB_id])
-
     scoreA = db.Column(db.Integer)
-
     scoreB = db.Column(db.Integer)
-
     type = db.Column(db.String(10))
-    
+
+
 class DetteTransaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
-
     montant = db.Column(db.Float)
-
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
     description = db.Column(db.String(100))
-
     joueur = db.relationship("Player")
-    
-# créer la table si elle n’existe pas
+
+
+# créer la table si elle n'existe pas
 with app.app_context():
     db.create_all()
-    
+
 # ----------------------------
 # ANCHOR CREATION BASE
 # ----------------------------
@@ -135,7 +99,6 @@ with app.app_context():
     db.create_all()
 
     migrations = [
-
         'ALTER TABLE player ADD COLUMN sexe TEXT DEFAULT "M"',
         'ALTER TABLE player ADD COLUMN actif BOOLEAN DEFAULT 1',
         'ALTER TABLE player ADD COLUMN force_team_b BOOLEAN DEFAULT 0',
@@ -143,12 +106,11 @@ with app.app_context():
         'ALTER TABLE player ADD COLUMN elo INTEGER DEFAULT 1000',
         'ALTER TABLE player ADD COLUMN dette FLOAT DEFAULT 0',
         'ALTER TABLE player ADD COLUMN chbb BOOLEAN DEFAULT 0',
-        'ALTER TABLE joueur ADD COLUMN chbb_count INTEGER DEFAULT 3',
-        'ALTER TABLE joueur ADD COLUMN chbb_date1 TEXT',
-        'ALTER TABLE joueur ADD COLUMN chbb_date2 TEXT',
-        'ALTER TABLE joueur ADD COLUMN chbb_date3 TEXT',
+        'ALTER TABLE player ADD COLUMN chbb_count INTEGER DEFAULT 3',
+        'ALTER TABLE player ADD COLUMN chbb_date1 TEXT',
+        'ALTER TABLE player ADD COLUMN chbb_date2 TEXT',
+        'ALTER TABLE player ADD COLUMN chbb_date3 TEXT',
         'ALTER TABLE player ADD COLUMN card_video TEXT'
-
     ]
 
     for m in migrations:
@@ -164,8 +126,7 @@ with app.app_context():
 # ----------------------------
 
 def allowed_file(filename):
-
-    return "." in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # ----------------------------
@@ -196,19 +157,17 @@ def update_elo(p1, p2, score1, score2):
 # ANCHOR index
 @app.route("/")
 def index():
-    # Récupérer TOUS les joueurs actifs (sans filtres supplémentaires)
-    interclub_actifs = Player.query.filter_by(actif=True).all()
+    # Joueurs interclub actifs
+    interclub_actifs = Player.query.filter_by(interclub=True, actif=True).all()
 
     # ================= CLASSEMENTS =================
-    # DUEL : membre_club=true ET atelier_duel=true
+
     joueurs_duel = [j for j in interclub_actifs if j.membre_club and j.atelier_duel]
     classement_duel = sorted(joueurs_duel, key=lambda j: j.duel, reverse=True)
-    
-    # GOAL : membre_club=true ET atelier_goal=true
+
     joueurs_goal = [j for j in interclub_actifs if j.membre_club and j.atelier_goal]
     classement_goal = sorted(joueurs_goal, key=lambda j: j.goal, reverse=True)
 
-    # ================= CLASSEMENT TOTAL (DUEL + GOAL) - MEMBRE CLUB UNIQUEMENT =================
     joueurs_membre_club = [j for j in interclub_actifs if j.membre_club]
     classement_total = sorted(
         joueurs_membre_club,
@@ -243,10 +202,10 @@ def index():
             rang_goal = i + 1
             break
 
-    # ================= MATCHS (IMPORTANT 🔥) =================
-    # ⚠️ adapte les champs selon ton modèle Match
-    matchs_duel = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).limit(10).all()
-    matchs_goal = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).limit(10).all()
+    # ================= MATCHS RECENTS (affichage uniquement) =================
+    # ⚠️ Variables renommées en _recents pour ne pas écraser celles du graph ELO
+    matchs_duel_recents = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).limit(10).all()
+    matchs_goal_recents = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).limit(10).all()
 
     def format_matches(matchs):
         matches_data = []
@@ -260,60 +219,111 @@ def index():
                 "date": date_str,
                 "playerA_name": m.playerA.name if m.playerA else "J1",
                 "playerA_photo": m.playerA.photo if m.playerA else "/static/img/default.png",
-                "playerB_name": m.playerB.name if m.playerB else "J2", 
+                "playerB_name": m.playerB.name if m.playerB else "J2",
                 "playerB_photo": m.playerB.photo if m.playerB else "/static/img/default.png",
                 "scoreA": m.scoreA,
                 "scoreB": m.scoreB
             })
         return matches_data
 
-    matches_duel_data = format_matches(matchs_duel)
-    matches_goal_data = format_matches(matchs_goal)
+    matches_duel_data = format_matches(matchs_duel_recents)
+    matches_goal_data = format_matches(matchs_goal_recents)
+
     # ================= GRAPH ELO GLOBAL =================
 
-    # Sépare les joueurs selon leur atelier
-    joueurs_goal_ids  = {j.id for j in interclub_actifs if j.atelier_goal}
-    joueurs_duel_ids  = {j.id for j in interclub_actifs if j.atelier_duel}
-    # Matchs GOAL : les deux joueurs doivent être inscrits à l'atelier goal
-    matchs_goal = (
-        Match.query
-        .filter(
-            Match.type == "GOAL",
-            Match.playerA_id.in_(joueurs_goal_ids),
-            Match.playerB_id.in_(joueurs_goal_ids)
+    print("=" * 50)
+    print("DIAGNOSTIC GRAPH ELO")
+    print("=" * 50)
+    print(f"interclub_actifs count : {len(interclub_actifs)}")
+    print(f"Noms : {[j.name for j in interclub_actifs]}")
+
+    # IDs par atelier
+    joueurs_goal_ids = {j.id for j in interclub_actifs if j.atelier_goal}
+    joueurs_duel_ids = {j.id for j in interclub_actifs if j.atelier_duel}
+
+    print(f"joueurs_goal_ids ({len(joueurs_goal_ids)}) : {joueurs_goal_ids}")
+    print(f"joueurs_duel_ids ({len(joueurs_duel_ids)}) : {joueurs_duel_ids}")
+
+    # Types réels en base
+    types_en_base = db.session.query(Match.type).distinct().all()
+    print(f"Types de matchs en base : {[t[0] for t in types_en_base]}")
+
+    sample = Match.query.limit(5).all()
+    for s in sample:
+        print(f"  Sample match {s.id} | type='{s.type}' | playerA={s.playerA_id} vs playerB={s.playerB_id}")
+
+    # Requêtes filtrées graph ELO
+    if not joueurs_goal_ids:
+        print("⚠️  joueurs_goal_ids est VIDE → matchs_goal_graph = []")
+        matchs_goal_graph = []
+    else:
+        matchs_goal_graph = (
+            Match.query
+            .filter(
+                Match.type == "GOAL",
+                Match.playerA_id.in_(joueurs_goal_ids),
+                Match.playerB_id.in_(joueurs_goal_ids)
+            )
+            .order_by(Match.date.asc())
+            .all()
         )
-        .order_by(Match.date.asc())
-        .all()
-    )
 
-    # Matchs DUEL : les deux joueurs doivent être inscrits à l'atelier duel
-    matchs_duel = (
-        Match.query
-        .filter(
-            Match.type == "DUEL",
-            Match.playerA_id.in_(joueurs_duel_ids),
-            Match.playerB_id.in_(joueurs_duel_ids)
+    if not joueurs_duel_ids:
+        print("⚠️  joueurs_duel_ids est VIDE → matchs_duel_graph = []")
+        matchs_duel_graph = []
+    else:
+        matchs_duel_graph = (
+            Match.query
+            .filter(
+                Match.type == "DUEL",
+                Match.playerA_id.in_(joueurs_duel_ids),
+                Match.playerB_id.in_(joueurs_duel_ids)
+            )
+            .order_by(Match.date.asc())
+            .all()
         )
-        .order_by(Match.date.asc())
-        .all()
-    )
 
-    # Fusionne et retrie par date
-    from itertools import chain
-    matchs_all = sorted(chain(matchs_goal, matchs_duel), key=lambda m: m.date)
+    print(f"matchs_goal_graph trouvés : {len(matchs_goal_graph)}")
+    print(f"matchs_duel_graph trouvés : {len(matchs_duel_graph)}")
 
-    print("MATCHS GOAL filtrés :", len(matchs_goal))
-    print("MATCHS DUEL filtrés :", len(matchs_duel))
-    print("TOTAL :", len(matchs_all))
+    # Diagnostic si 0 résultats
+    if len(matchs_goal_graph) == 0:
+        test_goal = Match.query.filter(Match.type == "GOAL").limit(5).all()
+        print(f"⚠️  Test GOAL sans filtre joueurs : {len(test_goal)} matchs")
+        for t in test_goal:
+            print(f"    → id={t.id} | playerA={t.playerA_id} | playerB={t.playerB_id}")
 
+    if len(matchs_duel_graph) == 0:
+        test_duel = Match.query.filter(Match.type == "DUEL").limit(5).all()
+        print(f"⚠️  Test DUEL sans filtre joueurs : {len(test_duel)} matchs")
+        for t in test_duel:
+            print(f"    → id={t.id} | playerA={t.playerA_id} | playerB={t.playerB_id}")
+
+    # Fusion triée par date
+    matchs_all = sorted(chain(matchs_goal_graph, matchs_duel_graph), key=lambda m: m.date)
+    print(f"TOTAL matchs_all graph : {len(matchs_all)}")
+
+    # ================= INIT ELO =================
     elo_history = {}
     labels = []
+    player_match_indices = {j.id: [] for j in interclub_actifs}
 
     for j in interclub_actifs:
         elo_history[j.id] = [j.elo]
 
+    # ================= SIMULATION ELO =================
+    skipped = 0
+
     for i, m in enumerate(matchs_all):
+
         if not m.playerA or not m.playerB:
+            print(f"⚠️  Match {m.id} ignoré : playerA ou playerB manquant")
+            skipped += 1
+            continue
+
+        if m.playerA.id not in elo_history or m.playerB.id not in elo_history:
+            print(f"⚠️  Match {m.id} ignoré : {m.playerA.name} ou {m.playerB.name} hors interclub_actifs")
+            skipped += 1
             continue
 
         class Temp:
@@ -328,19 +338,41 @@ def index():
         elo_history[m.playerA.id].append(p1_temp.elo)
         elo_history[m.playerB.id].append(p2_temp.elo)
 
+        player_match_indices[m.playerA.id].append(i)
+        player_match_indices[m.playerB.id].append(i)
+
         labels.append(i + 1)
 
-    # ✅ ICI, en dehors de la boucle
-    top_players = [j for j in classement_total if len(elo_history.get(j.id, [])) > 1]
+    print(f"Matchs simulés : {len(labels)} | ignorés : {skipped}")
 
+    # Diagnostic ELO par joueur
+    for j in interclub_actifs:
+        hist = elo_history.get(j.id, [])
+        nb_matchs = len(player_match_indices.get(j.id, []))
+        print(f"  {j.name} → {nb_matchs} matchs | elo_history len={len(hist)} | dernier ELO={hist[-1] if hist else 'N/A'}")
+
+    # ================= TOP PLAYERS =================
+    top_players = [j for j in classement_total if len(elo_history.get(j.id, [])) > 1]
+    print(f"top_players : {[j.name for j in top_players]}")
+
+    # ================= GRAPH DATA =================
+   # ================= GRAPH DATA =================
     graph_data = []
+
     for j in top_players:
+        raw_data = elo_history.get(j.id, [])
+        # raw_data[0] = ELO initial, raw_data[1:] = après chaque match joué
+        # On prend tout : point 0 = départ, puis évolution match par match
+        
         graph_data.append({
             "name": j.name,
-            "data": elo_history.get(j.id, []),
+            "data": raw_data,          # ✅ juste l'historique du joueur, sans null
+            "nb_matchs": len(raw_data) - 1,
             "photo": j.photo
         })
-        print("MATCHS FILTRÉS :", len(matchs_all))
+
+        print(f"graph_data prêt : {len(graph_data)} joueurs | labels : {len(labels)}")
+        print("=" * 50)
 
     # ================= RENDER =================
     return render_template(
@@ -360,28 +392,20 @@ def index():
     )
 
 
-
 # ANCHOR admin
 @app.route("/admin")
 def admin():
-    # Tous les joueurs
+
     players = Player.query.all()
-
-    # Joueurs actifs interclub uniquement pour les matchs restants
     interclub_players = Player.query.filter_by(interclub=True, actif=True).all()
-
-    # Tous les matchs existants
     matches = Match.query.order_by(Match.date.desc()).all()
-
     players_dict = {p.id: p for p in players}
 
-    # Paires déjà jouées
     played_pairs = {
         (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
         for m in matches if m.playerA_id and m.playerB_id
     }
 
-    # Génération round-robin uniquement interclub
     remaining_matches = []
     for p1, p2 in combinations(interclub_players, 2):
         pair = (min(p1.id, p2.id), max(p1.id, p2.id))
@@ -390,7 +414,6 @@ def admin():
         if (pair[0], pair[1], "GOAL") not in played_pairs:
             remaining_matches.append({"playerA_id": p1.id, "playerB_id": p2.id, "type": "GOAL"})
 
-    # Séparer Duel et Goal
     duel_remaining = [m for m in remaining_matches if m["type"] == "DUEL"]
     goal_remaining = [m for m in remaining_matches if m["type"] == "GOAL"]
 
@@ -403,6 +426,8 @@ def admin():
         duel_remaining=duel_remaining,
         goal_remaining=goal_remaining
     )
+
+
 # ANCHOR players
 @app.route("/players")
 def players():
@@ -413,15 +438,12 @@ def players():
     clubs_ext = defaultdict(list)
 
     for j in joueurs:
-
         if j.membre_club:
             club_javene.append(j)
-
         else:
             club = j.external_club or "Autre"
             clubs_ext[club].append(j)
 
-    # tri JAVENÉ
     club_javene.sort(
         key=lambda x: (
             not x.interclub,
@@ -430,7 +452,6 @@ def players():
         )
     )
 
-    # tri clubs ext
     for club in clubs_ext:
         clubs_ext[club].sort(key=lambda x: x.name)
 
@@ -440,17 +461,17 @@ def players():
         clubs_ext=clubs_ext
     )
 
+
 # ANCHOR toggle player
 @app.route("/admin/player/toggle/<int:id>")
 def toggle_player(id):
 
     player = Player.query.get_or_404(id)
-
     player.actif = not player.actif
-
     db.session.commit()
 
     return redirect("/admin")
+
 
 # ANCHOR composition équipes
 @app.route("/equipe")
@@ -475,7 +496,6 @@ def equipe():
         teamA = interclub_players[:8]
 
     teamB = [p for p in interclub_players if p not in teamA]
-
     club_players = [p for p in players_sorted if not p.interclub]
 
     return render_template(
@@ -485,16 +505,15 @@ def equipe():
         club_players=club_players
     )
 
+
 # ANCHOR add match
 @app.route("/add_match", methods=["POST"])
 def add_match():
 
     p1 = int(request.form.get("p1"))
     p2 = int(request.form.get("p2"))
-
     s1 = int(request.form.get("s1"))
     s2 = int(request.form.get("s2"))
-
     t = request.form.get("type")
 
     pl1 = Player.query.get(p1)
@@ -537,10 +556,10 @@ def add_match():
     update_elo(pl1, pl2, s1, s2)
 
     db.session.commit()
-
     socketio.emit("refresh")
 
     return redirect("/")
+
 
 # ANCHOR player profile
 @app.route("/player/<int:id>")
@@ -548,7 +567,6 @@ def player(id):
 
     p = Player.query.get_or_404(id)
 
-    # DUEL : interclub uniquement
     duel_players = Player.query.filter(
         Player.id != id,
         Player.actif == True,
@@ -556,7 +574,6 @@ def player(id):
         Player.interclub == True
     ).all()
 
-    # GOAL : tous les membres actifs du club
     goal_players = Player.query.filter(
         Player.id != id,
         Player.actif == True,
@@ -568,7 +585,7 @@ def player(id):
     ).all()
 
     duel_history = [m for m in matches if m.type == "DUEL"]
-    goal_history  = [m for m in matches if m.type == "GOAL"]
+    goal_history = [m for m in matches if m.type == "GOAL"]
 
     played_pairs = {
         (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
@@ -588,20 +605,15 @@ def player(id):
         if (pair[0], pair[1], "GOAL") not in played_pairs:
             goal_remaining.append(pl)
 
-    # tri style FIFA
     duel_remaining = sorted(duel_remaining, key=lambda x: abs(x.elo - p.elo))
     goal_remaining = sorted(goal_remaining, key=lambda x: abs(x.elo - p.elo))
 
-
     if not p.membre_club and p.card_background:
         card_image = p.card_background
-
     elif not p.membre_club:
         card_image = "/static/img/cards/exterieur.png"
-
     elif not p.interclub:
         card_image = "/static/img/cards/violet.png"
-
     else:
         card_image = "/static/img/cards/gold.png"
 
@@ -614,22 +626,22 @@ def player(id):
         duel_history=duel_history,
         goal_history=goal_history
     )
+
+
 # ANCHOR admin new player
 @app.route("/admin/player/new", methods=["GET", "POST"])
 def admin_new_player():
 
     import os
 
-    # récupérer clubs existants
     clubs = db.session.query(Player.external_club).distinct().all()
     clubs = [c[0] for c in clubs if c[0]]
 
-    # récupérer backgrounds externes
     cards_ext_path = os.path.join(app.root_path, "static/img/cards_ext")
 
     if os.path.exists(cards_ext_path):
         cards_ext = [f for f in os.listdir(cards_ext_path)
-                        if f.lower().endswith((".png",".jpg",".jpeg",".gif"))]
+                     if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
     else:
         cards_ext = []
 
@@ -647,29 +659,15 @@ def admin_new_player():
         atelier_duel = "atelier_duel" in request.form if membre_club else False
         atelier_goal = "atelier_goal" in request.form if membre_club else False
 
-        # ----------------
-        # PHOTO
-        # ----------------
-
         photo_file = request.files.get("photo")
 
         if photo_file and allowed_file(photo_file.filename):
-
             filename = secure_filename(photo_file.filename)
-
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
             photo_file.save(filepath)
-
             photo = f"/static/img/equipe/{filename}"
-
         else:
-
             photo = "/static/img/default.png"
-
-        # ----------------
-        # CLUB
-        # ----------------
 
         new_club = request.form.get("new_club")
         selected_club = request.form.get("external_club")
@@ -679,38 +677,22 @@ def admin_new_player():
         card_background = "/static/img/cards/bronze.png"
 
         if new_club:
-
             external_club = new_club
             club_logo = f"/static/img/logo/logo_{new_club}.png"
             card_background = f"/static/img/cards_ext/card_{new_club}.png"
-
         elif selected_club:
-
             external_club = selected_club
             club_logo = f"/static/img/logo/logo_{selected_club}.png"
             card_background = f"/static/img/cards_ext/card_{selected_club}.png"
-
         else:
-
             if sexe == "F":
-
                 card_background = "/static/img/cards/rose.png"
-
             elif membre_club and not interclub and not actif:
-
                 card_background = "/static/img/cards/ancien.png"
-
             elif membre_club and interclub and actif and force_team_b:
-
                 card_background = "/static/img/cards/argent.png"
-
             elif membre_club and not interclub and actif:
-
                 card_background = "/static/img/cards/bronze.png"
-
-        # ----------------
-        # CREATION JOUEUR
-        # ----------------
 
         player = Player(
             name=name,
@@ -733,7 +715,6 @@ def admin_new_player():
 
         return redirect("/admin")
 
-    # joueur vide pour éviter les erreurs Jinja
     dummy_player = Player(
         name="",
         sexe="M",
@@ -752,14 +733,14 @@ def admin_new_player():
         clubs=clubs,
         cards_ext=cards_ext
     )
-    
+
+
 # ANCHOR edit player
-@app.route("/admin/player/edit/<int:id>", methods=["GET","POST"])
+@app.route("/admin/player/edit/<int:id>", methods=["GET", "POST"])
 def edit_player(id):
 
     player = Player.query.get_or_404(id)
 
-    # récupérer clubs existants
     clubs = db.session.query(Player.external_club).distinct().all()
     clubs = [c[0] for c in clubs if c[0]]
 
@@ -767,80 +748,48 @@ def edit_player(id):
 
         player.name = request.form.get("name")
         player.sexe = request.form.get("sexe")
-
         player.membre_club = "membre_club" in request.form
         player.interclub = "interclub" in request.form
         player.actif = "actif" in request.form
         player.force_team_b = "force_team_b" in request.form
         player.chbb = "chbb" in request.form
-        
 
         player.atelier_duel = "atelier_duel" in request.form if player.membre_club else False
         player.atelier_goal = "atelier_goal" in request.form if player.membre_club else False
 
-        # ----------------
-        # PHOTO
-        # ----------------
         photo_file = request.files.get("photo")
 
         if photo_file and allowed_file(photo_file.filename):
-
             filename = secure_filename(photo_file.filename)
-
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
             photo_file.save(filepath)
-
             player.photo = f"/static/img/equipe/{filename}"
-
-        # ----------------
-        # CLUB
-        # ----------------
 
         new_club = request.form.get("new_club")
         selected_club = request.form.get("external_club")
 
         if new_club:
-
             player.external_club = new_club
             player.club_logo = f"/static/img/logo/logo_{new_club}.png"
             player.card_background = f"/static/img/cards_ext/card_{new_club}.png"
-
         elif selected_club:
-
             player.external_club = selected_club
             player.club_logo = f"/static/img/logo/logo_{selected_club}.png"
             player.card_background = f"/static/img/cards_ext/card_{selected_club}.png"
-
         else:
-
             player.external_club = None
             player.club_logo = None
 
-        # ----------------
-        # CARD BACKGROUND RULES
-        # ----------------
-
         if not player.external_club:
-
             if player.sexe == "F":
-
                 player.card_background = "/static/img/cards/rose.png"
-
             elif player.membre_club and not player.interclub and not player.actif:
-
                 player.card_background = "/static/img/cards/ancien.png"
-
             elif player.membre_club and player.interclub and player.actif and player.force_team_b:
-
                 player.card_background = "/static/img/cards/argent.png"
-
             elif player.membre_club and not player.interclub and player.actif:
-
                 player.card_background = "/static/img/cards/bronze.png"
-
             else:
-
                 player.card_background = "/static/img/cards/bronze.png"
 
         db.session.commit()
@@ -853,26 +802,23 @@ def edit_player(id):
         clubs=clubs
     )
 
+
 # ANCHOR admin match list
 @app.route("/admin/match/list")
 def admin_match_list():
-    from flask import request
 
     page = request.args.get("page", 1, type=int)
     per_page = 20
 
-    # Joueurs pour affichage
     players = Player.query.all()
     players_dict = {p.id: p for p in players}
 
-    # Pagination par type de match
     duel_pagination = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).paginate(page=page, per_page=per_page)
     goal_pagination = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).paginate(page=page, per_page=per_page)
 
     duel_matches = duel_pagination.items
     goal_matches = goal_pagination.items
 
-    # Stats live
     total_matches = Match.query.count()
     duel_count = Match.query.filter_by(type="DUEL").count()
     goal_count = Match.query.filter_by(type="GOAL").count()
@@ -890,17 +836,19 @@ def admin_match_list():
         goal_count=goal_count,
         top_elo=top_elo
     )
-    
+
+
 # ANCHOR delete match
 @app.route("/admin/match/delete/<int:id>")
 def delete_match(id):
+
     match = Match.query.get_or_404(id)
     db.session.delete(match)
     db.session.commit()
-
-    # Recalcul ELO de tous les joueurs
     recalculate_all_elo()
+
     return redirect("/admin/match/list")
+
 
 def recalculate_all_elo():
 
@@ -945,8 +893,9 @@ def recalculate_all_elo():
 
     db.session.commit()
 
+
 # ANCHOR edit match
-@app.route("/admin/match/edit/<int:id>", methods=["GET","POST"])
+@app.route("/admin/match/edit/<int:id>", methods=["GET", "POST"])
 def edit_match(id):
 
     match = Match.query.get_or_404(id)
@@ -960,8 +909,6 @@ def edit_match(id):
         match.scoreB = scoreB
 
         db.session.commit()
-
-        # recalcul complet ELO et stats
         recalculate_all_elo()
 
         return redirect("/admin/match/list")
@@ -974,14 +921,17 @@ def edit_match(id):
         match=match,
         players_dict=players_dict
     )
-    
-#ANCHOR - admin player list
+
+
+# ANCHOR admin player list
 @app.route("/admin/player/list")
 def admin_player_list():
+
     joueurs = Player.query.all()
 
     club_jft = [j for j in joueurs if j.membre_club]
     clubs_exterieurs = {}
+
     for j in joueurs:
         if not j.membre_club:
             clubs_exterieurs.setdefault(j.external_club or "Inconnu", []).append(j)
@@ -994,14 +944,13 @@ def admin_player_list():
     )
 
 
-#ANCHOR - dettes admin
-@app.route("/admin/dettes")
+# ANCHOR dettes admin
 @app.route("/admin/dettes")
 def admin_dettes():
-    # Vérifie si connecté
+
     if not session.get("dettes_auth"):
         return redirect("/admin/dettes/login")
-    
+
     joueurs = Player.query.filter_by(
         membre_club=True,
         actif=True
@@ -1029,13 +978,15 @@ def admin_dettes():
         total_dettes=total_dettes
     )
 
-#ANCHOR - dette password
-ADMIN_PASSWORD = "bonziniitsf"  # à changer
 
-#ANCHOR - dettes login
-@app.route("/admin/dettes/login", methods=["GET","POST"])
+# ANCHOR dette password
+ADMIN_PASSWORD = "bonziniitsf"
+
+
+# ANCHOR dettes login
+@app.route("/admin/dettes/login", methods=["GET", "POST"])
 def dettes_login():
-    # Si déjà connecté → redirige vers la page dettes
+
     if session.get("dettes_auth"):
         return redirect("/admin/dettes")
 
@@ -1051,39 +1002,40 @@ def dettes_login():
 
     return render_template("dettes_login.html", error=error)
 
-#ANCHOR - dettes logout
+
+# ANCHOR dettes logout
 @app.route("/admin/dettes/logout")
 def dettes_logout():
     session.pop("dettes_auth", None)
     return redirect("/admin/dettes/login")
 
-#ANCHOR - fiche dette edit player
+
+# ANCHOR fiche dette edit player
 @app.route("/admin/dettes/add/<int:player_id>", methods=["POST"])
 def add_dette(player_id):
 
     joueur = Player.query.get_or_404(player_id)
-
     montant = float(request.form["montant"])
-
-    description = request.form.get("description","")
+    description = request.form.get("description", "")
 
     joueur.dette = (joueur.dette or 0) + montant
 
     transaction = DetteTransaction(
-        player_id = player_id,
-        montant = montant,
-        description = description
+        player_id=player_id,
+        montant=montant,
+        description=description
     )
 
     db.session.add(transaction)
-
     db.session.commit()
 
     return redirect("/admin/dettes")
 
-#ANCHOR - admin dettes reset
+
+# ANCHOR admin dettes add one
 @app.route("/admin/dettes/add_one/<int:player_id>", methods=["POST"])
 def add_one_dette(player_id):
+
     try:
         joueur = Player.query.get_or_404(player_id)
         joueur.dette = (joueur.dette or 0) + 1
@@ -1096,27 +1048,35 @@ def add_one_dette(player_id):
         db.session.commit()
     except Exception as e:
         print("Erreur add_one_dette:", e)
+
     return redirect("/admin/dettes")
 
-#ANCHOR - admin dettes reset
+
+# ANCHOR admin dettes pay
 @app.route("/admin/dettes/pay/<int:player_id>", methods=["POST"])
 def pay_dette(player_id):
+
     joueur = Player.query.get_or_404(player_id)
     transaction = DetteTransaction(
         player_id=player_id,
-        montant=-joueur.dette,  # remet la dette à 0
+        montant=-joueur.dette,
         description="Paiement"
     )
     joueur.dette = 0
     db.session.add(transaction)
     db.session.commit()
+
     return redirect("/admin/dettes")
 
+
+# ANCHOR chbb password
 CHBB_PASSWORD = "biere"
-#ANCHOR - chbb admin
+
+
+# ANCHOR chbb admin
 @app.route("/admin/chbb")
 def admin_chbb():
-    # Vérifie que l’utilisateur est connecté
+
     if not session.get("chbb_auth"):
         return redirect("/admin/chbb/login")
 
@@ -1128,12 +1088,11 @@ def admin_chbb():
 
     return render_template("chbb.html", players=players)
 
-#ANCHOR - chbb login
-CHBB_PASSWORD = "biere"
 
-@app.route("/admin/chbb/login", methods=["GET","POST"])
+# ANCHOR chbb login
+@app.route("/admin/chbb/login", methods=["GET", "POST"])
 def chbb_login():
-    # Si déjà connecté → va au tableau
+
     if session.get("chbb_auth"):
         return redirect("/admin/chbb")
 
@@ -1149,44 +1108,41 @@ def chbb_login():
 
     return render_template("chbb_login.html", error=error)
 
-#ANCHOR - chbb logout
+
+# ANCHOR chbb logout
 @app.route("/admin/chbb/logout")
 def chbb_logout():
     session.pop("chbb_auth", None)
     return redirect("/admin/chbb/login")
 
-#ANCHOR - chbb update
+
+# ANCHOR chbb update
 @app.route("/admin/chbb/update", methods=["POST"])
 def chbb_update():
 
     player_id = request.form["player_id"]
-
     value = int(request.form["value"])
-
     player = Player.query.get(player_id)
 
-    from datetime import datetime
-
-    now = datetime.now().strftime("%d/%m/%Y %H:%M")
+    now = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     if value == 2 and player.chbb_date1 is None:
         player.chbb_date1 = now
-
     if value == 1 and player.chbb_date2 is None:
         player.chbb_date2 = now
-
     if value == 0 and player.chbb_date3 is None:
         player.chbb_date3 = now
 
     player.chbb_count = value
-
     db.session.commit()
 
     return "ok"
 
-#ANCHOR - chbb reset
+
+# ANCHOR chbb reset
 @app.route("/admin/chbb/reset")
 def chbb_reset():
+
     players = Player.query.filter_by(
         membre_club=True,
         chbb=True,
@@ -1201,20 +1157,19 @@ def chbb_reset():
 
     db.session.commit()
 
-    # Retour vers la page CHBB
     return redirect(url_for('admin_chbb'))
 
-#ANCHOR - no cache
+
+# ANCHOR no cache
 @app.after_request
 def add_header(response):
-
     response.headers["Cache-Control"] = "no-store"
-
     return response
+
+
 # ----------------------------
 # MAIN
 # ----------------------------
 
 if __name__ == "__main__":
-
     socketio.run(app, host="0.0.0.0", port=5070, debug=True)
