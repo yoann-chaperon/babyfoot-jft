@@ -369,12 +369,12 @@ th.points {
 .chart-container {
     /* background: linear-gradient(145deg, #203a5c, #0f1c2e);
     border: 2px solid rgba(255, 255, 255, 0.1); */
+    /* padding: 6px; */
+    /* margin-top: 6px; */
     border-radius: 10px;
-    padding: 6px;
-    margin-top: 6px;
     position: relative;
-    height: 382px;
-    min-height: 382px;
+    height: 408px;
+    min-height: 408px;
 }
 
 #playersChart {
