@@ -142,27 +142,21 @@ document.addEventListener("DOMContentLoaded", () => {
         data.forEach(m => {
             html += `
             <tr>
-                <img src="${m.playerA_photo}" class="img-player">
+                <td><img src="${m.playerA_photo}" class="img-player"></td>
                 <td class="score-history">${m.scoreA} vs ${m.scoreB}</td>
-                <img src="${m.playerB_photo}" class="img-player">
+                <td><img src="${m.playerB_photo}" class="img-player"></td>
             </tr>`;
         });
-
-        //<td>${m.playerA_name}</td>
-        //<td>${m.playerB_name}</td>
 
         // duplication pour effet boucle infinie
         data.slice(0, 2).forEach(m => {
             html += `
             <tr>
-                <img src="${m.playerA_photo}" class="img-player">
+                <td><img src="${m.playerA_photo}" class="img-player"></td>
                 <td class="score-history">${m.scoreA} vs ${m.scoreB}</td>
-                <img src="${m.playerB_photo}" class="img-player">
+                <td><img src="${m.playerB_photo}" class="img-player"></td>
             </tr>`;
         });
-        //<td>${m.playerA_name}</td>
-        // <td>${m.playerB_name}</td>
-
         tbody.innerHTML = html;
     }
 
@@ -173,7 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Calculer dynamiquement la hauteur réelle de la première ligne
         const firstRow = tbody.querySelector("tr");
-        const rowHeight = firstRow ? firstRow.offsetHeight : 150;
+        const rowHeight = 100;
+        // const rowHeight = firstRow ? firstRow.offsetHeight : 90;
 
         let index = 0;
         const maxIndex = dataLength;

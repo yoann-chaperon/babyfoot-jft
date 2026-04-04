@@ -2,13 +2,7 @@
     <video class="card-bg" autoplay muted loop playsinline>
         <source src="/static/videos/buteur.mp4" type="video/mp4">
     </video>
-
-    <!-- 🔢 Badge classement -->
-    {% if rang %}
-        <div class="rank-badge">
-            #{{ rang }}
-        </div>
-    {% endif %}
+    <div class="storm"></div>
 
     <div class="card-avatar">
         <img src="{{ joueur.photo }}">
@@ -25,7 +19,7 @@
 <style>
     .card_buteur .card-bg {
         position: absolute;
-        top: -41px;
+        top: -35px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -42,16 +36,67 @@
         margin-top: 86px;
     }
 
-    .rank-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: gold;
-    color: #000;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 14px;
-    box-shadow: 0 0 10px rgba(255,215,0,0.7);
-}
+    .card_buteur {
+        position: relative;
+        z-index: 1;
+
+        animation: electricGlow 2s infinite alternate;
+    }
+
+    @keyframes electricGlow {
+        0% {
+            box-shadow:
+                0 0 5px rgba(0, 150, 255, 0.5),
+                0 0 10px rgba(0, 150, 255, 0.5),
+                0 0 20px rgba(0, 150, 255, 0.5);
+        }
+
+        50% {
+            box-shadow:
+                0 0 10px rgba(0, 200, 255, 0.8),
+                0 0 20px rgba(0, 200, 255, 0.8),
+                0 0 40px rgba(0, 200, 255, 0.8);
+        }
+
+        100% {
+            box-shadow:
+                0 0 5px rgba(150, 0, 255, 0.6),
+                0 0 15px rgba(150, 0, 255, 0.6),
+                0 0 30px rgba(150, 0, 255, 0.6);
+        }
+    }
+
+    .card_buteur::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        pointer-events: none;
+
+        background: white;
+        opacity: 0;
+
+        animation: lightningFlash 3s infinite;
+    }
+
+    @keyframes lightningFlash {
+
+        0%,
+        92%,
+        100% {
+            opacity: 0;
+        }
+
+        94% {
+            opacity: 0.8;
+        }
+
+        96% {
+            opacity: 0;
+        }
+
+        98% {
+            opacity: 0.6;
+        }
+    }
 </style>

@@ -10,7 +10,7 @@
             <!-- ========================= -->
             <!-- CARTE JOUEUR -->
             <!-- ========================= -->
-            <di class="fut-card">
+            <div class="fut-card">
                 <img src="{{ card_image }}" class="card-bg">
                 <img src="{{ player.photo }}" class="player-photo">
                 <div class="player-name">
@@ -36,6 +36,10 @@
                     <div class="stat">
                         <span>Goal</span>
                         <b>{{ player.goal }} / {{ player.goal_won }}</b>
+                    </div>
+                    <div class="stat">
+                        <span>Points</span>
+                        <b>{{ player.points }}</b>
                     </div>
                 </div>
 
@@ -83,7 +87,7 @@
         <!-- ========================= -->
         <!-- MATCHS RESTANTS -->
         <!-- ========================= -->
-        <div class="matches-remaining">
+        <div class="four-tables-row">
             <div class="tab-duel-rencontres">
                 <h2>Matchs DUEL restants</h2>
                 <table class="interactive-table">
@@ -100,9 +104,9 @@
                                     <div class="mini-name">
                                         {{ p.name }}
                                     </div>
-                                    <span class="badge team-{{ p.team }}">
+                                    <!-- <span class="badge team-{{ p.team }}">
                                         Equipe {{ p.team }}
-                                    </span>
+                                    </span> -->
                                     <span class="badge stat-duel">
                                         DUEL {{ p.duel }}
                                     </span>
@@ -129,9 +133,9 @@
                                     <div class="mini-name">
                                         {{ p.name }}
                                     </div>
-                                    <span class="badge team-{{ p.team }}">
+                                    <!-- <span class="badge team-{{ p.team }}">
                                         Equipe {{ p.team }}
-                                    </span>
+                                    </span> -->
                                     <span class="badge stat-goal">
                                         GvG {{ p.goal }}
                                     </span>
@@ -142,19 +146,17 @@
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- ========================= -->
-        <!-- HISTORIQUE GOAL -->
-        <!-- ========================= -->
 
-        <div class="history-window">
+            <!-- ========================= -->
+            <!-- HISTORIQUE GOAL -->
+            <!-- ========================= -->
+
             <div class="tab-goal-historique">
                 <h2>Historique GOAL vs GOAL</h2>
                 <table class="interactive-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
                             <th>Adversaire</th>
                             <th>Score</th>
                             <th>Résultat</th>
@@ -167,8 +169,6 @@
                         {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
 
                         <tr>
-                            <td class="date">{{ m.date }}</td>
-
                             <td class="player-cell">
                                 <div class="mini-player">
                                     <img src="{{ opponent.photo }}" class="mini-avatar">
@@ -196,7 +196,7 @@
                 <table class="interactive-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
+                            <!-- <th>Date</th> -->
                             <th>Adversaire</th>
                             <th>Score</th>
                             <th>Résultat</th>
@@ -207,19 +207,14 @@
                         {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
                         {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
                         {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
-
                         <tr>
-                            <td class="date">{{ m.date }}</td>
-
                             <td class="player-cell">
                                 <div class="mini-player">
                                     <img src="{{ opponent.photo }}" class="mini-avatar">
                                     <div class="mini-name">{{ opponent.name }}</div>
                                 </div>
                             </td>
-
                             <td class="score">{{ s1 }} - {{ s2 }}</td>
-
                             <td>
                                 {% if s1 > s2 %}
                                 <span class="win">🏆 Victoire</span>
@@ -329,24 +324,6 @@
             }
         }, 40)
     }
-    // dupliquer les lignes du tableau HISTORIQUE pour créer un effet de défilement infini
-    // function duplicateTable(tableId) {
-    //     const tbody = document.getElementById(tableId)
-    //     if (!tbody) return
-
-    //     tbody.innerHTML += tbody.innerHTML
-    // }
-
-    // // GOAL
-    // duplicateTable("goal-history-body")
-    // autoScrollHistory("goal-history-body")
-
-    // // DUEL
-    // duplicateTable("duel-history-body")
-    // autoScrollHistory("duel-history-body")
-
-    // // init
-    // autoScrollHistory("goal-history-body")
 </script>
 
 

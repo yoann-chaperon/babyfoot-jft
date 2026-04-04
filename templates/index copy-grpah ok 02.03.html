@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
 <div class="main-grid">
 
     <!-- ================= COLONNE GAUCHE ================= -->
@@ -196,10 +196,11 @@
 
         <!-- ================= HISTORIQUE ================= -->
         <div class="history-global">
+            <div class="history-global-title">MATCH EN DIRECT</div>
             <div class="history-container">
                 <div class="history-box duel">
                     <div class="history-window">
-                        <div class="history-title duel">DUEL</div>
+                        <div class="history-title">DUEL</div>
                         <table>
                             <tbody id="duelHistory"></tbody>
                         </table>
@@ -208,7 +209,7 @@
 
                 <div class="history-box goal">
                     <div class="history-window">
-                        <div class="history-title goal">GOAL</div>
+                        <div class="history-title">GOAL</div>
                         <table>
                             <tbody id="goalHistory"></tbody>
                         </table>
@@ -228,30 +229,24 @@
     <div class="podium">
 
         <!-- LEGENDAIRE -->
-        <h3 class="title-section legend">Légendaire</h3>
+        <h3 class="title-section">Légendaire</h3>
         <div class="players-grid">
-            <div class="podium-card">
-                {% set joueur = legend %}
-                {% include "cards/card_legend.html" %}
-            </div>
+            {% set joueur = legend %}
+            {% include "cards/card_legend.html" %}
         </div>
 
         <!-- DUEL -->
-        <h3 class="title-section duel">Duel</h3>
+        <h3 class="title-section">Duel</h3>
         <div class="players-grid">
-            <div class="podium-card">
-                {% set joueur = meilleur_buteur %}
-                {% include "cards/card_buteur.html" %}
-            </div>
+            {% set joueur = meilleur_buteur %}
+            {% include "cards/card_buteur.html" %}
         </div>
 
         <!-- GOAL -->
-        <h3 class="title-section goal">Goal</h3>
+        <h3 class="title-section">Goal</h3>
         <div class="players-grid">
-            <div class="podium-card">
-                {% set joueur = meilleur_goal %}
-                {% include "cards/card_goal.html" %}
-            </div>
+            {% set joueur = meilleur_goal %}
+            {% include "cards/card_goal.html" %}
         </div>
 
     </div> <!-- end podium -->
@@ -303,7 +298,7 @@ const avatarPlugin = {
 
             if (!lastPoint) return;
 
-            const x = lastPoint.x + 2; // léger décalage à droite
+            const x = lastPoint.x;
             const y = lastPoint.y;
 
             const player = DATA.players[i];
@@ -311,35 +306,20 @@ const avatarPlugin = {
 
             if (!img) return;
 
-            const size = 50; // taille de l'avatar
-            
+            const size = 24;
+
             ctx.save();
-            
+
             ctx.shadowColor = "#00eaff";
             ctx.shadowBlur = 10;
-            
+
             ctx.beginPath();
-            
-            const colors = ["#FFD700", "#C0C0C0", "#CD7F32"]; // or, argent, bronze
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = colors[i] || "#00eaff";
-            ctx.stroke();
             ctx.arc(x, y, size / 2, 0, Math.PI * 2);
             ctx.closePath();
             ctx.clip();
 
-            // 🔥 couvrir le cercle sans déformer (object-fit: cover)
-            const scale = Math.max(size / img.width, size / img.height);
-            const w = img.width * scale;
-            const h = img.height * scale;
+            ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
 
-            ctx.drawImage(
-                img,
-                x - w / 2,
-                y - h / 2,
-                w,
-                h
-            );
             ctx.restore();
         });
     }
@@ -354,53 +334,43 @@ const datasets = DATA.players.map((player) => ({
 }));
 
 // ===== CHART =====
-// ===== DATASETS =====
 const playersChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: DATA.labels,  // [1, 2, 3, ... 37]
+        labels: DATA.labels,
         datasets: DATA.players.map((player, index) => ({
             label: player.name,
-            data: player.data,   // tableau aligné avec null aux matchs non joués
+            data: player.data,
             borderWidth: 2,
-            tension: 0.4,
-            spanGaps: true,      // ✅ relie les points en sautant les null
+            tension: 0.4
         }))
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    // Affiche seulement les points joués
-                    label: function(context) {
-                        if (context.raw === null) return null;
-                        return `${context.dataset.label} : ${context.raw}`;
-                    }
-                },
-                filter: function(item) {
-                    return item.raw !== null; // ✅ cache les null dans le tooltip
-                }
+            legend: {
+                    display: false
             }
         },
         elements: {
-            point: { radius: 0 }
+            point: {
+                radius: 0
+            }
         },
         scales: {
             x: {
-                ticks: { color: "#FFF" },
-                title: {
-                    display: true,
-                    text: `Matchs joués (total : ${DATA.labels.length})`,
-                    color: "#FFF"
-                }
+                display: false
             },
-            y: { ticks: { color: "#FFF" } }
+            y: {
+                ticks: { color: "#aaa" }
+            }
         }
     },
+
+    // 👇 ICI EXACTEMENT
     plugins: [avatarPlugin]
+
 });
 
 </script>
@@ -422,3 +392,20 @@ const playersChart = new Chart(ctx, {
     }
 </style>
 {% endblock %}
+
+<!-- # Dans ta boucle, au lieu de juste append, ajoute un flag :
+
+const datasets = DATA.players.map(player => ({
+    label: player.name,
+    data: player.data.map((val, i) => player.played[i] ? val : null), // ← null = pas de point
+    borderWidth: 2,
+    tension: 0.3,
+    spanGaps: true,  // ← Relie les points malgré les null
+    pointRadius: 4,
+    pointHoverRadius: 6
+}));
+
+DATA.players.forEach(player => {
+    const changes = player.data.filter((v, i, arr) => i === 0 || v !== arr[i-1]).length;
+    console.log(`${player.name}: ${player.data.length} points totaux, mais seulement ${changes} variations réelles`);
+}); -->

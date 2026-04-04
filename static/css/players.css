@@ -146,7 +146,7 @@ body.players {
     left: 36%;
     bottom: 16%;
     z-index: 1;
-    font-size: 1.2em;
+    font-size: 1em;
     display: flex;
     flex-direction: column;
     font-weight: bold;

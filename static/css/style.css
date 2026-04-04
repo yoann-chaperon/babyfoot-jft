@@ -52,7 +52,7 @@ body {
 }
 
 /* ANCHOR CSS ULTRA FUT PLAYER */
-/* .fut-card {
+.fut-card {
     position: relative;
     width: 280px;
     font-family: Arial;
@@ -105,6 +105,6 @@ body {
 .stat span {
     display: block;
     font-size: 12px;
-} */
+}
 
 /* ANCHOR card-generic ------------------------- */

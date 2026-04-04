@@ -9,8 +9,7 @@ body.index {
 /* ================= LAYOUT ================= */
 .main-grid {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 25px;
+    grid-template-columns: 1fr 310px;
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
@@ -21,7 +20,7 @@ body.index {
 .left-column {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 5px;
     overflow-y: auto;
     padding: 10px;
 }
@@ -32,14 +31,17 @@ body.index {
     flex-direction: column;
     gap: 10px;
     align-items: center;
+    height: 990px;
+    margin-right: 6px;
 }
 
 .podium .players-grid {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    align-items: center;
     width: 100%;
 }
+
 /* Forcer l’ordre des cards */
 .card_legend {
     order: 1;
@@ -56,10 +58,68 @@ body.index {
     /* juste en dessous de Buteur */
 }
 
-/* Les cards génériques viennent après */
-.card_generic {
-    order: 4;
+
+.history-title,
+.podium .title-section {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    margin: 1px 0;
+    position: relative;
 }
+
+.podium .title-section.legend {
+    color: #ffd700;
+
+    text-shadow:
+        0 0 5px gold,
+        0 0 10px gold,
+        0 0 20px rgba(255,215,0,0.8);
+
+    animation: glowLegend 2s infinite alternate;
+}
+
+@keyframes glowLegend {
+    from { text-shadow: 0 0 5px gold; }
+    to { text-shadow: 0 0 25px gold; }
+}
+
+.history-title.goal,
+.podium .title-section.duel {
+    color: #00d4ff;
+
+    text-shadow:
+        0 0 5px #00d4ff,
+        0 0 10px #00d4ff,
+        0 0 20px #00d4ff;
+
+    animation: glowDuel 1.5s infinite alternate;
+}
+
+@keyframes glowDuel {
+    from { text-shadow: 0 0 5px #00d4ff; }
+    to { text-shadow: 0 0 25px #00d4ff; }
+}
+
+.history-title.duel,
+.podium .title-section.goal {
+    color: #ff6a00;
+
+    text-shadow:
+        0 0 5px #ff4500,
+        0 0 10px #ff4500,
+        0 0 20px #ff8c00;
+
+    animation: glowFire 1.5s infinite alternate;
+}
+
+@keyframes glowFire {
+    from { text-shadow: 0 0 5px #ff4500; }
+    to { text-shadow: 0 0 25px #ff8c00; }
+}
+
 /* ================= DASHBOARD ================= */
 .dashboard-grid {
     display: grid;
@@ -67,13 +127,35 @@ body.index {
     gap: 20px;
 }
 
-/* ================= BOX ================= */
+/* ================= BOX COLONNE GAUCHE ================= */
+
+.podium,
+.history-globaL,
+canvas,
+.history-box.duel,
+.history-box.goal,
 .ranking-box {
-    background: linear-gradient(145deg, #203a5c, #0f1c2e);
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(224, 209, 47, 0.5);
     color: white;
+    box-shadow: 0 6px 20px rgba(224, 209, 47, 0.5);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 2px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 10px 3px rgba(255, 255, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+}
+
+.ranking-box h3 {
+    margin-block-start: 2px;
+    margin-block-end: 10px;
+    margin-top: 10px;
+    margin-bottom: 4px;
 }
 
 /* ================= TABLE HEAD ================= */
@@ -90,12 +172,13 @@ body.index {
 /* ================= TOP 3 ================= */
 .top-ranking td {
     padding: 10px 0px;
-    border-bottom: 4px solid rgba(255,255,255,0.05);
+    border-bottom: 4px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ================= SCROLL ZONE ================= */
 .ranking-window {
-    height: 250px; /* 3 lignes parfaites */
+    height: 170px;
+    /* 3 lignes parfaites */
     overflow: hidden;
     position: relative;
 }
@@ -112,12 +195,11 @@ body.index {
 
 /* ================= LIGNES ================= */
 .scroll-ranking tr {
-    border-bottom: 4px solid rgba(255,255,255,0.05);
+    border-bottom: 4px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ================= CELLULES ================= */
 .scroll-ranking td {
-    /* height: 90px; */
     padding: 10px 0px;
     vertical-align: middle;
     border: none;
@@ -143,6 +225,7 @@ th.points {
 .ranking-box th.player {
     width: auto;
 }
+
 /* ================= PLAYER ================= */
 .ranking-box .player {
     display: flex;
@@ -152,8 +235,8 @@ th.points {
 }
 
 .ranking-box .player img {
-    width: 88px;
-    height: 57px;
+    width: 68px;
+    height: 37px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -169,23 +252,21 @@ th.points {
 
 /* ================= MEDALS ================= */
 .medal-gold {
-    background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,215,0,0.1));
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.1));
 }
 
 .medal-silver {
-    background: linear-gradient(90deg, rgba(192,192,192,0.9), rgba(192,192,192,0.1));
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.9), rgba(192, 192, 192, 0.1));
 }
 
 .medal-bronze {
-    background: linear-gradient(90deg, rgba(205,127,50,0.9), rgba(205,127,50,0.1));
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.9), rgba(205, 127, 50, 0.1));
 }
 
 /* ================= HISTORIQUE ================= */
 .history-global {
-    background: linear-gradient(145deg, #203a5c, #0f1c2e);
     border-radius: 10px;
     padding: 10px;
-    border: 2px solid rgba(255,255,255,0.1);
 }
 
 .history-global-title {
@@ -197,11 +278,6 @@ th.points {
     letter-spacing: 1px;
 }
 
-.history-container td {
-    padding: 0;
-    height: 150px;
-}
-
 .history-container {
     display: flex;
     gap: 20px;
@@ -209,38 +285,52 @@ th.points {
 
 .history-box {
     flex: 1;
-    background:  #0f1c2e;
-    border-radius: 8px;
+    border-radius: 20px;
     overflow: hidden;
 }
 
-.history-title {
-    text-align: center;
-    padding: 8px;
-    font-weight: bold;
-    color: white;
-}
-
 .history-window {
-    height: 150px;
     overflow: hidden;
     position: relative;
 }
 
 .history-window tr {
-    height: 150px;
+    display: table-row;
 }
 
-.history-container td {
-    padding: 0;
-    height: 150px;
-    vertical-align: middle;
+.history-container td,
+.history-window,
+.history-window tr {
+    height: 100px;
 }
 
+.history-window table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-window td {
+    display: table-cell;
+    width: 33%;
+}
+
+.history-window tbody {
+    display: table-row-group;
+}
+
+.history-window .history-title {
+    position: absolute;
+    top: -5px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+}
 
 .history-global .img-player {
-    width: 140px;
-    height: 140px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     border-radius: 50%;
     display: block;
@@ -249,18 +339,45 @@ th.points {
 
 /* IMPORTANT : isoler les td ici */
 .history-container td {
-    padding: 10px;
-    color: white;
-    border-bottom: 4px solid rgba(255,255,255,0.05);
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    color: rgba(255, 215, 0, 0.9);
 }
 
-/* ================= BACKGROUNDS ================= */
+.score-history {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-weight: bold;
+    font-size: 60px;
+}
+
+/* ================= BACKGROUNDS match direct ================= */
 .history-box.duel {
     background: url("/static/img/background/background-history-duel.png") center/cover;
 }
 
 .history-box.goal {
     background: url("/static/img/background/background-wc.png");
-    background-size: 500px auto;
+    background-size: 440px auto;
     background-position: 50% 25%;
+}
+
+/* ================= GRAPHIQUE ================= */
+.chart-container {
+    /* background: linear-gradient(145deg, #203a5c, #0f1c2e);
+    border: 2px solid rgba(255, 255, 255, 0.1); */
+    border-radius: 10px;
+    padding: 6px;
+    margin-top: 6px;
+    position: relative;
+    height: 382px;
+    min-height: 382px;
+}
+
+#playersChart {
+    width: 100% !important;
+    height: 100% !important;
 }

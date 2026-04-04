@@ -354,53 +354,45 @@ const datasets = DATA.players.map((player) => ({
 }));
 
 // ===== CHART =====
-// ===== DATASETS =====
 const playersChart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: DATA.labels,  // [1, 2, 3, ... 37]
+        labels: DATA.labels,
         datasets: DATA.players.map((player, index) => ({
             label: player.name,
-            data: player.data,   // tableau aligné avec null aux matchs non joués
+            data: player.data,
             borderWidth: 2,
-            tension: 0.4,
-            spanGaps: true,      // ✅ relie les points en sautant les null
+            tension: 0.4
         }))
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    // Affiche seulement les points joués
-                    label: function(context) {
-                        if (context.raw === null) return null;
-                        return `${context.dataset.label} : ${context.raw}`;
-                    }
-                },
-                filter: function(item) {
-                    return item.raw !== null; // ✅ cache les null dans le tooltip
-                }
+            legend: {
+                    display: false
             }
         },
         elements: {
-            point: { radius: 0 }
+            point: {
+                radius: 0
+            }
         },
         scales: {
             x: {
-                ticks: { color: "#FFF" },
-                title: {
-                    display: true,
-                    text: `Matchs joués (total : ${DATA.labels.length})`,
-                    color: "#FFF"
-                }
+                // display: false
+                ticks: { color: "#FFF" }
+ 
             },
-            y: { ticks: { color: "#FFF" } }
+            y: {
+                ticks: { color: "#FFF" }
+            }
         }
     },
+
+    // 👇 ICI EXACTEMENT
     plugins: [avatarPlugin]
+
 });
 
 </script>

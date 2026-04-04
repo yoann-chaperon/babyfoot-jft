@@ -14,4 +14,4 @@ babyfoot.db
 .vscode/
 
 # Exclure le dossier d’images lourd
-#static/img/
+static/img/
