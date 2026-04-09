@@ -2,94 +2,138 @@
 
 {% block content %}
 
-<!-- <h1 class="player-page-title">{{ player.name }}</h1> -->
 <div class="contain_player">
+
+    <!-- ============================= -->
+    <!--ANCHOR COLONNE DROITE -->
+    <!-- ============================= -->
     <div class="colonne-droite">
+        <div class="player-selector">
+            <label for="player-select">Choisir un joueur</label>
+            <select id="player-select" onchange="window.location.href=this.value">
+                {% for p in players %}
+                {% if p.membre_club and p.actif %}
+                <option value="/player/{{ p.id }}" {% if p.id==player.id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
         <div class="player-profile">
 
-            <!-- ========================= -->
-            <!-- CARTE JOUEUR -->
-            <!-- ========================= -->
-            <div class="fut-card">
+            <div class="fut-card" data-team="{{ computed_team or 'A' }}">
                 <img src="{{ card_image }}" class="card-bg">
                 <img src="{{ player.photo }}" class="player-photo">
+
                 <div class="player-name">
                     {{ player.name }}
                 </div>
-                <div class="stats">
-                    <div class="stat">
-                        <span>Matchs</span>
-                        <b>{{ player.matches }}</b>
-                    </div>
-                    <div class="stat">
-                        <span>Victoires</span>
-                        <b>{{ player.wins }}</b>
-                    </div>
-                    <div class="stat">
-                        <span>Défaites</span>
-                        <b>{{ player.losses }}</b>
-                    </div>
-                    <div class="stat">
-                        <span>Duels</span>
-                        <b>{{ player.duel }}</b>
-                    </div>
-                    <div class="stat">
-                        <span>Goal</span>
-                        <b>{{ player.goal }} / {{ player.goal_won }}</b>
-                    </div>
-                    <div class="stat">
-                        <span>Points</span>
-                        <b>{{ player.points }}</b>
-                    </div>
-                </div>
 
-                <!-- ========================= -->
-                <!-- SAISIE RESULTAT -->
-                <!-- ========================= -->
-                <div class="result-form">
-                    <h2>Ajouter un résultat</h2>
-                    <form method="POST" action="/add_match" class="match-form">
-                        <input type="hidden" name="p1" value="{{ player.id }}">
-                        <label>Atelier</label>
-                        <select name="type" id="atelier-select">
-                            {% if player.atelier_duel %}
-                            <option value="DUEL">DUEL</option>
-                            {% endif %}
-                            {% if player.atelier_goal %}
-                            <option value="GOAL">GOAL vs GOAL</option>
-                            {% endif %}
-                        </select>
-                        <label>Adversaire</label>
-                        <select name="p2" id="opponent-select">
-                            {% for p in duel_remaining %}
-                            <option value="{{ p.id }}" data-type="DUEL">
-                                {{ p.name }}
-                            </option>
-                            {% endfor %}
-                            {% for p in goal_remaining %}
-                            <option value="{{ p.id }}" data-type="GOAL">
-                                {{ p.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <label>Score {{ player.name }}</label>
-                        <input type="number" name="s1" id="score-self" min="0" max="3" required>
-                        <label>Score adversaire</label>
-                        <input type="number" name="s2" id="score-opponent" min="0" max="3" required>
-                        <button type="submit">
-                            Enregistrer
-                        </button>
+                <div class="stats">
+                    <div class="stat"><span>Matchs</span><b>{{ player.matches }}</b></div>
+                    <div class="stat"><span>Victoires</span><b>{{ player.wins }}</b></div>
+                    <div class="stat"><span>Défaites</span><b>{{ player.losses }}</b></div>
+                    <div class="stat"><span>Duels</span><b>{{ player.duel }}</b></div>
+                    <div class="stat"><span>Goal</span><b>{{ player.goal }}</b></div>
+                    <div class="stat"><span>Points</span><b>{{ player.duel + player.goal }}</b></div>
+                </div>
+                <div class="block glow"></div>
+            </div>
+            <!-- ANCHOR - badges supplémentaires (CHBB, dette) -->
+            {% if player.chbb or player.dette %}
+            <div class="player-extra-badges">
+
+                {% if player.chbb %}
+                <div class="extra-badge">
+                    <span class="extra-label">CHBB restantes</span>
+                    <div class="chbb-pips">
+                        <div class="pip {% if player.chbb_count >= 3 %}active{% endif %}"></div>
+                        <div class="pip {% if player.chbb_count >= 2 %}active{% endif %}"></div>
+                        <div class="pip {% if player.chbb_count >= 1 %}active{% endif %}"></div>
+                    </div>
+                    <span class="chbb-count">
+                        {% if player.chbb_count == 0 %}👍{% else %}{{ player.chbb_count }}{% endif %}
+                    </span>
+                </div>
+                {% endif %}
+
+                {% if player.dette is not none %}
+                <div class="extra-badge">
+                    <span class="extra-label">Dette</span>
+                    <span class="dette-val 
+                                {% if player.dette < 0 %}neg
+                                {% elif player.dette > 0 %}pos
+                                {% else %}zero{% endif %}">
+                        {% if player.dette > 0 %}
+                        {% endif %}
+                        {{ player.dette|abs|int }} €
+                    </span>
+                    <form method="POST" action="/player/{{ player.id }}/dette/add_one" style="display:inline;margin:0">
+                        <button type="submit" class="dette-btn">+1</button>
+                    </form>
+                    <form method="POST" action="/player/{{ player.id }}/dette/add_four" style="display:inline;margin:0">
+                        <button type="submit" class="dette-btn">+4</button>
                     </form>
                 </div>
+                {% endif %}
+
+            </div>
+            {% endif %}
+            <!-- ANCHOR - formulaire ajout résultat -->
+            <div class="result-form">
+                <h2>Ajouter un résultat</h2>
+
+                <form method="POST" action="/add_match" class="match-form">
+                    <input type="hidden" name="p1" value="{{ player.id }}">
+
+                    <label for="atelier-select">Atelier</label>
+                    <label for="atelier-select">Atelier</label>
+                    <select name="type" id="atelier-select" required>
+                        {% if duel_done and goal_done %}
+                        <option disabled selected>FINI 👍</option>
+                        {% else %}
+                        {% if player.atelier_duel and not duel_done %}
+                        <option value="DUEL">DUEL</option>
+                        {% endif %}
+                        {% if player.atelier_goal and not goal_done %}
+                        <option value="GOAL">GOAL vs GOAL</option>
+                        {% endif %}
+                        {% endif %}
+                    </select>
+
+                    <label for="opponent-select">Adversaire</label>
+                    <select name="p2" id="opponent-select" required>
+                        {% for p in duel_remaining %}
+                        <option value="{{ p.id }}" data-type="DUEL">{{ p.name }}</option>
+                        {% endfor %}
+                        {% for p in goal_remaining %}
+                        <option value="{{ p.id }}" data-type="GOAL">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="score-self">Score {{ player.name }}</label>
+                    <input type="number" name="s1" id="score-self" min="0" max="3" required
+                        oninput="if(+this.value===3) document.getElementById('score-opponent').max=2; else document.getElementById('score-opponent').max=3;">
+
+                    <label for="score-opponent">Score adversaire</label>
+                    <input type="number" name="s2" id="score-opponent" min="0" max="3" required
+                        oninput="if(+this.value===3) document.getElementById('score-self').max=2; else document.getElementById('score-self').max=3;">
+
+                    <button type="submit">Enregistrer</button>
+                </form>
+            </div>
+
         </div>
     </div>
+
+    <!-- ============================= -->
+    <!-- COLONNE GAUCHE -->
+    <!-- ============================= -->
     <div class="colonne-gauche">
-        <!-- ========================= -->
-        <!-- MATCHS RESTANTS -->
-        <!-- ========================= -->
         <div class="four-tables-row">
             <div class="tab-duel-rencontres">
-                <h2>Matchs DUEL restants</h2>
+                <h2>DUEL restants</h2>
                 <table class="interactive-table">
                     <thead>
                         <tr>
@@ -97,28 +141,36 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% if not player.atelier_duel %}
+                        <tr>
+                            <td class="player-cell" style="text-align:center; color: var(--color-text-secondary);">
+                                non inscrit
+                            </td>
+                        </tr>
+                        {% elif duel_remaining | length == 0 %}
+                        <tr>
+                            <td class="player-cell" style="text-align:center;">
+                                FINI 👍
+                            </td>
+                        </tr>
+                        {% else %}
                         {% for p in duel_remaining %}
                         <tr>
                             <td class="player-cell">
                                 <div class="mini-player">
-                                    <div class="mini-name">
-                                        {{ p.name }}
-                                    </div>
-                                    <!-- <span class="badge team-{{ p.team }}">
-                                        Equipe {{ p.team }}
-                                    </span> -->
-                                    <span class="badge stat-duel">
-                                        DUEL {{ p.duel }}
-                                    </span>
+                                    <div class="mini-name">{{ p.name }}</div>
+                                    <span class="badge stat-duel">DUEL {{ p.duel }}</span>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
+
             <div class="tab-goal-rencontres">
-                <h2>Matchs GOAL vs GOAL restants</h2>
+                <h2>GOAL restants</h2>
                 <table class="interactive-table">
                     <thead>
                         <tr>
@@ -126,23 +178,30 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% if not player.atelier_goal %}
+                        <tr>
+                            <td class="player-cell" style="text-align:center; color: var(--color-text-secondary);">
+                                non inscrit
+                            </td>
+                        </tr>
+                        {% elif goal_remaining | length == 0 %}
+                        <tr>
+                            <td class="player-cell" style="text-align:center;">
+                                FINI 👍
+                            </td>
+                        </tr>
+                        {% else %}
                         {% for p in goal_remaining %}
                         <tr>
                             <td class="player-cell">
                                 <div class="mini-player">
-                                    <div class="mini-name">
-                                        {{ p.name }}
-                                    </div>
-                                    <!-- <span class="badge team-{{ p.team }}">
-                                        Equipe {{ p.team }}
-                                    </span> -->
-                                    <span class="badge stat-goal">
-                                        GvG {{ p.goal }}
-                                    </span>
+                                    <div class="mini-name">{{ p.name }}</div>
+                                    <span class="badge stat-goal">GvG {{ p.goal }}</span>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -231,14 +290,28 @@
     </div>
 </div>
 
+
 <!-- ========================= -->
 <!-- ANCHOR SCRIPTS -->
 <!-- ========================= -->
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll(".fut-card");
+
+        cards.forEach(card => {
+            const glow = card.querySelector(".glow");
+
+            // Affiche glow seulement si le joueur est TEAM A
+            if (card.dataset.team === "A") {
+                glow.style.display = "block";
+            } else {
+                glow.style.display = "none";
+            }
+        });
+    });
 
     /* filtrage adversaire selon atelier */
-
     const atelier = document.getElementById("atelier-select")
     const opponent = document.getElementById("opponent-select")
 
@@ -247,83 +320,68 @@
         let type = atelier.value
 
         for (let opt of opponent.options) {
-
             opt.style.display = (opt.dataset.type === type) ? "block" : "none"
-
         }
-
     }
 
     atelier.addEventListener("change", filterOpponents)
 
     filterOpponents()
 
-
     /* score automatique */
-
     const scoreSelf = document.getElementById("score-self")
     const scoreOpponent = document.getElementById("score-opponent")
 
     function updateScore() {
-
         let s1 = parseInt(scoreSelf.value)
         let s2 = parseInt(scoreOpponent.value)
 
         if (!isNaN(s1) && s1 < 3) {
             scoreOpponent.value = 3
         }
-
         if (!isNaN(s2) && s2 < 3) {
             scoreSelf.value = 3
         }
-
     }
 
     scoreSelf.addEventListener("input", updateScore)
     scoreOpponent.addEventListener("input", updateScore)
+
     // ANCHOR - preview background carte
     function updateCardPreview() {
 
-        let card = "/static/img/cards/bronze.png"   // masculin défaut
+        let card = "/static/img/cards/bronze.png"
 
-        const sexe = document.querySelector('[name="sexe"]').value
+        const sexe = document.querySelector('[name="sexe"]').value.trim()
         const interclub = document.querySelector('[name="interclub"]').checked
 
+        const glow = document.querySelector('.fut-card .block.glow')
+        const cardImg = document.querySelector('.fut-card .card-bg')
 
-        // FEMININ
+        console.log("DEBUG:", sexe, interclub)
+
+        // RESET
+        if (glow) glow.style.display = "none"
+
         if (sexe === "F") {
             card = "/static/img/cards/rose.png"
         }
-
-        // MASCULIN INTERCLUB
         else if (sexe === "M" && interclub) {
+            card = "/static/img/cards/gold.png"
+
+            if (glow) {
+                glow.style.display = "block"
+            }
+        }
+        else if (sexe === "M") {
             card = "/static/img/cards/argent.png"
         }
 
-        // MASCULIN NON INTERCLUB
-        else if (sexe === "M" && !interclub) {
-            card = "/static/img/cards/bronze.png"
+        if (cardImg) {
+            cardImg.src = card
         }
-
-        document.getElementById("card_bg").src = card
-
     }
 
-    function autoScrollHistory(tableId) {
-        const tbody = document.getElementById(tableId)
-        if (!tbody) return
-
-        let scroll = 0
-
-        setInterval(() => {
-            scroll += 1
-            tbody.style.transform = `translateY(-${scroll}px)`
-
-            if (scroll > tbody.scrollHeight / 2) {
-                scroll = 0
-            }
-        }, 40)
-    }
 </script>
 
 

@@ -38,6 +38,7 @@ class Player(db.Model):
     photo = db.Column(db.String(200), default="/static/img/default.png")
     sexe = db.Column(db.String(1), default="M")
     actif = db.Column(db.Boolean, default=True)
+    team = db.Column(db.String(1))  # "A", "B" ou NULL
     force_team_b = db.Column(db.Boolean, default=False)
     card_background = db.Column(db.String(200))
     card_video = db.Column(db.String(200), nullable=True)
@@ -45,6 +46,8 @@ class Player(db.Model):
     goal = db.Column(db.Integer, default=0)
     goal_won = db.Column(db.Integer, default=0)
     matches = db.Column(db.Integer, default=0)
+    matches_duel = db.Column(db.Integer, default=0)
+    matches_goal = db.Column(db.Integer, default=0)
     wins = db.Column(db.Integer, default=0)
     losses = db.Column(db.Integer, default=0)
     elo = db.Column(db.Integer, default=1000)
@@ -110,7 +113,10 @@ with app.app_context():
         'ALTER TABLE player ADD COLUMN chbb_date1 TEXT',
         'ALTER TABLE player ADD COLUMN chbb_date2 TEXT',
         'ALTER TABLE player ADD COLUMN chbb_date3 TEXT',
-        'ALTER TABLE player ADD COLUMN card_video TEXT'
+        'ALTER TABLE player ADD COLUMN card_video TEXT',
+        'ALTER TABLE player ADD COLUMN matches_duel INTEGER DEFAULT 0',
+        'ALTER TABLE player ADD COLUMN matches_goal INTEGER DEFAULT 0',
+        'ALTER TABLE player ADD COLUMN team TEXT'
     ]
 
     for m in migrations:
@@ -150,13 +156,48 @@ def update_elo(p1, p2, score1, score2):
     p1.elo = int(p1.elo + K * (result1 - expected1))
     p2.elo = int(p2.elo + K * (result2 - expected2))
 
+# ----------------------------
+# ANCHOR CALCUL COMPOSITION EQUIPES
+# ----------------------------
 
+def generate_teams():
+    players = Player.query.filter_by(actif=True, interclub=True).all()
+
+    players_sorted = sorted(players, key=lambda p: p.elo, reverse=True)
+
+    teamA = []
+    teamB = []
+
+    for i, p in enumerate(players_sorted):
+        if p.force_team_b:
+            teamB.append(p)
+        elif i % 2 == 0:
+            teamA.append(p)
+        else:
+            teamB.append(p)
+
+    # Sauvegarde en base
+    for p in teamA:
+        p.team = "A"
+
+    for p in teamB:
+        p.team = "B"
+
+    db.session.commit()
 # ----------------------------
 # ROUTES
 # ----------------------------
 # ANCHOR index
 @app.route("/")
 def index():
+        # récupérer tous les joueurs
+    joueurs = Player.query.all()
+    
+    if not joueurs:
+        print("⚠️ Aucun joueur trouvé en base !")
+    
+    # tu peux créer une liste filtrée si besoin (ici juste pour illustrer)
+    joueurs_valides = [j for j in joueurs if j is not None]
     # Joueurs interclub actifs
     interclub_actifs = Player.query.filter_by(interclub=True, actif=True).all()
 
@@ -356,7 +397,7 @@ def index():
     print(f"top_players : {[j.name for j in top_players]}")
 
     # ================= GRAPH DATA =================
-   # ================= GRAPH DATA =================
+    # ================= GRAPH DATA =================
     graph_data = []
 
     for j in top_players:
@@ -516,6 +557,11 @@ def add_match():
     s2 = int(request.form.get("s2"))
     t = request.form.get("type")
 
+    # Validation des scores
+    valid_scores = {(3, 0), (3, 1), (3, 2), (0, 3), (1, 3), (2, 3)}
+    if (s1, s2) not in valid_scores:
+        return "Score invalide (3-3 interdit, un joueur doit gagner 3-0, 3-1 ou 3-2)", 400
+
     pl1 = Player.query.get(p1)
     pl2 = Player.query.get(p2)
 
@@ -540,9 +586,13 @@ def add_match():
     pl2.matches += 1
 
     if t == "DUEL":
+        pl1.matches_duel += 1  
+        pl2.matches_duel += 1  
         pl1.duel += s1
         pl2.duel += s2
     else:
+        pl1.matches_goal += 1  
+        pl2.matches_goal += 1  
         pl1.goal += s1
         pl2.goal += s2
 
@@ -565,19 +615,26 @@ def add_match():
 @app.route("/player/<int:id>")
 def player(id):
 
+    players = Player.query.filter(
+        Player.actif == True,
+        Player.membre_club == True
+    ).order_by(Player.name).all()
+    
     p = Player.query.get_or_404(id)
 
     duel_players = Player.query.filter(
         Player.id != id,
         Player.actif == True,
         Player.membre_club == True,
-        Player.interclub == True
+        # Player.interclub == True,
+        Player.atelier_duel == True
     ).all()
 
     goal_players = Player.query.filter(
         Player.id != id,
         Player.actif == True,
-        Player.membre_club == True
+        Player.membre_club == True,
+        Player.atelier_goal == True
     ).all()
 
     matches = Match.query.filter(
@@ -608,25 +665,115 @@ def player(id):
     duel_remaining = sorted(duel_remaining, key=lambda x: abs(x.elo - p.elo))
     goal_remaining = sorted(goal_remaining, key=lambda x: abs(x.elo - p.elo))
 
-    if not p.membre_club and p.card_background:
-        card_image = p.card_background
-    elif not p.membre_club:
-        card_image = "/static/img/cards/exterieur.png"
-    elif not p.interclub:
-        card_image = "/static/img/cards/violet.png"
-    else:
-        card_image = "/static/img/cards/gold.png"
+    # ===== Statut ateliers terminés (global, toutes paires) =====
+    all_duel_players = Player.query.filter(
+        Player.actif == True,
+        Player.membre_club == True,
+        Player.interclub == True,
+        Player.atelier_duel == True
+    ).all()
 
+    all_goal_players = Player.query.filter(
+        Player.actif == True,
+        Player.membre_club == True,
+        Player.atelier_goal == True
+    ).all()
+
+    all_played_pairs = {
+        (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
+        for m in Match.query.all()
+    }
+
+    # duel_done = ce joueur n'a plus de match DUEL à jouer
+    duel_done = len(duel_remaining) == 0
+
+    # goal_done = ce joueur n'a plus de match GOAL à jouer  
+    goal_done = len(goal_remaining) == 0
+
+    # ===== Carte et team =====
+    # ===== Classement pour déterminer carte gold/argent =====
+    joueurs_interclub = Player.query.filter(
+        Player.membre_club == True,
+        Player.interclub == True,
+        Player.actif == True
+    ).all()
+
+    joueurs_interclub_tries = sorted(
+        joueurs_interclub,
+        key=lambda x: (x.duel + x.goal),
+        reverse=True
+    )
+
+    top8_ids = {j.id for j in joueurs_interclub_tries[:8]}
+
+    # ===== Carte et team =====
+    if p.sexe == "F":
+        card_image = "/static/img/cards/rose.png"
+        computed_team = p.team or "A"
+    elif not p.interclub:
+        card_image = "/static/img/cards/bronze.png"
+        computed_team = "C"
+    elif p.membre_club and p.interclub and p.actif and p.force_team_b:
+        card_image = "/static/img/cards/argent.png"
+        computed_team = "B"
+    elif p.membre_club and p.interclub and p.actif:
+        if p.id in top8_ids:
+            card_image = "/static/img/cards/gold.png"
+            computed_team = "A"
+        else:
+            card_image = "/static/img/cards/argent.png"
+            computed_team = "B"
+    else:
+        card_image = "/static/img/cards/bronze.png"
+        computed_team = None
+    # DEBUG for duel_done
+        print(f"=== DEBUG duel_done ===")
+        print(f"all_duel_players : {[p.name for p in all_duel_players]}")
+        print(f"Paires attendues DUEL : {list(combinations([p.id for p in all_duel_players], 2))}")
+        paires_duel_jouees = {(a,b) for (a,b,t) in all_played_pairs if t == "DUEL"}
+        print(f"Paires DUEL jouées : {paires_duel_jouees}")
+        print(f"duel_done : {duel_done}")
     return render_template(
         "player.html",
         player=p,
+        players=players,
         card_image=card_image,
+        computed_team=computed_team,
         duel_remaining=duel_remaining,
         goal_remaining=goal_remaining,
         duel_history=duel_history,
-        goal_history=goal_history
+        goal_history=goal_history,
+        duel_done=duel_done,
+        goal_done=goal_done,
     )
+    
+# ANCHOR dette quick add depuis fiche joueur
+@app.route("/player/<int:player_id>/dette/add_one", methods=["POST"])
+def player_dette_add_one(player_id):
+    joueur = Player.query.get_or_404(player_id)
+    joueur.dette = (joueur.dette or 0) + 1
+    transaction = DetteTransaction(
+        player_id=player_id,
+        montant=1,
+        description="+1 fiche joueur"
+    )
+    db.session.add(transaction)
+    db.session.commit()
+    return redirect(url_for('player', id=player_id))
 
+
+@app.route("/player/<int:player_id>/dette/add_four", methods=["POST"])
+def player_dette_add_four(player_id):
+    joueur = Player.query.get_or_404(player_id)
+    joueur.dette = (joueur.dette or 0) + 4
+    transaction = DetteTransaction(
+        player_id=player_id,
+        montant=4,
+        description="+4 fiche joueur"
+    )
+    db.session.add(transaction)
+    db.session.commit()
+    return redirect(url_for('player', id=player_id))
 
 # ANCHOR admin new player
 @app.route("/admin/player/new", methods=["GET", "POST"])
@@ -641,7 +788,7 @@ def admin_new_player():
 
     if os.path.exists(cards_ext_path):
         cards_ext = [f for f in os.listdir(cards_ext_path)
-                     if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
+                    if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
     else:
         cards_ext = []
 
@@ -786,6 +933,7 @@ def edit_player(id):
             elif player.membre_club and not player.interclub and not player.actif:
                 player.card_background = "/static/img/cards/ancien.png"
             elif player.membre_club and player.interclub and player.actif and player.force_team_b:
+                player.team = "B"
                 player.card_background = "/static/img/cards/argent.png"
             elif player.membre_club and not player.interclub and player.actif:
                 player.card_background = "/static/img/cards/bronze.png"
@@ -857,6 +1005,8 @@ def recalculate_all_elo():
     for p in players:
         p.elo = 1000
         p.matches = 0
+        p.matches_duel = 0
+        p.matches_goal = 0   
         p.wins = 0
         p.losses = 0
         p.duel = 0
@@ -876,9 +1026,13 @@ def recalculate_all_elo():
         p2.matches += 1
 
         if m.type == "DUEL":
+            p1.matches_duel += 1 
+            p2.matches_duel += 1 
             p1.duel += m.scoreA
             p2.duel += m.scoreB
         else:
+            p1.matches_goal += 1 
+            p2.matches_goal += 1
             p1.goal += m.scoreA
             p2.goal += m.scoreB
 
@@ -904,6 +1058,10 @@ def edit_match(id):
 
         scoreA = max(0, min(3, int(request.form.get("scoreA"))))
         scoreB = max(0, min(3, int(request.form.get("scoreB"))))
+
+        valid_scores = {(3, 0), (3, 1), (3, 2), (0, 3), (1, 3), (2, 3)}
+        if (scoreA, scoreB) not in valid_scores:
+            return "Score invalide", 400
 
         match.scoreA = scoreA
         match.scoreB = scoreB
@@ -942,7 +1100,11 @@ def admin_player_list():
         club_jft=club_jft,
         clubs_exterieurs=clubs_exterieurs
     )
-
+#ANCHOR - generate teams
+@app.route("/admin/generate_teams")
+def generate_teams_route():
+    generate_teams()
+    return redirect("/admin")
 
 # ANCHOR dettes admin
 @app.route("/admin/dettes")

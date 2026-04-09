@@ -1,18 +1,169 @@
+/* Bloquer le scroll global pour la borne */
+html,
+body {
+    overflow: hidden;
+    height: 100%;
+    touch-action: none;
+    /* si écran tactile */
+    user-select: none;
+    /* empêcher sélection accidentelle */
+}
+
 .contain_player {
     display: flex;
     flex-direction: row-reverse;
     gap: 20px;
     padding: 10px;
+    background: url('/static/img/background/background-14.png');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    box-sizing: border-box;
 }
+
+.colonne-droite {
+    flex: 0 0 280px;
+}
+
+.colonne-gauche {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ANCHOR COLONNE DROITE START */
+
 /* Container joueur */
+/* ANIMATION CARDS TEAM A */
+
+/* ========================= */
+/* SELECTEUR JOUEUR */
+/* ========================= */
+.colonne-droite {
+    height: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 280px;
+    padding: 15px;
+    background: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-radius: 16px;
+
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        inset 0 0 25px rgba(0, 0, 0, 0.6),
+        0 10px 30px rgba(0, 0, 0, 0.7);
+
+    position: relative;
+    overflow: hidden;
+}
+
+.colonne-droite::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+
+    background: linear-gradient(360deg,
+            rgba(0, 255, 255, 0.4),
+            rgba(0, 255, 136, 0.3),
+            transparent);
+
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+.colonne-droite::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.08),
+            transparent);
+
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+.player-selector {
+    background: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-radius: 14px;
+    padding: 12px;
+
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        inset 0 0 25px rgba(0, 0, 0, 0.6),
+        0 8px 25px rgba(0, 0, 0, 0.6);
+
+    position: relative;
+}
+
+/* glow animé */
+.colonne-droite::after,
+.player-selector::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1px;
+
+    background: linear-gradient(120deg, #00e5ff, #00ff88, #00e5ff);
+    background-size: 300% 300%;
+    animation: borderGlow 6s linear infinite;
+
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+/* label */
+.player-selector label {
+    display: block;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+/* select */
+.player-selector select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+
+    font-size: 13px;
+    cursor: pointer;
+}
+
 .player-profile {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    /* gap: 20px; */
     font-family: Arial, sans-serif;
 }
-
 
 .player-photo {
     width: 130px;
@@ -24,7 +175,6 @@
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #ccc;
 }
 
 /* Stats en grille */
@@ -34,302 +184,546 @@
     gap: 10px;
     text-align: left;
     margin-left: 70px;
-    color: #ccc;
     width: 100px;
-
+    
 }
 
 .stat span {
     display: block;
     font-size: 12px;
-    color: #aaa;
+}
+[data-team="C"] .player-name,
+[data-team="C"] .stat,
+[data-team="C"] .stat span,
+[data-team="A"] .player-name,
+[data-team="A"] .stat,
+[data-team="A"] .stat span {
+    color: rgba(255, 215, 0, 0.9);
+}
+
+[data-team="B"] .player-name,
+[data-team="B"] .stat,
+[data-team="B"] .stat span {
+    color: #4b4a4a;
 }
 
 .points {
     font-size: 20px;
     font-weight: bold;
-    color: gold;
 }
 
-/* Formulaire de saisie */
+.block {
+    position: absolute;
+    top: -36px;
+    left: 20px;
+    width: 240px;
+    height: 400px;
+    border-radius: 28px;
+    clip-path: polygon(40% 16%,
+            64% 15%,
+            100% 24%,
+            100% 91%,
+            45% 100%,
+            55% 100%,
+            0% 91%,
+            0% 25%);
+    z-index: -110;
+}
+
+.glow::before,
+.glow::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: 36px;
+
+    background: conic-gradient(#48ff00,
+            #00ffd5,
+            #002bff,
+            #7a00ff,
+            #ff00c8,
+            #48ff00);
+
+    width: calc(100% + 2px);
+    height: calc(100% - 4px);
+
+    animation: rotateGlow 6s linear infinite;
+
+    filter: blur(3px);
+    z-index: -1000;
+}
+
+.glow::after {
+    animation: rotateGlow 2s linear infinite;
+}
+
+@keyframes rotateGlow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================= */
+/* BADGES EXTRA */
+/* ========================= */
+.player-extra-badges {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    width: 100%;
+    margin: 0px 10px 20px 10px
+}
+
+.extra-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.extra-label {
+    font-size: 14px;
+    color: #aaa;
+}
+
+/* CHBB */
+.chbb-pips {
+    display: flex;
+    gap: 4px;
+    margin: 5px 0;
+}
+
+.pip {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+}
+
+.pip.active {
+    background: #ff4d4d;
+    box-shadow: 0 0 6px #ff4d4d;
+}
+
+.chbb-count {
+    font-size: 14px;
+    font-weight: bold;
+    color: #aaa;
+    ;
+}
+
+/* DETTE */
+.dette-val {
+    font-weight: bold;
+}
+
+.dette-val.neg {
+    color: #00ff88;
+}
+
+.dette-val.pos {
+    color: #ff4d4d;
+}
+
+.dette-val.zero {
+    color: #aaa;
+}
+
+.dette-btn {
+    margin-top: 5px;
+    padding: 5px 24px;
+    border: none;
+    border-radius: 6px;
+    background: #00e5ff;
+    color: black;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* ========================= */
+/* FORMULAIRE */
+/* ========================= */
+.result-form {
+    background: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 15px;
+    width: 90%;
+
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        inset 0 0 25px rgba(0, 0, 0, 0.6),
+        0 8px 25px rgba(0, 0, 0, 0.6);
+
+    position: relative;
+}
+
+.result-form h2 {
+    color: #FFF;
+    margin-bottom: 10px;
+    margin-top: 0;
+}
+
+/* glow contour */
+.extra-badge::after,
+.result-form::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1px;
+
+    background: linear-gradient(120deg, #00e5ff, #00ff88, #00e5ff);
+    background-size: 300% 300%;
+    animation: borderGlow 6s linear infinite;
+
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+/* ========================= */
+/* FORM */
+/* ========================= */
 .match-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: #f4f4f4;
-    padding: 15px;
-    border-radius: 10px;
-    width: 400px;
 }
 
 .match-form label {
-    font-weight: bold;
+    font-size: 12px;
+    color: #aaa;
 }
 
 .match-form input,
-.match-form select,
-.match-form button {
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.match-form select {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
 }
 
 .match-form button {
-    background: gold;
+    margin-top: 10px;
+    padding: 10px;
     border: none;
-    color: #000;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #00e5ff, #00ff88);
+    color: black;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 10px;
     transition: 0.2s;
 }
 
 .match-form button:hover {
-    background: #ffd700;
+    transform: scale(1.05);
 }
 
-/* Tableau des matchs joués */
-.matches-played {
-    width: 100%;
-    max-width: 800px;
-    overflow-x: auto;
-}
-
-.matches-played table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 600px;
-}
-
-.matches-played th,
-.matches-played td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-}
-
-.matches-played th {
-    background: #333;
-    color: white;
-}
-
-.matches-played tr:nth-child(even) {
-    background: #f9f9f9;
-}
-
-.matches-played tr:hover {
-    background: #eaeaea;
-    transition: 0.2s;
-}
-
-/* Titres */
-.player-page-title {
-    font-size: 32px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-/* Result form title */
-.result-form h2,
-.matches-played h2 {
-    text-align: center;
-    margin-bottom: 10px;
-    color: #222;
-}
-
-/* Responsive */
-/* @media (max-width: 500px) {
-
-    .fifa-card.big-card,
-    .match-form {
-        width: 90%;
+/* ========================= */
+/* ANIMATION GLOW */
+/* ========================= */
+@keyframes borderGlow {
+    0% {
+        background-position: 0% 50%;
     }
 
-    .stats {
-        grid-template-columns: 1fr;
+    50% {
+        background-position: 100% 50%;
     }
-} */
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ANCHOR COLONNE DROITE FIN */
 
 /* ANCHOR tableau adversaire restant fiche joueur */
 /* ========================= */
 /* TABLEAU FIFA STYLE */
 /* ========================= */
+/* ========================= */
+/* LAYOUT GLOBAL */
+/* ========================= */
 .four-tables-row {
     display: flex;
-    flex-direction: row;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
     width: 100%;
+    overflow-x: hidden;
 }
 
-.four-tables-row .table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 30px;
-    background: #111;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+/* ========================= */
+/* BLOCS TABLEAUX */
+/* ========================= */
+.tab-duel-rencontres,
+.tab-goal-rencontres {
+    flex: 0 0 200px;
+    width: 200px;
 }
 
+.tab-goal-historique,
+.tab-duel-historique {
+    flex: 1;
+}
+
+/* style carte FIFA */
 .tab-duel-rencontres,
 .tab-goal-rencontres,
 .tab-goal-historique,
 .tab-duel-historique {
-    flex: 1;
-    min-width: 0;        /* empêche le débordement */
+    height: 380px;
+    background: rgba(20, 20, 20, 0.55);
+    /* transparence */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.05),
+        /* lumière interne */
+        inset 0 0 25px rgba(0, 0, 0, 0.6),
+        /* profondeur */
+        0 8px 25px rgba(0, 0, 0, 0.6);
+    position: relative;
     overflow: hidden;
-    background: linear-gradient(90deg, #1f1f1f, #2d2d2d);
 }
 
-/* limiter la hauteur des tableaux avec scroll si beaucoup de lignes */
-.tab-duel-rencontres .interactive-table,
-.tab-goal-rencontres .interactive-table,
-.tab-goal-historique .interactive-table,
-.tab-duel-historique .interactive-table {
-    display: block;
-    max-height: 400px;
-    overflow-y: auto;
+/* glow subtil */
+.tab-duel-rencontres::before,
+.tab-goal-rencontres::before,
+.tab-goal-historique::before,
+.tab-duel-historique::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.08),
+            transparent);
+    border-radius: 14px;
+    pointer-events: none;
 }
 
-/* header */
-.four-tables-row .thead {
-    background: linear-gradient(90deg, #1f1f1f, #2d2d2d);
-}
-.four-tables-row .th {
-    padding: 14px;
-    text-align: left;
-    color: #fff;
-    font-size: 14px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
+.tab-duel-rencontres::after,
+.tab-goal-rencontres::after,
+.tab-goal-historique::after,
+.tab-duel-historique::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 4px;
 
-/* lignes */
-.four-tables-row .td {
-    padding: 16px;
-    border-bottom: 1px solid #2a2a2a;
-}
+    background: linear-gradient(360deg,
+            rgba(0, 255, 255, 0.4),
+            rgba(0, 255, 136, 0.3),
+            transparent);
 
-/* hover */
-.four-tables-row .tbody tr:hover,
-.four-tables-row .tbody tr:hover {
-    background: linear-gradient(90deg, #1c1c1c, #292929);
-    transform: scale(1.01);
-    transition: 0.2s;
-}
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
 
-/* ========================= */
-/* PLAYER CELL */
-/* ========================= */
-/* .contain_player .date,
-.player-cell {
-    font-size: 14px;
-    color: white;
-} */
-
-.mini-player {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-/* nom joueur */
-
-.mini-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffd54a;
-    min-width: 150px;
-}
-
-/* ========================= */
-/* BADGES */
-/* ========================= */
-.tab-duel-rencontres .score,
-.tab-goal-rencontres .score,
-.tab-duel-rencontres .badge,
-.tab-goal-rencontres .badge {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* stats */
-.tab-duel-historique .score,
-.stat-duel {
-    background: #333;
-    color: #00e5ff;
-}
-.tab-goal-historique .score,
-.stat-goal {
-    background: #333;
-    color: #00ff88;
+    pointer-events: none;
 }
 
 /* ========================= */
 /* TITRES */
 /* ========================= */
-
-/* .matches-remaining h2 {
-    margin-top: 40px;
-    margin-bottom: 10px;
+.four-tables-row h2 {
+    font-size: 14px;
     color: #fff;
+    margin-bottom: 10px;
+    text-align: center;
     letter-spacing: 1px;
-} */
-.tbody,
+    text-transform: uppercase;
+}
+
+/* ========================= */
+/* TABLE */
+/* ========================= */
+.interactive-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    font-size: 13px;
+    overflow-x: hidden;
+}
+
 .interactive-table tbody {
-    display: block;
-    max-height: 260px; /* ~5 lignes */
+    overflow-x: auto;
     overflow-y: auto;
 }
-.thead,
-.tbody tr,
-.interactive-table thead,
-.interactive-table tbody tr {
+
+/* cache uniquement la scrollbar horizontale */
+.interactive-table tbody::-webkit-scrollbar:horizontal {
+    display: none;
+}
+
+.interactive-table thead {
     display: table;
     width: 100%;
     table-layout: fixed;
 }
 
-/* scrollbar stylée */
-.interactive-table tbody::-webkit-scrollbar {
-    width: 6px;
+.interactive-table th {
+    padding: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #aaa;
 }
 
-.interactive-table tbody::-webkit-scrollbar-thumb {
-    background: #00bfff;
-    border-radius: 10px;
+.interactive-table tbody {
+    display: block;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-/* HISTORIQUE */
-/* . {
-    max-height: 260px; ~5 lignes
-    overflow: hidden;
-    position: relative;
-} */
+.interactive-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    transition: 0.2s;
+}
 
-.mini-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 8px;
+/* ========================= */
+/* LIGNES */
+/* ========================= */
+.interactive-table td {
+    padding: 10px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+/* hover FIFA */
+.interactive-table tbody tr:hover {
+    background: linear-gradient(90deg, #1c1c1c, #292929);
+    transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+/* ========================= */
+/* PLAYER */
+/* ========================= */
+.player-cell {
+    padding: 8px;
 }
 
 .mini-player {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-.tab-duel-rencontres .win {
-    color:green;
+.mini-avatar {
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.mini-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: #ffd54a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========================= */
+/* SCORE */
+/* ========================= */
+.score {
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ========================= */
+/* BADGES */
+/* ========================= */
+.badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* duel */
+.stat-duel {
+    background: rgba(0, 229, 255, 0.15);
+    color: #00e5ff;
+}
+
+/* goal */
+.stat-goal {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+}
+
+/* ========================= */
+/* RESULTATS */
+/* ========================= */
+.win {
+    color: #00ff88;
     font-weight: bold;
 }
-.tab-duel-rencontres .loss {
-    color:red;
+
+.loss {
+    color: #ff4d4d;
     font-weight: bold;
+}
+
+/* ========================= */
+/* SCROLLBAR FIFA */
+/* ========================= */
+.interactive-table tbody::-webkit-scrollbar {
+    width: 6px;
+}
+
+.interactive-table tbody::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00e5ff, #00ff88);
+    border-radius: 10px;
+}
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+@media (max-width: 900px) {
+    .four-tables-row {
+        flex-direction: column;
+
+    }
+
+    .tab-duel-rencontres,
+    .tab-goal-rencontres {
+        width: 100%;
+        flex: none;
+    }
 }

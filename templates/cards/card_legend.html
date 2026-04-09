@@ -29,10 +29,9 @@
     .player-card {
         position: relative;
         width: 286px;
-        height: 286px;
+        height: 300px;
         border-radius: 12px;
         overflow: hidden;
-        color: black;
         text-align: center;
         box-shadow:
             0 0 calc(10px + (40px * var(--power-normalized))) var(--color);
@@ -99,6 +98,10 @@
 
     /* ANCHOR vidéo ou image de fond */
     /* LEGEND */
+    .card_legend {
+        width: 286px;
+        height: 350px;
+    }
     .card_legend .card-bg {
         position: absolute;
         top: 0;
@@ -122,9 +125,10 @@
         position: relative;
         z-index: 1;
         margin: 20px auto;
-        width: 180px;
+        width: 170px;
         border-radius: 50%;
         overflow: hidden;
+        top: 15%;
     }
 
     .card-avatar img {
@@ -140,15 +144,15 @@
         position: relative;
         z-index: 1;
         font-size: 1em;
-        margin-top: 15px;
+        margin-top: 40px;
         color: #8b6f17;
     }
 
-    .card-avatar,
+    /* .card-avatar,
     .card-stats {
         position: relative;
         z-index: 3;
-    }
+    } */
 
     .title.legend {
         margin: 0 auto;

@@ -126,8 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 // ================= HISTORIQUE DES MATCHS =================
-// matches est injecté depuis Flask dans index.html :
-// <script>const matches = {{ matches | tojson }};</script>
 
 document.addEventListener("DOMContentLoaded", () => {
 

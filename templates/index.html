@@ -30,7 +30,7 @@
                             class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
                             <td class="classement">{{ loop.index }}</td>
                             <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
-                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="nbrMatchs">{{ p.matches_duel }}</td>
                             <td class="points">{{ p.duel }}</td>
                         </tr>
                         {% endfor %}
@@ -46,7 +46,7 @@
                                 <tr>
                                     <td class="classement">{{ loop.index + 3 }}</td>
                                     <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
-                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="nbrMatchs">{{ p.matches_duel }}</td>
                                     <td class="points">{{ p.duel }}</td>
                                 </tr>
                                 {% endfor %}
@@ -76,7 +76,7 @@
                             class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
                             <td class="classement">{{ loop.index }}</td>
                             <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
-                            <td class="nbrMatchs">{{ p.matches }}</td>
+                            <td class="nbrMatchs">{{ p.matches_goal  }}</td>
                             <td class="points">{{ p.goal }}</td>
                         </tr>
                         {% endfor %}
@@ -91,7 +91,7 @@
                                 <tr>
                                     <td class="classement">{{ loop.index + 3 }}</td>
                                     <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
-                                    <td class="nbrMatchs">{{ p.matches }}</td>
+                                    <td class="nbrMatchs">{{ p.matches_goal }}</td>
                                     <td class="points">{{ p.goal }}</td>
                                 </tr>
                                 {% endfor %}
@@ -257,7 +257,8 @@
     </div> <!-- end podium -->
 
 </div> <!-- end main-grid -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<script src="/static/js/chart.umd.js"></script>
 
 <script>
 const DATA = {
@@ -390,8 +391,10 @@ const playersChart = new Chart(ctx, {
         },
         scales: {
             x: {
+                max: Math.max(...DATA.players.map(p => p.data.length)),
                 ticks: {
                     color: "#FFF",
+                    padding: 24,
                     callback: (val, i) => i === 0 ? 'Départ' : `M${i}`
                 }
             },
