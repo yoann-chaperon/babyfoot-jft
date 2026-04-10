@@ -1,0 +1,149 @@
+body {
+
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+
+    /* background FIFA clair */
+    color: #1a1a1a;
+    background-image: url("/static/img/background/background-3.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+}
+
+
+/* container principal */
+
+.container {
+    width: 1400px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.46);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(9.1px);
+    -webkit-backdrop-filter: blur(9.1px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    padding: 40px 60px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* titre */
+h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #00bfff;
+}
+
+/* grille */
+.form-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 80px;
+    align-items: start;
+}
+
+/* FORMULAIRE */
+form {
+    font-size: 16px;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    font-weight: 600;
+}
+
+input[type="text"],
+select {
+    width: 500px;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px solid #d8e6f5;
+    background: #f7fbff;
+    font-size: 15px;
+}
+
+input[type="file"] {
+    margin-top: 8px;
+}
+
+.checkbox-group {
+    margin-top: 15px;
+}
+
+.checkbox-group label {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+/* bouton */
+.btn-add {
+    margin-top: 30px;
+    padding: 14px 50px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    /* background: #4defc2; */
+    background: linear-gradient(to right, #00b140, #00ff7f);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-add:hover {
+    background: linear-gradient(to right, #00ff7f, #00b140);
+}
+
+/* CARD PREVIEW */
+.player-card {
+    width: 320px;
+    height: 460px;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.card-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.player-photo {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    z-index: 3;
+}
+
+.club-logo {
+    position: absolute;
+    top: 65px;
+    left: 32px;
+    width: 70px;
+    z-index: 4;
+}
+
+.player-name {
+    position: absolute;
+    bottom: 177px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    z-index: 4;
+}
+

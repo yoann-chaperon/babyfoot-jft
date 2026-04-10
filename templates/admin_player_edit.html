@@ -235,28 +235,8 @@
                     <input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>
                     CHBB
                 </label>
-
+                <label><input type="checkbox" name="force_team_b" value="1" {% if player.force_team_b %}checked{% endif %}><strong>Forcer équipe B</strong></label>
             </div>
-
-
-            <label>Club externe</label>
-            <select name="external_club" id="club_select">
-
-                <option value="">-- Choisir --</option>
-
-                {% for c in clubs %}
-                <option value="{{ c }}" {% if player.external_club==c %}selected{% endif %}>
-                    {{ c }}
-                </option>
-                {% endfor %}
-
-            </select>
-
-
-            <label>Nouveau club</label>
-            <input type="text" name="new_club" id="new_club_input">
-
-
             <label>Photo joueur</label>
             <input type="file" name="photo" id="photo_input">
 

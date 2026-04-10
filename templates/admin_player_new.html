@@ -3,157 +3,6 @@
 {% block content %}
 
 <title>Ajouter un joueur - Admin</title>
-<style>
-    body {
-
-        margin: 0;
-        font-family: 'Segoe UI', Arial, sans-serif;
-
-        /* background FIFA clair */
-        color: #1a1a1a;
-        background-image: url("/static/img/background/background-3.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-
-    }
-
-
-    /* container principal */
-
-    .container {
-        width: 1400px;
-        margin: 40px auto;
-        background: rgba(255, 255, 255, 0.46);
-        border-radius: 16px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(9.1px);
-        -webkit-backdrop-filter: blur(9.1px);
-        border: 1px solid rgba(255, 255, 255, 0.45);
-        padding: 40px 60px;
-        border-radius: 16px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    /* titre */
-    h1 {
-        text-align: center;
-        font-size: 36px;
-        margin-bottom: 40px;
-        color: #00bfff;
-    }
-
-    /* grille */
-    .form-grid {
-        display: grid;
-        grid-template-columns: 420px 1fr;
-        gap: 80px;
-        align-items: start;
-    }
-
-    /* FORMULAIRE */
-    form {
-        font-size: 16px;
-    }
-
-    label {
-        display: block;
-        margin-top: 18px;
-        font-weight: 600;
-    }
-
-    input[type="text"],
-    select {
-        width: 500px;
-        padding: 12px;
-        margin-top: 6px;
-        border-radius: 8px;
-        border: 1px solid #d8e6f5;
-        background: #f7fbff;
-        font-size: 15px;
-    }
-
-    input[type="file"] {
-        margin-top: 8px;
-    }
-
-    .checkbox-group {
-        margin-top: 15px;
-    }
-
-    .checkbox-group label {
-        display: inline-block;
-        margin-right: 20px;
-    }
-
-    /* bouton */
-    .btn-add {
-        margin-top: 30px;
-        padding: 14px 50px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        /* background: #4defc2; */
-        background: linear-gradient(to right, #00b140, #00ff7f);
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .btn-add:hover {
-        background: linear-gradient(to right, #00ff7f, #00b140);
-    }
-
-    /* CARD PREVIEW */
-    .player-card {
-        width: 320px;
-        height: 460px;
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-    }
-
-    .card-bg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 1;
-    }
-
-    .player-photo {
-        position: absolute;
-        top: 70px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 180px;
-        height: 180px;
-        object-fit: cover;
-        z-index: 3;
-    }
-
-    .club-logo {
-        position: absolute;
-        top: 65px;
-        left: 32px;
-        width: 70px;
-        z-index: 4;
-    }
-
-    .player-name {
-        position: absolute;
-        bottom: 177px;
-        width: 100%;
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-        z-index: 4;
-    }
-</style>
-</head>
 
 <h1>Ajouter un joueur</h1>
 
@@ -161,9 +10,7 @@
 
     <!-- PREVIEW CARTE -->
     <div class="card-preview">
-
         <div class="player-card" id="player_card">
-
             <img id="card_bg" class="card-bg" src="/static/img/cards/bronze.png">
 
             <img id="club_logo" class="club-logo" src="" style="display:none;">
@@ -201,9 +48,8 @@
                 <label><input type="checkbox" name="atelier_duel" id="atelierDuelCheckbox"> Duel</label>
                 <label><input type="checkbox" name="atelier_goal" id="atelierGoalCheckbox"> Goal</label>
                 <label><input type="checkbox" name="actif" {% if player.actif %}checked{% endif %}>Actif</label>
-                <label>
-                    <input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>CHBB</label>
-
+                <label><input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>CHBB</label>
+                <label><input type="checkbox" name="force_team_b" value="1" {% if player.force_team_b %}checked{% endif %}><strong>Forcer équipe B</strong></label>
             </div>
 
             <label>Club externe</label>
@@ -229,6 +75,7 @@
 </div>
 
 <script>
+    // ===== GESTION ATELIERS =====
     const membreClubCheckbox = document.getElementById("membreClubCheckbox");
     const atelierDuel = document.getElementById("atelierDuelCheckbox");
     const atelierGoal = document.getElementById("atelierGoalCheckbox");
@@ -247,91 +94,71 @@
     updateAteliers();
     membreClubCheckbox.addEventListener("change", updateAteliers);
 
-    // Preview photo
+    // ===== PREVIEW PHOTO =====
     document.querySelector('input[name="photo"]').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
             document.getElementById('photo_preview').src = URL.createObjectURL(file);
-        } else {
-            document.getElementById('photo_preview').src = "/static/img/default.png";
         }
     });
-    // preview photo
-    document.getElementById("photo_input").addEventListener("change", function (e) {
 
-        const file = e.target.files[0]
+    // ===== PREVIEW NOM =====
+    document.querySelector('input[name="name"]').addEventListener('input', function () {
+        document.getElementById("player_name_preview").innerText = this.value || "Nom joueur";
+    });
 
-        if (file) {
-
-            document.getElementById("photo_preview").src = URL.createObjectURL(file)
-
+    // ===== PREVIEW CARTE =====
+    function updateCardPreview() {
+        const sexe = document.querySelector('[name="sexe"]').value;
+        const membreClub = document.querySelector('[name="membre_club"]').checked;
+        const interclub = document.querySelector('[name="interclub"]').checked;
+        const actif = document.querySelector('[name="actif"]').checked;
+        const forceTeamB = document.querySelector('[name="force_team_b"]').checked;
+        const externalClub = document.getElementById("club_select").value;
+        const newClub = document.getElementById("new_club_input").value;
+        
+        const cardBg = document.getElementById("card_bg");
+        const clubLogo = document.getElementById("club_logo");
+        
+        let cardPath = "/static/img/cards/bronze.png";
+        const club = newClub || externalClub;
+        
+        if (club) {
+            cardPath = `/static/img/cards_ext/card_${club}.png`;
+            clubLogo.src = `/static/img/logo/logo_${club}.png`;
+            clubLogo.style.display = "block";
+        } else {
+            clubLogo.style.display = "none";
+            if (sexe === "F") {
+                cardPath = "/static/img/cards/rose.png";
+            } else if (!membreClub || !actif) {
+                cardPath = "/static/img/cards/ancien.png";
+            } else if (membreClub && interclub && actif && forceTeamB) {
+                cardPath = "/static/img/cards/argent.png";
+            } else if (membreClub && interclub && actif) {
+                cardPath = "/static/img/cards/argent.png";
+            }
         }
-
-    })
-
-
-    // preview nom
-    document.getElementById("player_name_input").addEventListener("input", function () {
-
-        document.getElementById("player_name_preview").innerText =
-            this.value || "Nom joueur"
-
-    })
-
-
-
-    function updateClubPreview(club) {
-
-        const logo = document.getElementById("club_logo")
-        const card = document.getElementById("card_bg")
-
-        if (!club) {
-            logo.style.display = "none"
-            updateCardPreview()
-            return
-        }
-
-        const logoPath = "/static/img/logo/logo_" + club + ".png"
-        const cardPath = "/static/img/cards_ext/card_" + club + ".png"
-
-        logo.src = logoPath
-        logo.style.display = "block"
-
-        // force reload image
-        card.src = ""
-        setTimeout(() => {
-            card.src = cardPath
-        }, 10)
+        cardBg.src = "";
+        setTimeout(() => { cardBg.src = cardPath; }, 10);
     }
 
+    // ===== LISTENERS CARTE =====
+    document.querySelector('[name="sexe"]').addEventListener("change", updateCardPreview);
+    document.querySelector('[name="interclub"]').addEventListener("change", updateCardPreview);
+    document.querySelector('[name="membre_club"]').addEventListener("change", updateCardPreview);
+    document.querySelector('[name="actif"]').addEventListener("change", updateCardPreview);
+    document.querySelector('[name="force_team_b"]').addEventListener("change", updateCardPreview);
+    document.getElementById("club_select").addEventListener("change", function() {
+        document.getElementById("new_club_input").value = ""; // reset new_club
+        updateCardPreview();
+    });
+    document.getElementById("new_club_input").addEventListener("input", function() {
+        document.getElementById("club_select").value = ""; // reset select
+        updateCardPreview();
+    });
 
-    // select club
-    document.getElementById("club_select").addEventListener("change", function () {
-
-        updateClubPreview(this.value)
-
-    })
-
-
-    // nouveau club
-    document.getElementById("new_club_input").addEventListener("input", function () {
-
-        updateClubPreview(this.value)
-
-    })
-
-    // preview background carte
-    document.querySelector('[name="sexe"]').addEventListener("change", updateCardPreview)
-    document.querySelector('[name="interclub"]').addEventListener("change", updateCardPreview)
-
-    updateCardPreview()
-
-    document.getElementById("club_select").addEventListener("change", function () {
-        updateClubPreview(this.value)
-    })
-
-    document.getElementById("new_club_input").addEventListener("input", function () {
-        updateClubPreview(this.value)
-    })
+    // ===== INIT =====
+    updateCardPreview();
 </script>
 {% endblock %}ææ

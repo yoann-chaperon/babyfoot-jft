@@ -70,10 +70,10 @@
                         {{ player.dette|abs|int }} €
                     </span>
                     <form method="POST" action="/player/{{ player.id }}/dette/add_one" style="display:inline;margin:0">
-                        <button type="submit" class="dette-btn">+1</button>
+                        <button type="submit" class="dette-btn">+ 1</button>
                     </form>
                     <form method="POST" action="/player/{{ player.id }}/dette/add_four" style="display:inline;margin:0">
-                        <button type="submit" class="dette-btn">+4</button>
+                        <button type="submit" class="dette-btn">+ 4</button>
                     </form>
                 </div>
                 {% endif %}
