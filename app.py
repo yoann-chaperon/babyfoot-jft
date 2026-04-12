@@ -88,7 +88,25 @@ class DetteTransaction(db.Model):
     description = db.Column(db.String(100))
     joueur = db.relationship("Player")
 
+class Season(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    date_start = db.Column(db.DateTime)
+    date_end = db.Column(db.DateTime, nullable=True)
+    active = db.Column(db.Boolean, default=True)
 
+
+class PlayerSeasonStats(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer)
+    season_id = db.Column(db.Integer)
+
+    duel = db.Column(db.Integer, default=0)
+    goal = db.Column(db.Integer, default=0)
+    wins = db.Column(db.Integer, default=0)
+    losses = db.Column(db.Integer, default=0)
+    matches = db.Column(db.Integer, default=0)
+    elo = db.Column(db.Integer, default=1000)
 # créer la table si elle n'existe pas
 with app.app_context():
     db.create_all()
@@ -1321,6 +1339,64 @@ def chbb_reset():
 
     return redirect(url_for('admin_chbb'))
 
+# ANCHOR admin season
+@app.route("/admin/season")
+def admin_season():
+    seasons = Season.query.order_by(Season.date_start.desc()).all()
+    current = Season.query.filter_by(active=True).first()
+
+    return render_template(
+        "admin_season.html",
+        seasons=seasons,
+        current_season=current
+    )
+
+# ANCHOR admin new season
+@app.route("/admin/season/new", methods=["POST"])
+def new_season():
+
+    from datetime import datetime
+
+    current = Season.query.filter_by(active=True).first()
+
+    if current:
+        current.active = False
+        current.date_end = datetime.now()
+
+    # sauvegarde stats ici (tu peux brancher PlayerSeasonStats)
+
+    # reset joueurs
+    players = Player.query.all()
+    for p in Player.query.all():
+
+        # RESET STATS
+        p.duel = 0
+        p.goal = 0
+        p.goal_won = 0
+
+        # 🔥 MATCHS
+        p.matches = 0
+        p.matches_duel = 0
+        p.matches_goal = 0
+
+        # 🔥 RESULTATS
+        p.wins = 0
+        p.losses = 0
+
+        # 🔥 ELO
+        p.elo = 1000
+
+    # nouvelle saison
+    new = Season(
+        name=request.form.get("name"),
+        date_start=datetime.now(),
+        active=True
+    )
+
+    db.session.add(new)
+    db.session.commit()
+
+    return redirect("/admin/season")
 
 # ANCHOR no cache
 @app.after_request

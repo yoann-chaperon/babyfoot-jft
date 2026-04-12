@@ -185,13 +185,14 @@ body {
     text-align: left;
     margin-left: 70px;
     width: 100px;
-    
+
 }
 
 .stat span {
     display: block;
     font-size: 12px;
 }
+
 [data-team="C"] .player-name,
 [data-team="C"] .stat,
 [data-team="C"] .stat span,
@@ -340,7 +341,7 @@ body {
 
 .dette-val.pos {
     color: #ff4d4d;
-    
+
     font-weight: bold;
     font-size: 20px;
 }
@@ -437,11 +438,16 @@ body {
     padding: 10px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #00e5ff, #00ff88);
+    background: linear-gradient(120deg, #00e5ff, #00ff88, #00e5ff);
+    background-size: 300% 300%;
+    animation: borderGlow 6s linear infinite;
     color: black;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .match-form button:hover {

@@ -1,0 +1,307 @@
+/* ============================= */
+/* GLOBAL */
+/* ============================= */
+body {
+    background: linear-gradient(180deg, #f4f6f9, #e9edf3);
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #222;
+}
+
+/* ============================= */
+/* CONTAINER */
+/* ============================= */
+.admin-container {
+    max-width: 1200px;
+    min-height: 100vh;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+/* ============================= */
+/* TITRES */
+/* ============================= *//* ============================= */
+/* GRID DASHBOARD */
+/* ============================= */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 40px;
+}
+
+/* ============================= */
+/* STAT CARD */
+/* ============================= */
+.stat-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+
+    text-align: center;
+
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* glow subtil */
+.stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top,
+        rgba(255,215,0,0.25),
+        transparent 70%);
+    opacity: 0;
+    transition: 0.4s;
+}
+
+/* hover */
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px) scale(1.03);
+}
+
+/* texte */
+.stat-card h3 {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.stat-card p {
+    font-size: 26px;
+    font-weight: bold;
+    color: #222;
+}
+
+/* ============================= */
+/* ANIMATION APPARITION */
+/* ============================= */
+.fut-card, .stat-card {
+    animation: fadeUp 0.6s ease;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.admin-container h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #222;
+}
+
+.admin-container h2 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* ============================= */
+/* CARD FUT LIGHT */
+/* ============================= */
+.fut-card {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 20px auto 40px auto;
+
+    padding: 35px;
+
+    background: #ffffff;
+    border-radius: 20px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    text-align: center;
+}
+
+/* ============================= */
+/* GLOW DOUX */
+/* ============================= */
+.fut-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: radial-gradient(circle at top,
+            rgba(255, 215, 0, 0.25),
+            transparent 70%);
+
+    animation: glowMove 8s linear infinite;
+    z-index: 1;
+}
+
+/* ============================= */
+/* REFLET FUT */
+/* ============================= */
+.fut-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(120deg,
+            transparent 40%,
+            rgba(255, 255, 255, 0.6),
+            transparent 70%);
+
+    opacity: 0;
+    transition: 0.4s;
+    z-index: 2;
+}
+
+.fut-card:hover::after {
+    opacity: 1;
+}
+
+/* ============================= */
+/* ANIMATION */
+/* ============================= */
+@keyframes glowMove {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================= */
+/* CONTENU AU-DESSUS */
+/* ============================= */
+.fut-card>* {
+    position: relative;
+    z-index: 3;
+}
+
+/* ============================= */
+/* SAISON */
+/* ============================= */
+.season-current {
+    font-size: 18px;
+}
+
+/* ============================= */
+/* FORMULAIRE */
+/* ============================= */
+.season-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+/* INPUT */
+/* ============================= */
+.season-form input {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+
+    background: #f9fafc;
+    color: #222;
+    font-size: 16px;
+    text-align: center;
+
+    transition: 0.3s;
+}
+
+.season-form input:focus {
+    outline: none;
+    border-color: gold;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* ============================= */
+/* BOUTON FUT */
+/* ============================= */
+.btn-fut {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+
+    background: linear-gradient(135deg, gold, orange);
+    color: #222;
+
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+/* HOVER */
+.btn-fut:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* ============================= */
+/* TABLE */
+/* ============================= */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* HEADER */
+.admin-table th {
+    background: linear-gradient(135deg, gold, orange);
+    color: #222;
+    padding: 12px;
+}
+
+/* CELLULES */
+.admin-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+/* HOVER */
+.admin-table tr:hover {
+    background: rgba(255, 215, 0, 0.1);
+}
+
+/* ============================= */
+/* RESPONSIVE */
+/* ============================= */
+@media (max-width: 600px) {
+    .fut-card {
+        padding: 25px;
+    }
+
+    .admin-container h1 {
+        font-size: 24px;
+    }
+}

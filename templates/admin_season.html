@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+
+    <h1>🏆 Dashboard Babyfoot</h1>
+
+    <!-- ================= STATS ================= -->
+    <div class="dashboard-grid">
+
+        <div class="stat-card">
+            <h3>👥 Joueurs</h3>
+            <p>{{ players|length }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>⚽ Matchs</h3>
+            <p>{{ matches|length }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>🔥 Saison</h3>
+            <p>{{ current_season.name if current_season else "Aucune" }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>🏆 Leader</h3>
+            <p>{{ top_elo.name if top_elo else "-" }}</p>
+        </div>
+
+    </div>
+
+    <!-- ================= FORM ================= -->
+    <div class="fut-card">
+
+        <h2>🚀 Nouvelle saison</h2>
+
+        <form method="POST"
+              action="/admin/season/new"
+              class="season-form"
+              onsubmit="return confirm('⚠️ Reset total. Continuer ?')">
+
+            <input type="text" name="name" placeholder="Nom de la saison" required>
+
+            <button class="btn-fut">
+                🔥 Lancer la saison
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- ================= HISTORIQUE ================= -->
+    <div class="fut-card">
+
+        <h2>📚 Historique</h2>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Début</th>
+                    <th>Fin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in seasons %}
+                <tr>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.date_start.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        {% if s.date_end %}
+                            {{ s.date_end.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            En cours
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+{% endblock %}
