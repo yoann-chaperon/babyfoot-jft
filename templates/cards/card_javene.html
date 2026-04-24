@@ -1,0 +1,66 @@
+{% if joueur.membre_club and joueur.actif %}
+<a href="{{ url_for('player', id=joueur.id) }}" class="player-card-link">
+
+    <div class="player-card card_javene" style="height: 440px;">
+
+        {% if joueur.card_video %}
+        <video class="card-bg" autoplay muted loop playsinline>
+            <source src="{{ joueur.card_video }}" type="video/mp4">
+        </video>
+        {% else %}
+
+        <div class="card-bg" style="background-image: url('/static/img/cards/card_Javené.png'); top: 0;"></div>
+        {% endif %}
+
+        <div class="card-header">
+            <img class="club-logo" src="/static/img/logo/logo_Javené.png">
+        </div>
+
+        <div class="card-avatar">
+            <img src="{{ joueur.photo }}">
+        </div>
+
+        <!-- NOM -->
+        <div class="card-name">
+            {{ joueur.name or "Joueur" }}
+        </div>
+
+        <!-- STATS -->
+        <div class="card-stats" style="color: white;">
+            <span>Duel: {{ joueur.duel }}</span>
+            <span>Goals: {{ joueur.goal }}</span>
+            <span>Matchs: {{ joueur.matches }}</span>
+        </div>
+        <div class="block glow"></div>
+    </div>
+
+</a>
+{% endif %}
+
+<style>
+    /* ======================= */
+    /* CARD JAVENE             */
+    /* ======================= */
+    .player-card.card_javene:hover {
+        box-shadow: 0 0 20px rgba(255, 226, 3, 0.962);
+    }
+
+    /* AVATAR */
+    .player-card.card_javene .card-avatar {
+        position: relative;
+        z-index: 20;
+        margin: 30px auto;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        top: 23px;
+    }
+
+    .player-card.card_javene .card-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+</style>

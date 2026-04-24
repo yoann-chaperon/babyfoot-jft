@@ -35,6 +35,16 @@
 
         <h2>🚀 Nouvelle saison</h2>
 
+        {% if current_season and remaining_matches %}
+        <p>
+            La saison en cours n'est pas terminée :
+            {{ duel_remaining|length }} match(s) DUEL et
+            {{ goal_remaining|length }} match(s) GOAL restent à jouer.
+        </p>
+        {% else %}
+        <p>Créer une nouvelle saison remet à zéro les stats, classements, historiques et le graphe ELO de la saison courante.</p>
+        {% endif %}
+
         <form method="POST"
               action="/admin/season/new"
               class="season-form"
@@ -42,7 +52,7 @@
 
             <input type="text" name="name" placeholder="Nom de la saison" required>
 
-            <button class="btn-fut">
+            <button class="btn-fut" {% if current_season and remaining_matches %}disabled{% endif %}>
                 🔥 Lancer la saison
             </button>
 

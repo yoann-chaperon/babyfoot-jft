@@ -23,7 +23,6 @@ touch requirements.txt
 touch database/models.py
 
 touch templates/index.html
-touch templates/global.html
 touch templates/player.html
 
 touch static/css/style.css

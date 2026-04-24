@@ -20,6 +20,7 @@
                 {% endfor %}
             </select>
         </div>
+
         <div class="player-profile">
 
             <div class="fut-card" data-team="{{ computed_team or 'A' }}">
@@ -40,67 +41,89 @@
                 </div>
                 <div class="block glow"></div>
             </div>
+            {% if computed_team in ['A', 'B'] %}
+            <div class="team-gif-container">
+                <img src="/static/videos/team_{{ computed_team }}.gif" alt="Team {{ computed_team }}" class="team-gif">
+            </div>
+            {% endif %}
             <!-- ANCHOR - badges supplémentaires (CHBB, dette) -->
-            {% if player.chbb or player.dette %}
             <div class="player-extra-badges">
 
+                {# ===================== CHBB ===================== #}
                 {% if player.chbb %}
                 <div class="extra-badge">
                     <span class="extra-label">CHBB restantes</span>
+
                     <div class="chbb-pips">
+                        {% if player.chbb_count == 0 %}
+                        <img src="/static/videos/click_biere.gif" alt="Animation" width="30" height="30"><img
+                            src="/static/videos/click_biere.gif" alt="Animation" width="30" height="30"><img
+                            src="/static/videos/click_biere.gif" alt="Animation" width="30" height="30">
+                        {% else %}
                         <div class="pip {% if player.chbb_count >= 3 %}active{% endif %}"></div>
                         <div class="pip {% if player.chbb_count >= 2 %}active{% endif %}"></div>
                         <div class="pip {% if player.chbb_count >= 1 %}active{% endif %}"></div>
+                        {% endif %}
                     </div>
+
                     <span class="chbb-count">
-                        {% if player.chbb_count == 0 %}👍{% else %}{{ player.chbb_count }}{% endif %}
+                        {% if player.chbb_count == 0 %}
+                        👍
+                        {% else %}
+                        {{ player.chbb_count }}
+                        {% endif %}
                     </span>
                 </div>
                 {% endif %}
 
-                {% if player.dette is not none %}
+
+                {# ===================== DETTE (TOUJOURS VISIBLE) ===================== #}
                 <div class="extra-badge">
                     <span class="extra-label">Dette</span>
+
                     <span class="dette-val 
-                                {% if player.dette < 0 %}neg
-                                {% elif player.dette > 0 %}pos
-                                {% else %}zero{% endif %}">
-                        {% if player.dette > 0 %}
-                        {% endif %}
+            {% if player.dette < 0 %}neg
+            {% elif player.dette > 0 %}pos
+            {% else %}zero{% endif %}">
+
                         {{ player.dette|abs|int }} €
                     </span>
+
                     <form method="POST" action="/player/{{ player.id }}/dette/add_one" style="display:inline;margin:0">
                         <button type="submit" class="dette-btn">+ 1</button>
                     </form>
+
                     <form method="POST" action="/player/{{ player.id }}/dette/add_four" style="display:inline;margin:0">
                         <button type="submit" class="dette-btn">+ 4</button>
                     </form>
                 </div>
-                {% endif %}
 
             </div>
-            {% endif %}
             <!-- ANCHOR - formulaire ajout résultat -->
             <div class="result-form">
                 <h2>Ajouter un résultat</h2>
 
                 <form method="POST" action="/add_match" class="match-form">
                     <input type="hidden" name="p1" value="{{ player.id }}">
+                    <input type="hidden" name="return_to" value="{{ url_for('player', id=player.id) }}">
 
                     <label for="atelier-select">Atelier</label>
                     <label for="atelier-select">Atelier</label>
+                    {% if duel_done and goal_done %}
+                    <div class="all-done">
+                        <img src="/static/videos/fini1.gif" alt="Fini" class="done-gif" height="20">
+                        <span>👍</span>
+                    </div>
+                    {% else %}
                     <select name="type" id="atelier-select" required>
-                        {% if duel_done and goal_done %}
-                        <option disabled selected>FINI 👍</option>
-                        {% else %}
                         {% if player.atelier_duel and not duel_done %}
                         <option value="DUEL">DUEL</option>
                         {% endif %}
                         {% if player.atelier_goal and not goal_done %}
                         <option value="GOAL">GOAL vs GOAL</option>
                         {% endif %}
-                        {% endif %}
                     </select>
+                    {% endif %}
 
                     <label for="opponent-select">Adversaire</label>
                     <select name="p2" id="opponent-select" required>
@@ -144,13 +167,14 @@
                         {% if not player.atelier_duel %}
                         <tr>
                             <td class="player-cell" style="text-align:center; color: var(--color-text-secondary);">
-                                non inscrit
+                                <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="160" height="100"
+                                    style="margin-top: 90px;">
                             </td>
                         </tr>
                         {% elif duel_remaining | length == 0 %}
                         <tr>
                             <td class="player-cell" style="text-align:center;">
-                                FINI 👍
+                                <img src="/static/videos/fini.gif" alt="Animation" width="160" height="280">
                             </td>
                         </tr>
                         {% else %}
@@ -181,13 +205,15 @@
                         {% if not player.atelier_goal %}
                         <tr>
                             <td class="player-cell" style="text-align:center; color: var(--color-text-secondary);">
-                                non inscrit
+                                <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="160" height="100"
+                                    style="margin-top: 90px;">
+
                             </td>
                         </tr>
                         {% elif goal_remaining | length == 0 %}
                         <tr>
                             <td class="player-cell" style="text-align:center;">
-                                FINI 👍
+                                <img src="/static/videos/fini.gif" alt="Animation" width="160" height="280">
                             </td>
                         </tr>
                         {% else %}
@@ -213,78 +239,243 @@
 
             <div class="tab-goal-historique">
                 <h2>Historique GOAL vs GOAL</h2>
-                <table class="interactive-table">
+                <table class="interactive-table season-history-table">
                     <thead>
                         <tr>
                             <th>Adversaire</th>
-                            <th>Score</th>
-                            <th>Résultat</th>
+                            {% for season_col in history_seasons %}
+                            <th>{{ season_col.label }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody id="goal-history-body">
-                        {% for m in goal_history %}
-                        {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
-                        {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
-                        {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
-
+                        {% for row in goal_history_rows %}
                         <tr>
                             <td class="player-cell">
                                 <div class="mini-player">
-                                    <img src="{{ opponent.photo }}" class="mini-avatar">
-                                    <div class="mini-name">{{ opponent.name }}</div>
+                                    <img src="{{ row.opponent_photo }}" class="mini-avatar">
+                                    <div class="mini-name">{{ row.opponent_name }}</div>
                                 </div>
                             </td>
-
-                            <td class="score">{{ s1 }} - {{ s2 }}</td>
-
-                            <td>
-                                {% if s1 > s2 %}
-                                <span class="win">🏆 Victoire</span>
+                            {% for cell in row.season_cells %}
+                            <td class="season-history-cell">
+                                {% if cell.entries %}
+                                {% for entry in cell.entries %}
+                                <div class="season-result {{ entry.result_class }}">{{ entry.result_icon }} {{ entry.score }}</div>
+                                {% endfor %}
+                                {% elif cell.placeholder %}
+                                <span class="season-empty">-</span>
                                 {% else %}
-                                <span class="loss">😔 Défaite</span>
+                                <span class="season-empty">-</span>
                                 {% endif %}
                             </td>
+                            {% endfor %}
                         </tr>
                         {% endfor %}
+                        {% if not goal_history_rows %}
+                        <tr>
+                            <td class="player-cell" colspan="{{ 1 + history_seasons|length }}" style="text-align:center;">
+                                Aucun historique GOAL
+                            </td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
 
             <div class="tab-duel-historique">
                 <h2>Historique DUEL</h2>
-                <table class="interactive-table">
+                <table class="interactive-table season-history-table">
                     <thead>
                         <tr>
-                            <!-- <th>Date</th> -->
                             <th>Adversaire</th>
-                            <th>Score</th>
-                            <th>Résultat</th>
+                            {% for season_col in history_seasons %}
+                            <th>{{ season_col.label }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody id="duel-history-body">
-                        {% for m in duel_history %}
-                        {% set opponent = m.playerB if m.playerA_id == player.id else m.playerA %}
-                        {% set s1 = m.scoreA if m.playerA_id == player.id else m.scoreB %}
-                        {% set s2 = m.scoreB if m.playerA_id == player.id else m.scoreA %}
+                        {% for row in duel_history_rows %}
                         <tr>
                             <td class="player-cell">
                                 <div class="mini-player">
-                                    <img src="{{ opponent.photo }}" class="mini-avatar">
-                                    <div class="mini-name">{{ opponent.name }}</div>
+                                    <img src="{{ row.opponent_photo }}" class="mini-avatar">
+                                    <div class="mini-name">{{ row.opponent_name }}</div>
                                 </div>
                             </td>
-                            <td class="score">{{ s1 }} - {{ s2 }}</td>
-                            <td>
-                                {% if s1 > s2 %}
-                                <span class="win">🏆 Victoire</span>
+                            {% for cell in row.season_cells %}
+                            <td class="season-history-cell">
+                                {% if cell.entries %}
+                                {% for entry in cell.entries %}
+                                <div class="season-result {{ entry.result_class }}">{{ entry.result_icon }} {{ entry.score }}</div>
+                                {% endfor %}
+                                {% elif cell.placeholder %}
+                                <span class="season-empty">-</span>
                                 {% else %}
-                                <span class="loss">😔 Défaite</span>
+                                <span class="season-empty">-</span>
                                 {% endif %}
                             </td>
+                            {% endfor %}
                         </tr>
                         {% endfor %}
+                        {% if not duel_history_rows %}
+                        <tr>
+                            <td class="player-cell" colspan="{{ 1 + history_seasons|length }}" style="text-align:center;">
+                                Aucun historique DUEL
+                            </td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="player-chart-row">
+            <div class="player-ranking-row">
+                <div class="player-ranking-card">
+                    <h2>Classement DUEL</h2>
+                    {% if not player.atelier_duel %}
+                    <div class="ranking-empty-state">
+                        <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="190" height="100">
+                    </div>
+                    {% else %}
+                    <table class="player-ranking-table">
+                        <thead>
+                            <tr>
+                                <th class="classement">N°</th>
+                                <th>Joueur</th>
+                                <th class="points">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in duel_ranking_rows %}
+                            <tr class="{% if row.is_current %}current-player-rank{% endif %}">
+                                <td class="classement">{{ row.rank }}</td>
+                                <td class="player"><img src="{{ row.photo }}"><span>{{ row.name }}</span></td>
+                                <td class="points">{{ row.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+
+                <div class="player-ranking-card">
+                    <h2>Classement GOAL</h2>
+                    {% if not player.atelier_goal %}
+                    <div class="ranking-empty-state">
+                        <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="190" height="100">
+                    </div>
+                    {% else %}
+                    <table class="player-ranking-table">
+                        <thead>
+                            <tr>
+                                <th class="classement">N°</th>
+                                <th>Joueur</th>
+                                <th class="points">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in goal_ranking_rows %}
+                            <tr class="{% if row.is_current %}current-player-rank{% endif %}">
+                                <td class="classement">{{ row.rank }}</td>
+                                <td class="player"><img src="{{ row.photo }}"><span>{{ row.name }}</span></td>
+                                <td class="points">{{ row.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+
+                <div class="player-ranking-card">
+                    <h2>Classement ELO</h2>
+                    {% if not player.atelier_duel and not player.atelier_goal %}
+                    <div class="ranking-empty-state">
+                        <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="190" height="100">
+                    </div>
+                    {% else %}
+                    <table class="player-ranking-table">
+                        <thead>
+                            <tr>
+                                <th class="classement">N°</th>
+                                <th>Joueur</th>
+                                <th class="points">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in elo_ranking_rows %}
+                            <tr class="{% if row.is_current %}current-player-rank{% endif %}">
+                                <td class="classement">{{ row.rank }}</td>
+                                <td class="player"><img src="{{ row.photo }}"><span>{{ row.name }}</span></td>
+                                <td class="points">{{ row.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+
+                <div class="player-ranking-card">
+                    <h2>Classement TOTAL</h2>
+                    {% if not player.atelier_duel and not player.atelier_goal %}
+                    <div class="ranking-empty-state">
+                        <img src="/static/videos/pas_inscrit.gif" alt="Animation" width="190" height="100">
+                    </div>
+                    {% else %}
+                    <table class="player-ranking-table">
+                        <thead>
+                            <tr>
+                                <th class="classement">N°</th>
+                                <th>Joueur</th>
+                                <th class="points">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in total_ranking_rows %}
+                            <tr class="{% if row.is_current %}current-player-rank{% endif %}">
+                                <td class="classement">{{ row.rank }}</td>
+                                <td class="player"><img src="{{ row.photo }}"><span>{{ row.name }}</span></td>
+                                <td class="points">{{ row.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="player-perf-row">
+                {% for metric in season_delta.metrics %}
+                <div class="player-perf-card {{ metric.trend }}">
+                    <div class="perf-label">Statistique {{ metric.label }}</div>
+                    <div class="perf-current">Points actuels : {{ metric.current }}</div>
+                    <div class="perf-last-points">
+                        Points saison derniere : {{ metric.previous_value }}
+                    </div>
+                    <div class="perf-rank-last">
+                        classement saison derniere :
+                        {% if metric.previous_rank %}
+                        #{{ metric.previous_rank }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
+                    <div class="perf-delta">
+                        <span class="perf-icon">{{ metric.icon }}</span>
+                        <span>
+                            {% if metric.delta > 0 %}+{% endif %}{{ metric.delta }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="tab-player-chart">
+                <h2>Performances par saison</h2>
+                <div class="season-chart-card">
+                    <canvas id="playerSeasonChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -295,6 +486,7 @@
 <!-- ANCHOR SCRIPTS -->
 <!-- ========================= -->
 
+<script src="/static/js/chart.umd.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const cards = document.querySelectorAll(".fut-card");
@@ -314,19 +506,182 @@
     /* filtrage adversaire selon atelier */
     const atelier = document.getElementById("atelier-select")
     const opponent = document.getElementById("opponent-select")
+    const matchForm = document.querySelector(".match-form")
+    const submitButton = matchForm?.querySelector('button[type="submit"]')
+    const initialOpponentOptions = opponent
+        ? Array.from(opponent.options).map(opt => ({
+            value: opt.value,
+            type: opt.dataset.type,
+            label: opt.textContent
+        }))
+        : []
 
     function filterOpponents() {
+        if (!atelier || !opponent) return
 
-        let type = atelier.value
+        const type = atelier.value
+        const filteredOptions = initialOpponentOptions.filter(opt => opt.type === type)
 
-        for (let opt of opponent.options) {
-            opt.style.display = (opt.dataset.type === type) ? "block" : "none"
+        opponent.innerHTML = ""
+
+        filteredOptions.forEach(opt => {
+            const option = document.createElement("option")
+            option.value = opt.value
+            option.dataset.type = opt.type
+            option.textContent = opt.label
+            opponent.appendChild(option)
+        })
+
+        const hasOpponents = filteredOptions.length > 0
+        opponent.disabled = !hasOpponents
+
+        if (submitButton) {
+            submitButton.disabled = !hasOpponents
         }
     }
 
-    atelier.addEventListener("change", filterOpponents)
+    if (atelier) {
+        atelier.addEventListener("change", filterOpponents)
+        filterOpponents()
+    }
 
-    filterOpponents()
+    const seasonChartData = {{ season_chart | tojson | safe }}
+    const seasonChartCanvas = document.getElementById("playerSeasonChart")
+    const seasonChartMax = {{ season_chart_max | tojson | safe }}
+
+    if (seasonChartCanvas && seasonChartData.labels.length > 0) {
+        const chartCtx = seasonChartCanvas.getContext("2d")
+        const valueLabelPlugin = {
+            id: "valueLabelPlugin",
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart
+
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex)
+
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index]
+                        if (value === null || value === undefined) return
+
+                        ctx.save()
+                        ctx.fillStyle = dataset.borderColor
+                        ctx.font = "bold 11px Orbitron"
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "bottom"
+                        ctx.fillText(String(value), bar.x, bar.y - 6)
+                        ctx.restore()
+                    })
+                })
+            }
+        }
+
+        new Chart(chartCtx, {
+            type: "bar",
+            data: {
+                labels: seasonChartData.labels,
+                datasets: [
+                    {
+                        label: "ELO",
+                        data: seasonChartData.elo,
+                        backgroundColor: "rgba(0, 229, 255, 0.75)",
+                        borderColor: "#00e5ff",
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: "yElo"
+                    },
+                    {
+                        label: "DUEL",
+                        data: seasonChartData.duel,
+                        backgroundColor: "rgba(255, 213, 74, 0.75)",
+                        borderColor: "#ffd54a",
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: "yStats"
+                    },
+                    {
+                        label: "GOAL",
+                        data: seasonChartData.goal,
+                        backgroundColor: "rgba(0, 255, 136, 0.75)",
+                        borderColor: "#00ff88",
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: "yStats"
+                    },
+                    {
+                        label: "TOTAL",
+                        data: seasonChartData.total,
+                        backgroundColor: "rgba(255, 77, 77, 0.75)",
+                        borderColor: "#ff4d4d",
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: "yStats"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: "top",
+                        align: "center",
+                        justifyContent: "center",
+                        padding: 24,
+                        labels: {
+                            color: "#f5f5f5",
+                            font: {
+                                family: "Orbitron",
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 18
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: "#d0d0d0"
+                        },
+                        grid: {
+                            color: "rgba(255,255,255,0.08)"
+                        }
+                    },
+                    yElo: {
+                        type: "linear",
+                        position: "left",
+                        beginAtZero: true,
+                        max: seasonChartMax,
+                        ticks: {
+                            color: "#00e5ff"
+                        },
+                        grid: {
+                            color: "rgba(255,255,255,0.08)"
+                        }
+                    },
+                    yStats: {
+                        type: "linear",
+                        position: "right",
+                        beginAtZero: true,
+                        ticks: {
+                            color: "#ffd54a"
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            },
+            plugins: [valueLabelPlugin]
+        })
+    }
 
     /* score automatique */
     const scoreSelf = document.getElementById("score-self")

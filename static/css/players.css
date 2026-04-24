@@ -1,5 +1,5 @@
 body.players {
-    background-image: url("/static/img/background/background-12.png");
+    background-image: url("/static/img/background/background-10.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -205,43 +205,4 @@ body.players {
     100% {
         background-position: 100% 50%;
     }
-}
-
-/* ==== CARD RENNES ==== */
-.club-section.Rennes .club-header {
-    background: #fc4302;
-}
-
-.club-section.Rennes .card-name {
-    color: #f9f9f9;
-}
-
-/* ==== CARD NOUVOITOU ==== */
-.club-section.Nouvoitou .club-header {
-    background: #e3020a;
-}
-
-/* ==== CARD LARCHAMP ==== */
-.club-section.Larchamp .club-header {
-    background: #678dbd;
-}
-
-.club-section.Larchamp .player-card .club-logo {
-    width: 80px;
-}
-
-/* ==== CARD BRUZ ==== */
-.club-section.Bruz .club-header {
-    background: white;
-    color: black;
-}
-
-/* ==== CARD CHEVAIGNE ==== */
-.club-section.Chevaigne .club-header {
-    background: #f9925a;
-    color: #232436;
-}
-
-.club-section.Chevaigne .player-card .club-logo {
-    left: 52px;
 }

@@ -164,12 +164,6 @@
 
             <img id="card_bg" class="card-bg" src="{{ player.card_background or '/static/img/cards/bronze.png' }}">
 
-            {% if player.external_club %}
-            <img id="club_logo" class="club-logo" src="/static/img/logo/logo_{{ player.external_club }}.png">
-            {% else %}
-            <img id="club_logo" class="club-logo" style="display:none;">
-            {% endif %}
-
             <img id="photo_preview" class="player-photo" src="{{ player.photo or '/static/img/default.png' }}">
 
             <div class="player-name" id="player_name_preview">
@@ -204,13 +198,6 @@
 
 
             <div class="checkbox-group">
-
-                <label>
-                    <input type="checkbox" name="membre_club" id="membreClubCheckbox" {% if player.membre_club
-                        %}checked{% endif %}>
-                    Membre club
-                </label>
-
                 <label>
                     <input type="checkbox" name="interclub" {% if player.interclub %}checked{% endif %}>
                     Interclub
@@ -252,36 +239,6 @@
 <!--------------------- S C R I P T ----------------------->
 
 <script>
-
-    const membreClubCheckbox = document.getElementById("membreClubCheckbox")
-    const atelierDuel = document.getElementById("atelierDuelCheckbox")
-    const atelierGoal = document.getElementById("atelierGoalCheckbox")
-
-    function updateAteliers() {
-
-        if (!membreClubCheckbox.checked) {
-
-            atelierDuel.checked = false
-            atelierGoal.checked = false
-
-            atelierDuel.disabled = true
-            atelierGoal.disabled = true
-
-        } else {
-
-            atelierDuel.disabled = false
-            atelierGoal.disabled = false
-
-        }
-
-    }
-
-    updateAteliers()
-
-    membreClubCheckbox.addEventListener("change", updateAteliers)
-
-
-
     // preview photo
     document.getElementById("photo_input").addEventListener("change", function (e) {
 
@@ -307,67 +264,18 @@
     })
 
 
-
-    function updateClubPreview(club) {
-
-        const logo = document.getElementById("club_logo")
-        const card = document.getElementById("card_bg")
-
-        if (!club) {
-            logo.style.display = "none"
-            updateCardPreview()
-            return
-        }
-
-        const logoPath = "/static/img/logo/logo_" + club + ".png"
-        const cardPath = "/static/img/cards_ext/card_" + club + ".png"
-
-        logo.src = logoPath
-        logo.style.display = "block"
-
-        // force reload image
-        card.src = ""
-        setTimeout(() => {
-            card.src = cardPath
-        }, 10)
-    }
-
-
-
-    // select club
-    document.getElementById("club_select").addEventListener("change", function () {
-
-        updateClubPreview(this.value)
-
-    })
-
-
-
-    // nouveau club
-    document.getElementById("new_club_input").addEventListener("input", function () {
-
-        updateClubPreview(this.value)
-
-    })
-
-
-
     function updateCardPreview() {
-
-        const club = document.getElementById("club_select").value
-        const newClub = document.getElementById("new_club_input").value
-
-        if (club || newClub) {
-            return
-        }
-
         const sexe = document.querySelector('[name="sexe"]').value
         const interclub = document.querySelector('[name="interclub"]').checked
+        const actif = document.querySelector('[name="actif"]').checked
 
         let bg = "/static/img/cards/bronze.png"
 
         if (sexe === "F") {
             bg = "/static/img/cards/rose.png"
+        }
+        else if (!actif) {
+            bg = "/static/img/cards/ancien.png"
         }
         else if (interclub) {
             bg = "/static/img/cards/argent.png"
@@ -380,15 +288,9 @@
 
     document.querySelector('[name="sexe"]').addEventListener("change", updateCardPreview)
     document.querySelector('[name="interclub"]').addEventListener("change", updateCardPreview)
+    document.querySelector('[name="actif"]').addEventListener("change", updateCardPreview)
 
     updateCardPreview()
-
-    document.getElementById("club_select").addEventListener("change", function () {
-        updateClubPreview(this.value)
-    })
-    document.getElementById("new_club_input").addEventListener("input", function () {
-        updateClubPreview(this.value)
-    })
 
 </script>
 

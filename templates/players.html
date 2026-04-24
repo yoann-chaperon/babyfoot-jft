@@ -4,10 +4,6 @@
 
 <div class="players-page">
 
-    <!-- ========================= -->
-    <!-- CLUB JAVENÉ -->
-    <!-- ========================= -->
-
     <div class="club-section">
 
         <div class="club-header Javene" onclick="toggleClub(this)">
@@ -15,8 +11,8 @@
             <div class="club-title">
                 JAVENÉ
                 <span class="club-count">
-                    {{ club_javene|selectattr("actif")|list|length }} /
-                    {{ club_javene|length }}
+                    {{ joueurs|selectattr("actif")|list|length }} /
+                    {{ joueurs|length }}
                 </span>
             </div>
 
@@ -28,51 +24,8 @@
             <!-- ACTIFS -->
             <h3 class="players-subtitle">Joueurs actifs</h3>
             <div class="players-grid">
-                {% for joueur in club_javene if joueur.actif %}
-                {% include "cards_ext/card_javene.html" %}
-                {% endfor %}
-            </div>
-
-            <!-- INACTIFS -->
-            <h3 class="players-subtitle players-inactive">Joueurs inactifs</h3>
-            <div class="players-grid">
-                {% for joueur in club_javene if not joueur.actif %}
-                {% include "cards_ext/card_javene.html" %}
-                {% endfor %}
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ========================= -->
-    <!-- CLUBS EXTERIEURS -->
-    <!-- ========================= -->
-
-    {% for club, joueurs in clubs_ext.items() %}
-    <div class="club-section {{ club }}">
-
-        <div class="club-header" onclick="toggleClub(this)">
-            <img src="/static/img/logo/logo_{{ club }}.png" class="club-logo-banner">
-
-            <div class="club-title">
-                {{ club }}
-                <span class="club-count">
-                    {{ joueurs|selectattr("actif")|list|length }} /
-                    {{ joueurs|length }}
-                </span>
-            </div>
-
-            <div class="club-arrow">▼</div>
-        </div>
-
-        <div class="club-content">
-
-            <!-- ACTIFS -->
-            <h3 class="players-subtitle">Joueurs actifs</h3>
-            <div class="players-grid">
                 {% for joueur in joueurs if joueur.actif %}
-                {% include "cards_ext/card_" ~ club ~ ".html" ignore missing %}
+                {% include "cards/card_javene.html" %}
                 {% endfor %}
             </div>
 
@@ -80,14 +33,13 @@
             <h3 class="players-subtitle players-inactive">Joueurs inactifs</h3>
             <div class="players-grid">
                 {% for joueur in joueurs if not joueur.actif %}
-                {% include "cards_ext/card_" ~ club ~ ".html" ignore missing %}
+                {% include "cards/card_javene.html" %}
                 {% endfor %}
             </div>
 
         </div>
 
     </div>
-    {% endfor %}
 
 </div>
 

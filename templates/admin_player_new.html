@@ -13,8 +13,6 @@
         <div class="player-card" id="player_card">
             <img id="card_bg" class="card-bg" src="/static/img/cards/bronze.png">
 
-            <img id="club_logo" class="club-logo" src="" style="display:none;">
-
             <img id="photo_preview" class="player-photo" src="/static/img/default.png">
 
             <div class="player-name" id="player_name_preview">
@@ -42,8 +40,6 @@
             </select>
 
             <div class="checkbox-group">
-                <label><input type="checkbox" name="membre_club" id="membreClubCheckbox" checked> Membre
-                    club</label>
                 <label><input type="checkbox" name="interclub"> Interclub</label>
                 <label><input type="checkbox" name="atelier_duel" id="atelierDuelCheckbox"> Duel</label>
                 <label><input type="checkbox" name="atelier_goal" id="atelierGoalCheckbox"> Goal</label>
@@ -51,17 +47,6 @@
                 <label><input type="checkbox" name="chbb" {% if player.chbb %}checked{% endif %}>CHBB</label>
                 <label><input type="checkbox" name="force_team_b" value="1" {% if player.force_team_b %}checked{% endif %}><strong>Forcer équipe B</strong></label>
             </div>
-
-            <label>Club externe</label>
-            <select name="external_club" id="club_select">
-                <option value="">-- Choisir --</option>
-                {% for c in clubs %}
-                <option value="{{ c }}">{{ c }}</option>
-                {% endfor %}
-            </select>
-
-            <label>Nouveau club</label>
-            <input type="text" name="new_club" id="new_club_input">
 
             <label>Photo joueur</label>
             <input type="file" name="photo" id="photo_input">
@@ -75,25 +60,6 @@
 </div>
 
 <script>
-    // ===== GESTION ATELIERS =====
-    const membreClubCheckbox = document.getElementById("membreClubCheckbox");
-    const atelierDuel = document.getElementById("atelierDuelCheckbox");
-    const atelierGoal = document.getElementById("atelierGoalCheckbox");
-
-    function updateAteliers() {
-        if (!membreClubCheckbox.checked) {
-            atelierDuel.checked = false;
-            atelierGoal.checked = false;
-            atelierDuel.disabled = true;
-            atelierGoal.disabled = true;
-        } else {
-            atelierDuel.disabled = false;
-            atelierGoal.disabled = false;
-        }
-    }
-    updateAteliers();
-    membreClubCheckbox.addEventListener("change", updateAteliers);
-
     // ===== PREVIEW PHOTO =====
     document.querySelector('input[name="photo"]').addEventListener('change', function (e) {
         const file = e.target.files[0];
@@ -110,35 +76,20 @@
     // ===== PREVIEW CARTE =====
     function updateCardPreview() {
         const sexe = document.querySelector('[name="sexe"]').value;
-        const membreClub = document.querySelector('[name="membre_club"]').checked;
         const interclub = document.querySelector('[name="interclub"]').checked;
         const actif = document.querySelector('[name="actif"]').checked;
-        const forceTeamB = document.querySelector('[name="force_team_b"]').checked;
-        const externalClub = document.getElementById("club_select").value;
-        const newClub = document.getElementById("new_club_input").value;
-        
         const cardBg = document.getElementById("card_bg");
-        const clubLogo = document.getElementById("club_logo");
         
         let cardPath = "/static/img/cards/bronze.png";
-        const club = newClub || externalClub;
-        
-        if (club) {
-            cardPath = `/static/img/cards_ext/card_${club}.png`;
-            clubLogo.src = `/static/img/logo/logo_${club}.png`;
-            clubLogo.style.display = "block";
-        } else {
-            clubLogo.style.display = "none";
-            if (sexe === "F") {
-                cardPath = "/static/img/cards/rose.png";
-            } else if (!membreClub || !actif) {
-                cardPath = "/static/img/cards/ancien.png";
-            } else if (membreClub && interclub && actif && forceTeamB) {
-                cardPath = "/static/img/cards/argent.png";
-            } else if (membreClub && interclub && actif) {
-                cardPath = "/static/img/cards/argent.png";
-            }
+
+        if (sexe === "F") {
+            cardPath = "/static/img/cards/rose.png";
+        } else if (!actif) {
+            cardPath = "/static/img/cards/ancien.png";
+        } else if (interclub) {
+            cardPath = "/static/img/cards/argent.png";
         }
+
         cardBg.src = "";
         setTimeout(() => { cardBg.src = cardPath; }, 10);
     }
@@ -146,19 +97,9 @@
     // ===== LISTENERS CARTE =====
     document.querySelector('[name="sexe"]').addEventListener("change", updateCardPreview);
     document.querySelector('[name="interclub"]').addEventListener("change", updateCardPreview);
-    document.querySelector('[name="membre_club"]').addEventListener("change", updateCardPreview);
     document.querySelector('[name="actif"]').addEventListener("change", updateCardPreview);
-    document.querySelector('[name="force_team_b"]').addEventListener("change", updateCardPreview);
-    document.getElementById("club_select").addEventListener("change", function() {
-        document.getElementById("new_club_input").value = ""; // reset new_club
-        updateCardPreview();
-    });
-    document.getElementById("new_club_input").addEventListener("input", function() {
-        document.getElementById("club_select").value = ""; // reset select
-        updateCardPreview();
-    });
 
     // ===== INIT =====
     updateCardPreview();
 </script>
-{% endblock %}ææ
+{% endblock %}

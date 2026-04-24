@@ -1,12 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from itertools import chain
-from sqlalchemy import func, case
+from sqlalchemy import func, case, or_
 from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 from itertools import combinations
 from datetime import datetime
-from collections import defaultdict
 import datetime, os
 
 # ----------------------------
@@ -77,6 +76,7 @@ class Match(db.Model):
     scoreA = db.Column(db.Integer)
     scoreB = db.Column(db.Integer)
     type = db.Column(db.String(10))
+    season_id = db.Column(db.Integer, db.ForeignKey('season.id'))
 
 
 class DetteTransaction(db.Model):
@@ -91,10 +91,9 @@ class DetteTransaction(db.Model):
 class Season(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    date_start = db.Column(db.DateTime)
-    date_end = db.Column(db.DateTime, nullable=True)
     active = db.Column(db.Boolean, default=True)
-
+    date_start = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    date_end = db.Column(db.DateTime)
 
 class PlayerSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -134,7 +133,8 @@ with app.app_context():
         'ALTER TABLE player ADD COLUMN card_video TEXT',
         'ALTER TABLE player ADD COLUMN matches_duel INTEGER DEFAULT 0',
         'ALTER TABLE player ADD COLUMN matches_goal INTEGER DEFAULT 0',
-        'ALTER TABLE player ADD COLUMN team TEXT'
+        'ALTER TABLE player ADD COLUMN team TEXT',
+        'ALTER TABLE match ADD COLUMN season_id INTEGER'
     ]
 
     for m in migrations:
@@ -202,6 +202,337 @@ def generate_teams():
         p.team = "B"
 
     db.session.commit()
+
+# ----------------------------
+# ANCHOR season en cours
+# ----------------------------
+
+def get_current_season():
+    return Season.query.filter_by(active=True).first()
+
+
+def get_played_pairs_for_season(season):
+    if not season:
+        return set()
+
+    matches = Match.query.filter_by(season_id=season.id).all()
+    return {
+        (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
+        for m in matches
+        if m.playerA_id and m.playerB_id
+    }
+
+
+def get_remaining_matches_for_season(season):
+    duel_players = Player.query.filter_by(
+        membre_club=True,
+        actif=True,
+        atelier_duel=True
+    ).all()
+
+    goal_players = Player.query.filter_by(
+        membre_club=True,
+        actif=True,
+        atelier_goal=True
+    ).all()
+
+    played_pairs = get_played_pairs_for_season(season)
+    remaining_matches = []
+
+    for p1, p2 in combinations(duel_players, 2):
+        pair = (min(p1.id, p2.id), max(p1.id, p2.id))
+        if (pair[0], pair[1], "DUEL") not in played_pairs:
+            remaining_matches.append({"playerA_id": p1.id, "playerB_id": p2.id, "type": "DUEL"})
+
+    for p1, p2 in combinations(goal_players, 2):
+        pair = (min(p1.id, p2.id), max(p1.id, p2.id))
+        if (pair[0], pair[1], "GOAL") not in played_pairs:
+            remaining_matches.append({"playerA_id": p1.id, "playerB_id": p2.id, "type": "GOAL"})
+
+    duel_remaining = [m for m in remaining_matches if m["type"] == "DUEL"]
+    goal_remaining = [m for m in remaining_matches if m["type"] == "GOAL"]
+
+    return remaining_matches, duel_remaining, goal_remaining
+
+
+def get_history_season_columns(max_seasons=6):
+    seasons = Season.query.order_by(Season.date_start.desc()).limit(max_seasons).all()
+    columns = [{"id": s.id, "label": s.name, "placeholder": False} for s in seasons]
+
+    while len(columns) < max_seasons:
+        columns.append({"id": None, "label": "à venir", "placeholder": True})
+
+    return columns
+
+
+def build_player_history_rows(player_id, match_type, season_columns):
+    season_ids = [col["id"] for col in season_columns if col["id"] is not None]
+    if not season_ids:
+        return []
+
+    matches = (
+        Match.query
+        .filter(
+            Match.type == match_type,
+            Match.season_id.in_(season_ids),
+            or_(
+                Match.playerA_id == player_id,
+                Match.playerB_id == player_id
+            )
+        )
+        .order_by(Match.date.desc(), Match.id.desc())
+        .all()
+    )
+
+    rows_by_opponent = {}
+
+    for match in matches:
+        opponent = match.playerB if match.playerA_id == player_id else match.playerA
+        if not opponent:
+            continue
+
+        score_self = match.scoreA if match.playerA_id == player_id else match.scoreB
+        score_opp = match.scoreB if match.playerA_id == player_id else match.scoreA
+        result_class = "win" if score_self > score_opp else "loss"
+        result_icon = "🏆" if score_self > score_opp else "😔"
+
+        row = rows_by_opponent.setdefault(opponent.id, {
+            "opponent_name": opponent.name,
+            "opponent_photo": opponent.photo,
+            "season_results": {}
+        })
+
+        row["season_results"].setdefault(match.season_id, []).append({
+            "score": f"{score_self}-{score_opp}",
+            "result_class": result_class,
+            "result_icon": result_icon
+        })
+
+    rows = []
+    for opponent_id, row in sorted(rows_by_opponent.items(), key=lambda item: item[1]["opponent_name"].lower()):
+        season_cells = []
+        for column in season_columns:
+            entries = row["season_results"].get(column["id"], []) if column["id"] is not None else []
+            season_cells.append({
+                "placeholder": column["placeholder"],
+                "entries": entries
+            })
+
+        rows.append({
+            "opponent_id": opponent_id,
+            "opponent_name": row["opponent_name"],
+            "opponent_photo": row["opponent_photo"],
+            "season_cells": season_cells
+        })
+
+    return rows
+
+
+def build_player_season_chart(player):
+    seasons = Season.query.order_by(Season.date_start.asc()).all()
+    archived_stats = PlayerSeasonStats.query.filter_by(player_id=player.id).all()
+    archived_by_season = {stat.season_id: stat for stat in archived_stats}
+
+    labels = []
+    duel_values = []
+    goal_values = []
+    elo_values = []
+    total_values = []
+    total_rank_values = []
+    max_rank = 1
+
+    for season in seasons:
+        if season.active:
+            duel = player.duel or 0
+            goal = player.goal or 0
+            elo = player.elo or 1000
+            matches = player.matches or 0
+            season_players = Player.query.filter_by(membre_club=True, actif=True).all()
+            ranking_pool = sorted(
+                season_players,
+                key=lambda p: ((p.duel or 0) + (p.goal or 0), p.elo or 0, p.name),
+                reverse=True
+            )
+            rank = next((index for index, ranked_player in enumerate(ranking_pool, start=1) if ranked_player.id == player.id), None)
+        else:
+            stat = archived_by_season.get(season.id)
+            if not stat:
+                continue
+            duel = stat.duel or 0
+            goal = stat.goal or 0
+            elo = stat.elo or 1000
+            matches = stat.matches or 0
+            season_stats = PlayerSeasonStats.query.filter_by(season_id=season.id).all()
+            ranking_pool = sorted(
+                season_stats,
+                key=lambda p: (((p.duel or 0) + (p.goal or 0)), p.elo or 0, p.player_id),
+                reverse=True
+            )
+            rank = next((index for index, ranked_stat in enumerate(ranking_pool, start=1) if ranked_stat.player_id == player.id), None)
+
+        if not season.active and matches == 0 and duel == 0 and goal == 0 and elo == 1000:
+            continue
+
+        labels.append(season.name)
+        duel_values.append(duel)
+        goal_values.append(goal)
+        elo_values.append(elo)
+        total_values.append(duel + goal)
+        total_rank_values.append(rank)
+        if rank:
+            max_rank = max(max_rank, rank)
+
+    return {
+        "labels": labels,
+        "duel": duel_values,
+        "goal": goal_values,
+        "elo": elo_values,
+        "total": total_values,
+        "total_rank": total_rank_values,
+        "rank_max": max_rank
+    }
+
+
+def get_global_player_chart_max():
+    max_value = 0
+
+    for player in Player.query.filter_by(membre_club=True).all():
+        current_values = [
+            player.elo or 0,
+            player.duel or 0,
+            player.goal or 0,
+            (player.duel or 0) + (player.goal or 0)
+        ]
+        max_value = max(max_value, *current_values)
+
+    for stat in PlayerSeasonStats.query.all():
+        archived_values = [
+            stat.elo or 0,
+            stat.duel or 0,
+            stat.goal or 0,
+            (stat.duel or 0) + (stat.goal or 0)
+        ]
+        max_value = max(max_value, *archived_values)
+
+    if max_value <= 0:
+        return 100
+
+    return int(((max_value + 100) + 99) // 100 * 100)
+
+
+def build_centered_ranking_rows(players, player_id, points_getter):
+    rows = []
+    target_index = next((i for i, player in enumerate(players) if player.id == player_id), None)
+
+    if target_index is None:
+        return rows
+
+    for index in [target_index - 1, target_index, target_index + 1]:
+        if 0 <= index < len(players):
+            ranked_player = players[index]
+            rows.append({
+                "rank": index + 1,
+                "photo": ranked_player.photo,
+                "name": ranked_player.name,
+                "points": points_getter(ranked_player),
+                "is_current": ranked_player.id == player_id
+            })
+
+    return rows
+
+
+def build_player_season_delta(player):
+    archived_stats = (
+        PlayerSeasonStats.query
+        .filter_by(player_id=player.id)
+        .order_by(PlayerSeasonStats.season_id.desc())
+        .all()
+    )
+
+    previous = archived_stats[0] if archived_stats else None
+    previous_ranks = {
+        "duel": None,
+        "goal": None,
+        "elo": None,
+        "total": None
+    }
+
+    if previous:
+        season_stats = PlayerSeasonStats.query.filter_by(season_id=previous.season_id).all()
+
+        duel_ranking = sorted(
+            [stat for stat in season_stats if (stat.duel or 0) > 0],
+            key=lambda stat: ((stat.duel or 0), (stat.elo or 0), stat.player_id),
+            reverse=True
+        )
+        goal_ranking = sorted(
+            [stat for stat in season_stats if (stat.goal or 0) > 0],
+            key=lambda stat: ((stat.goal or 0), (stat.elo or 0), stat.player_id),
+            reverse=True
+        )
+        elo_ranking = sorted(
+            season_stats,
+            key=lambda stat: ((stat.elo or 0), stat.player_id),
+            reverse=True
+        )
+        total_ranking = sorted(
+            season_stats,
+            key=lambda stat: (((stat.duel or 0) + (stat.goal or 0)), (stat.elo or 0), stat.player_id),
+            reverse=True
+        )
+
+        for key, ranking in [
+            ("duel", duel_ranking),
+            ("goal", goal_ranking),
+            ("elo", elo_ranking),
+            ("total", total_ranking)
+        ]:
+            for index, stat in enumerate(ranking, start=1):
+                if stat.player_id == player.id:
+                    previous_ranks[key] = index
+                    break
+
+    current_values = {
+        "duel": player.duel or 0,
+        "goal": player.goal or 0,
+        "elo": player.elo or 1000,
+        "total": (player.duel or 0) + (player.goal or 0)
+    }
+    previous_values = {
+        "duel": previous.duel if previous else 0,
+        "goal": previous.goal if previous else 0,
+        "elo": previous.elo if previous else 1000,
+        "total": ((previous.duel or 0) + (previous.goal or 0)) if previous else 0
+    }
+
+    metrics = []
+    for key, label in [("duel", "DUEL"), ("goal", "GOAL"), ("elo", "ELO"), ("total", "TOTAL")]:
+        delta = current_values[key] - previous_values[key]
+        if delta > 0:
+            trend = "up"
+            icon = "▲"
+        elif delta < 0:
+            trend = "down"
+            icon = "▼"
+        else:
+            trend = "flat"
+            icon = "•"
+
+        metrics.append({
+            "label": label,
+            "current": current_values[key],
+            "previous_value": previous_values[key],
+            "delta": delta,
+            "trend": trend,
+            "icon": icon,
+            "previous_rank": previous_ranks[key]
+        })
+
+    return {
+        "previous_exists": previous is not None,
+        "previous_label": "Saison derniere",
+        "metrics": metrics
+    }
 # ----------------------------
 # ROUTES
 # ----------------------------
@@ -209,7 +540,8 @@ def generate_teams():
 @app.route("/")
 def index():
         # récupérer tous les joueurs
-    joueurs = Player.query.all()
+    joueurs = Player.query.filter_by(membre_club=True).all()
+    season = get_current_season()
     
     if not joueurs:
         print("⚠️ Aucun joueur trouvé en base !")
@@ -217,7 +549,7 @@ def index():
     # tu peux créer une liste filtrée si besoin (ici juste pour illustrer)
     joueurs_valides = [j for j in joueurs if j is not None]
     # Joueurs interclub actifs
-    interclub_actifs = Player.query.filter_by(interclub=True, actif=True).all()
+    interclub_actifs = Player.query.filter_by(membre_club=True, interclub=True, actif=True).all()
 
     # ================= CLASSEMENTS =================
 
@@ -263,8 +595,19 @@ def index():
 
     # ================= MATCHS RECENTS (affichage uniquement) =================
     # ⚠️ Variables renommées en _recents pour ne pas écraser celles du graph ELO
-    matchs_duel_recents = Match.query.filter_by(type="DUEL").order_by(Match.date.desc()).limit(10).all()
-    matchs_goal_recents = Match.query.filter_by(type="GOAL").order_by(Match.date.desc()).limit(10).all()
+    if season:
+        matchs_duel_recents = Match.query.filter(
+            Match.type == "DUEL",
+            Match.season_id == season.id
+        ).order_by(Match.date.desc()).limit(10).all()
+
+        matchs_goal_recents = Match.query.filter(
+            Match.type == "GOAL",
+            Match.season_id == season.id
+        ).order_by(Match.date.desc()).limit(10).all()
+    else:
+        matchs_duel_recents = []
+        matchs_goal_recents = []
 
     def format_matches(matchs):
         matches_data = []
@@ -299,7 +642,7 @@ def index():
     # IDs par atelier
     joueurs_goal_ids = {j.id for j in interclub_actifs if j.atelier_goal}
     joueurs_duel_ids = {j.id for j in interclub_actifs if j.atelier_duel}
-
+    #season en cours
     print(f"joueurs_goal_ids ({len(joueurs_goal_ids)}) : {joueurs_goal_ids}")
     print(f"joueurs_duel_ids ({len(joueurs_duel_ids)}) : {joueurs_duel_ids}")
 
@@ -315,32 +658,38 @@ def index():
     if not joueurs_goal_ids:
         print("⚠️  joueurs_goal_ids est VIDE → matchs_goal_graph = []")
         matchs_goal_graph = []
-    else:
+    elif season:
         matchs_goal_graph = (
             Match.query
             .filter(
                 Match.type == "GOAL",
+                Match.season_id == season.id,
                 Match.playerA_id.in_(joueurs_goal_ids),
                 Match.playerB_id.in_(joueurs_goal_ids)
             )
             .order_by(Match.date.asc())
             .all()
         )
+    else:
+        matchs_goal_graph = []
 
     if not joueurs_duel_ids:
         print("⚠️  joueurs_duel_ids est VIDE → matchs_duel_graph = []")
         matchs_duel_graph = []
-    else:
+    elif season:
         matchs_duel_graph = (
             Match.query
             .filter(
                 Match.type == "DUEL",
+                Match.season_id == season.id,
                 Match.playerA_id.in_(joueurs_duel_ids),
                 Match.playerB_id.in_(joueurs_duel_ids)
             )
             .order_by(Match.date.asc())
             .all()
         )
+    else:
+        matchs_duel_graph = []
 
     print(f"matchs_goal_graph trouvés : {len(matchs_goal_graph)}")
     print(f"matchs_duel_graph trouvés : {len(matchs_duel_graph)}")
@@ -455,26 +804,11 @@ def index():
 @app.route("/admin")
 def admin():
 
+    season = get_current_season()
     players = Player.query.all()
-    interclub_players = Player.query.filter_by(interclub=True, actif=True).all()
-    matches = Match.query.order_by(Match.date.desc()).all()
+    matches = Match.query.filter_by(season_id=season.id).order_by(Match.date.desc()).all() if season else []
     players_dict = {p.id: p for p in players}
-
-    played_pairs = {
-        (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
-        for m in matches if m.playerA_id and m.playerB_id
-    }
-
-    remaining_matches = []
-    for p1, p2 in combinations(interclub_players, 2):
-        pair = (min(p1.id, p2.id), max(p1.id, p2.id))
-        if (pair[0], pair[1], "DUEL") not in played_pairs:
-            remaining_matches.append({"playerA_id": p1.id, "playerB_id": p2.id, "type": "DUEL"})
-        if (pair[0], pair[1], "GOAL") not in played_pairs:
-            remaining_matches.append({"playerA_id": p1.id, "playerB_id": p2.id, "type": "GOAL"})
-
-    duel_remaining = [m for m in remaining_matches if m["type"] == "DUEL"]
-    goal_remaining = [m for m in remaining_matches if m["type"] == "GOAL"]
+    remaining_matches, duel_remaining, goal_remaining = get_remaining_matches_for_season(season)
 
     return render_template(
         "admin.html",
@@ -491,19 +825,9 @@ def admin():
 @app.route("/players")
 def players():
 
-    joueurs = Player.query.order_by(Player.name).all()
+    joueurs = Player.query.filter_by(membre_club=True).order_by(Player.name).all()
 
-    club_javene = []
-    clubs_ext = defaultdict(list)
-
-    for j in joueurs:
-        if j.membre_club:
-            club_javene.append(j)
-        else:
-            club = j.external_club or "Autre"
-            clubs_ext[club].append(j)
-
-    club_javene.sort(
+    joueurs.sort(
         key=lambda x: (
             not x.interclub,
             -(x.elo or 0),
@@ -511,13 +835,9 @@ def players():
         )
     )
 
-    for club in clubs_ext:
-        clubs_ext[club].sort(key=lambda x: x.name)
-
     return render_template(
         "players.html",
-        club_javene=club_javene,
-        clubs_ext=clubs_ext
+        joueurs=joueurs
     )
 
 
@@ -536,7 +856,7 @@ def toggle_player(id):
 @app.route("/equipe")
 def equipe():
 
-    players = Player.query.filter_by(actif=True).all()
+    players = Player.query.filter_by(membre_club=True, actif=True).all()
 
     players_sorted = sorted(
         players,
@@ -574,6 +894,7 @@ def add_match():
     s1 = int(request.form.get("s1"))
     s2 = int(request.form.get("s2"))
     t = request.form.get("type")
+    return_to = request.form.get("return_to")
 
     # Validation des scores
     valid_scores = {(3, 0), (3, 1), (3, 2), (0, 3), (1, 3), (2, 3)}
@@ -589,13 +910,31 @@ def add_match():
     if not pl1.actif or not pl2.actif:
         return "Un joueur est inactif", 400
 
+    season = get_current_season()
+    season_filter = Match.season_id == season.id if season else Match.season_id.is_(None)
+
+    existing_match = Match.query.filter(
+        Match.type == t,
+        season_filter,
+        or_(
+            (Match.playerA_id == p1) & (Match.playerB_id == p2),
+            (Match.playerA_id == p2) & (Match.playerB_id == p1)
+        )
+    ).first()
+
+    if existing_match:
+        if return_to and return_to.startswith("/"):
+            return redirect(return_to)
+        return redirect(url_for("player", id=p1))
+
     m = Match(
         playerA_id=p1,
         playerB_id=p2,
         scoreA=s1,
         scoreB=s2,
         type=t,
-        date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        season_id=season.id if season else None
     )
 
     db.session.add(m)
@@ -626,7 +965,10 @@ def add_match():
     db.session.commit()
     socketio.emit("refresh")
 
-    return redirect("/")
+    if return_to and return_to.startswith("/"):
+        return redirect(return_to)
+
+    return redirect(url_for("player", id=p1))
 
 
 # ANCHOR player profile
@@ -655,12 +997,65 @@ def player(id):
         Player.atelier_goal == True
     ).all()
 
-    matches = Match.query.filter(
-        (Match.playerA_id == id) | (Match.playerB_id == id)
-    ).all()
+    season = get_current_season()
+
+    query = Match.query.filter(
+        (Match.playerA_id == id) |
+        (Match.playerB_id == id)
+    )
+
+    # Appliquer le filtre saison uniquement si elle existe
+    if season:
+        query = query.filter(Match.season_id == season.id)
+
+    matches = query.order_by(Match.date.desc()).all()
 
     duel_history = [m for m in matches if m.type == "DUEL"]
     goal_history = [m for m in matches if m.type == "GOAL"]
+    history_seasons = get_history_season_columns()
+    duel_history_rows = build_player_history_rows(id, "DUEL", history_seasons)
+    goal_history_rows = build_player_history_rows(id, "GOAL", history_seasons)
+    season_chart = build_player_season_chart(p)
+    season_chart_max = get_global_player_chart_max()
+    season_delta = build_player_season_delta(p)
+    duel_ranking_players = sorted(
+        Player.query.filter(
+            Player.actif == True,
+            Player.membre_club == True,
+            Player.atelier_duel == True
+        ).all(),
+        key=lambda player: (player.duel, player.elo, player.name),
+        reverse=True
+    )
+    goal_ranking_players = sorted(
+        Player.query.filter(
+            Player.actif == True,
+            Player.membre_club == True,
+            Player.atelier_goal == True
+        ).all(),
+        key=lambda player: (player.goal, player.elo, player.name),
+        reverse=True
+    )
+    elo_ranking_players = sorted(
+        Player.query.filter(
+            Player.actif == True,
+            Player.membre_club == True
+        ).all(),
+        key=lambda player: (player.elo, player.name),
+        reverse=True
+    )
+    total_ranking_players = sorted(
+        Player.query.filter(
+            Player.actif == True,
+            Player.membre_club == True
+        ).all(),
+        key=lambda player: (player.duel + player.goal, player.elo, player.name),
+        reverse=True
+    )
+    duel_ranking_rows = build_centered_ranking_rows(duel_ranking_players, id, lambda player: player.duel)
+    goal_ranking_rows = build_centered_ranking_rows(goal_ranking_players, id, lambda player: player.goal)
+    elo_ranking_rows = build_centered_ranking_rows(elo_ranking_players, id, lambda player: player.elo)
+    total_ranking_rows = build_centered_ranking_rows(total_ranking_players, id, lambda player: player.duel + player.goal)
 
     played_pairs = {
         (min(m.playerA_id, m.playerB_id), max(m.playerA_id, m.playerB_id), m.type)
@@ -761,6 +1156,16 @@ def player(id):
         goal_remaining=goal_remaining,
         duel_history=duel_history,
         goal_history=goal_history,
+        history_seasons=history_seasons,
+        duel_history_rows=duel_history_rows,
+        goal_history_rows=goal_history_rows,
+        season_chart=season_chart,
+        season_chart_max=season_chart_max,
+        season_delta=season_delta,
+        duel_ranking_rows=duel_ranking_rows,
+        goal_ranking_rows=goal_ranking_rows,
+        elo_ranking_rows=elo_ranking_rows,
+        total_ranking_rows=total_ranking_rows,
         duel_done=duel_done,
         goal_done=goal_done,
     )
@@ -797,32 +1202,19 @@ def player_dette_add_four(player_id):
 @app.route("/admin/player/new", methods=["GET", "POST"])
 def admin_new_player():
 
-    import os
-
-    clubs = db.session.query(Player.external_club).distinct().all()
-    clubs = [c[0] for c in clubs if c[0]]
-
-    cards_ext_path = os.path.join(app.root_path, "static/img/cards_ext")
-
-    if os.path.exists(cards_ext_path):
-        cards_ext = [f for f in os.listdir(cards_ext_path)
-                    if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
-    else:
-        cards_ext = []
-
     if request.method == "POST":
 
         name = request.form.get("name")
         sexe = request.form.get("sexe")
 
-        membre_club = "membre_club" in request.form
+        membre_club = True
         interclub = "interclub" in request.form
         actif = "actif" in request.form
         force_team_b = "force_team_b" in request.form
         chbb = "chbb" in request.form
 
-        atelier_duel = "atelier_duel" in request.form if membre_club else False
-        atelier_goal = "atelier_goal" in request.form if membre_club else False
+        atelier_duel = "atelier_duel" in request.form
+        atelier_goal = "atelier_goal" in request.form
 
         photo_file = request.files.get("photo")
 
@@ -834,30 +1226,16 @@ def admin_new_player():
         else:
             photo = "/static/img/default.png"
 
-        new_club = request.form.get("new_club")
-        selected_club = request.form.get("external_club")
-
-        external_club = None
-        club_logo = None
         card_background = "/static/img/cards/bronze.png"
 
-        if new_club:
-            external_club = new_club
-            club_logo = f"/static/img/logo/logo_{new_club}.png"
-            card_background = f"/static/img/cards_ext/card_{new_club}.png"
-        elif selected_club:
-            external_club = selected_club
-            club_logo = f"/static/img/logo/logo_{selected_club}.png"
-            card_background = f"/static/img/cards_ext/card_{selected_club}.png"
-        else:
-            if sexe == "F":
-                card_background = "/static/img/cards/rose.png"
-            elif membre_club and not interclub and not actif:
-                card_background = "/static/img/cards/ancien.png"
-            elif membre_club and interclub and actif and force_team_b:
-                card_background = "/static/img/cards/argent.png"
-            elif membre_club and not interclub and actif:
-                card_background = "/static/img/cards/bronze.png"
+        if sexe == "F":
+            card_background = "/static/img/cards/rose.png"
+        elif not actif:
+            card_background = "/static/img/cards/ancien.png"
+        elif interclub and actif and force_team_b:
+            card_background = "/static/img/cards/argent.png"
+        elif interclub and actif:
+            card_background = "/static/img/cards/argent.png"
 
         player = Player(
             name=name,
@@ -869,8 +1247,8 @@ def admin_new_player():
             atelier_duel=atelier_duel,
             atelier_goal=atelier_goal,
             photo=photo,
-            external_club=external_club,
-            club_logo=club_logo,
+            external_club=None,
+            club_logo=None,
             card_background=card_background,
             chbb=chbb
         )
@@ -894,9 +1272,7 @@ def admin_new_player():
 
     return render_template(
         "admin_player_new.html",
-        player=dummy_player,
-        clubs=clubs,
-        cards_ext=cards_ext
+        player=dummy_player
     )
 
 
@@ -906,21 +1282,18 @@ def edit_player(id):
 
     player = Player.query.get_or_404(id)
 
-    clubs = db.session.query(Player.external_club).distinct().all()
-    clubs = [c[0] for c in clubs if c[0]]
-
     if request.method == "POST":
 
         player.name = request.form.get("name")
         player.sexe = request.form.get("sexe")
-        player.membre_club = "membre_club" in request.form
+        player.membre_club = True
         player.interclub = "interclub" in request.form
         player.actif = "actif" in request.form
         player.force_team_b = "force_team_b" in request.form
         player.chbb = "chbb" in request.form
 
-        player.atelier_duel = "atelier_duel" in request.form if player.membre_club else False
-        player.atelier_goal = "atelier_goal" in request.form if player.membre_club else False
+        player.atelier_duel = "atelier_duel" in request.form
+        player.atelier_goal = "atelier_goal" in request.form
 
         photo_file = request.files.get("photo")
 
@@ -930,33 +1303,20 @@ def edit_player(id):
             photo_file.save(filepath)
             player.photo = f"/static/img/equipe/{filename}"
 
-        new_club = request.form.get("new_club")
-        selected_club = request.form.get("external_club")
+        player.external_club = None
+        player.club_logo = None
 
-        if new_club:
-            player.external_club = new_club
-            player.club_logo = f"/static/img/logo/logo_{new_club}.png"
-            player.card_background = f"/static/img/cards_ext/card_{new_club}.png"
-        elif selected_club:
-            player.external_club = selected_club
-            player.club_logo = f"/static/img/logo/logo_{selected_club}.png"
-            player.card_background = f"/static/img/cards_ext/card_{selected_club}.png"
+        if player.sexe == "F":
+            player.card_background = "/static/img/cards/rose.png"
+        elif not player.actif:
+            player.card_background = "/static/img/cards/ancien.png"
+        elif player.interclub and player.actif and player.force_team_b:
+            player.team = "B"
+            player.card_background = "/static/img/cards/argent.png"
+        elif player.interclub and player.actif:
+            player.card_background = "/static/img/cards/argent.png"
         else:
-            player.external_club = None
-            player.club_logo = None
-
-        if not player.external_club:
-            if player.sexe == "F":
-                player.card_background = "/static/img/cards/rose.png"
-            elif player.membre_club and not player.interclub and not player.actif:
-                player.card_background = "/static/img/cards/ancien.png"
-            elif player.membre_club and player.interclub and player.actif and player.force_team_b:
-                player.team = "B"
-                player.card_background = "/static/img/cards/argent.png"
-            elif player.membre_club and not player.interclub and player.actif:
-                player.card_background = "/static/img/cards/bronze.png"
-            else:
-                player.card_background = "/static/img/cards/bronze.png"
+            player.card_background = "/static/img/cards/bronze.png"
 
         db.session.commit()
 
@@ -964,8 +1324,7 @@ def edit_player(id):
 
     return render_template(
         "admin_player_edit.html",
-        player=player,
-        clubs=clubs
+        player=player
     )
 
 
@@ -1103,20 +1462,11 @@ def edit_match(id):
 @app.route("/admin/player/list")
 def admin_player_list():
 
-    joueurs = Player.query.all()
-
-    club_jft = [j for j in joueurs if j.membre_club]
-    clubs_exterieurs = {}
-
-    for j in joueurs:
-        if not j.membre_club:
-            clubs_exterieurs.setdefault(j.external_club or "Inconnu", []).append(j)
+    joueurs = Player.query.filter_by(membre_club=True).all()
 
     return render_template(
         "admin_player_list.html",
-        players=joueurs,
-        club_jft=club_jft,
-        clubs_exterieurs=clubs_exterieurs
+        players=joueurs
     )
 #ANCHOR - generate teams
 @app.route("/admin/generate_teams")
@@ -1344,11 +1694,26 @@ def chbb_reset():
 def admin_season():
     seasons = Season.query.order_by(Season.date_start.desc()).all()
     current = Season.query.filter_by(active=True).first()
+    players = Player.query.filter_by(membre_club=True, actif=True).all()
+    matches = Match.query.filter_by(season_id=current.id).all() if current else []
+    top_elo = (
+        Player.query
+        .filter_by(membre_club=True, actif=True)
+        .order_by(Player.elo.desc())
+        .first()
+    )
+    remaining_matches, duel_remaining, goal_remaining = get_remaining_matches_for_season(current)
 
     return render_template(
         "admin_season.html",
         seasons=seasons,
-        current_season=current
+        current_season=current,
+        players=players,
+        matches=matches,
+        top_elo=top_elo,
+        remaining_matches=remaining_matches,
+        duel_remaining=duel_remaining,
+        goal_remaining=goal_remaining
     )
 
 # ANCHOR admin new season
@@ -1358,16 +1723,33 @@ def new_season():
     from datetime import datetime
 
     current = Season.query.filter_by(active=True).first()
+    remaining_matches, duel_remaining, goal_remaining = get_remaining_matches_for_season(current)
+
+    if current and remaining_matches:
+        return (
+            f"Saison '{current.name}' incomplète : "
+            f"{len(duel_remaining)} matchs DUEL et {len(goal_remaining)} matchs GOAL restants.",
+            400
+        )
 
     if current:
+        for p in Player.query.filter_by(membre_club=True).all():
+            db.session.add(PlayerSeasonStats(
+                player_id=p.id,
+                season_id=current.id,
+                duel=p.duel,
+                goal=p.goal,
+                wins=p.wins,
+                losses=p.losses,
+                matches=p.matches,
+                elo=p.elo
+            ))
+
         current.active = False
         current.date_end = datetime.now()
 
-    # sauvegarde stats ici (tu peux brancher PlayerSeasonStats)
-
     # reset joueurs
-    players = Player.query.all()
-    for p in Player.query.all():
+    for p in Player.query.filter_by(membre_club=True).all():
 
         # RESET STATS
         p.duel = 0
@@ -1385,6 +1767,8 @@ def new_season():
 
         # 🔥 ELO
         p.elo = 1000
+        p.team = None
+        p.interclub_wins = 0
 
     # nouvelle saison
     new = Season(

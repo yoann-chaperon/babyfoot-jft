@@ -10,12 +10,6 @@
     <div class="card-bg" style="background-image:url('/static/img/cards/argent.png');"></div>
     {% endif %}
 
-    <div class="card-header">
-        {% if joueur.external_club %}
-        <img class="club-logo" src="{{ joueur.club_logo }}">
-        {% endif %}
-    </div>
-
     <div class="card-avatar">
         <img src="{{ joueur.photo }}">
     </div>
@@ -116,4 +110,3 @@
     pointer-events:none;
 }
 </style>
-
