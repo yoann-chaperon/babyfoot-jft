@@ -1,9 +1,14 @@
 /* ============================= */
 /* GLOBAL */
 /* ============================= */
-body {
-    background: linear-gradient(180deg, #f4f6f9, #e9edf3);
+body.admin_season {
     margin: 0;
+    background-image: url("/static/img/background/background-12.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
     font-family: 'Poppins', sans-serif;
     color: #222;
 }
@@ -12,12 +17,25 @@ body {
 /* CONTAINER */
 /* ============================= */
 .admin-container {
-    max-width: 1200px;
-    min-height: 100vh;
     margin: auto;
     padding: 40px 20px;
 }
 
+.season-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    gap: 28px;
+    align-items: start;
+}
+
+.season-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.season-column-right {
+        width: max-content;
+}
 /* ============================= */
 /* TITRES */
 /* ============================= *//* ============================= */
@@ -25,11 +43,9 @@ body {
 /* ============================= */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-auto-flow: column;
     gap: 20px;
     width: 100%;
-    max-width: 900px;
-    margin-bottom: 40px;
 }
 
 /* ============================= */
@@ -39,11 +55,8 @@ body {
     background: #fff;
     border-radius: 15px;
     padding: 20px;
-
     text-align: center;
-
     box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-
     transition: 0.3s;
     position: relative;
     overflow: hidden;
@@ -106,7 +119,7 @@ body {
     margin-bottom: 40px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: #222;
+    color:white;
 }
 
 .admin-container h2 {
@@ -120,17 +133,14 @@ body {
 .fut-card {
     position: relative;
     width: 100%;
-    max-width: 700px;
-    margin: 20px auto 40px auto;
-
+    margin: 0;
     padding: 35px;
-
     background: #ffffff;
     border-radius: 20px;
-
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     text-align: center;
+    box-sizing: border-box;
 }
 
 /* ============================= */
@@ -142,7 +152,7 @@ body {
     inset: 0;
 
     background: radial-gradient(circle at top,
-            rgba(255, 215, 0, 0.25),
+            rgba(253, 215, 2, 0.652),
             transparent 70%);
 
     animation: glowMove 8s linear infinite;
@@ -199,6 +209,11 @@ body {
     font-size: 18px;
 }
 
+.season-message {
+    margin: 0 0 22px;
+    line-height: 1.5;
+}
+
 /* ============================= */
 /* FORMULAIRE */
 /* ============================= */
@@ -225,6 +240,13 @@ body {
     text-align: center;
 
     transition: 0.3s;
+}
+
+.btn-fut:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .season-form input:focus {
@@ -267,11 +289,16 @@ body {
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-
-    background: #fff;
     border-radius: 12px;
     overflow: hidden;
+}
+
+.season-table-scroll {
+    margin-top: 20px;
+    max-height: 560px;
+    overflow-y: auto;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 215, 0, 0.18);
 }
 
 /* HEADER */
@@ -279,6 +306,9 @@ body {
     background: linear-gradient(135deg, gold, orange);
     color: #222;
     padding: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 /* CELLULES */
@@ -293,9 +323,28 @@ body {
     background: rgba(255, 215, 0, 0.1);
 }
 
+.season-table-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.season-table-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, gold, orange);
+    border-radius: 999px;
+}
+
 /* ============================= */
 /* RESPONSIVE */
 /* ============================= */
+@media (max-width: 980px) {
+    .season-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
 @media (max-width: 600px) {
     .fut-card {
         padding: 25px;

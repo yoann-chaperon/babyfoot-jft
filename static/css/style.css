@@ -12,6 +12,7 @@ body {
     background: linear-gradient(#1e3b5c, #0f243d);
     padding: 0px 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 .topbar_left {
     display:flex;
@@ -19,6 +20,9 @@ body {
 }
 .topbar_left .club-logo {
     width:120px;
+    max-height: 88px;
+    height: auto;
+    display: block;
 }
 .topbar_left .title_menu {
     color: white;

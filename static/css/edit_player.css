@@ -1,4 +1,158 @@
-form {
+html,
+body {
+    min-height: 100%;
+}
+
+body.edit_player {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    /* background FIFA clair */
+    background-image: url("/static/img/background/background-3.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+
+/* container principal */
+body.edit_player .container {
+    width: min(1400px, calc(100% - 32px));
+    margin: 200px auto;
+    background: rgba(255, 255, 255, 0.46);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(9.1px);
+    -webkit-backdrop-filter: blur(9.1px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    padding: 40px 60px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+}
+
+/* titre */
+body.edit_player h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #00bfff;
+}
+
+/* grille */
+.form-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 80px;
+    align-items: start;
+}
+
+.form-grid > div:last-child {
+    display: flex;
+    justify-content: center;
+}
+
+/* FORMULAIRE */
+body.edit_player form {
+    font-size: 16px;
+    width: min(100%, 520px);
+}
+
+body.edit_player label {
+    display: block;
+    margin-top: 18px;
+    font-weight: 600;
+}
+body.edit_player input[type="email"],
+body.edit_player input[type="text"],
+body.edit_player select {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px solid #d8e6f5;
+    background: #f7fbff;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+body.edit_player input[type="file"] {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.checkbox-group {
+    margin-top: 15px;
+}
+
+.checkbox-group label {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+/* bouton */
+.btn-add {
+    margin-top: 30px;
+    padding: 14px 50px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    /* background: #4defc2; */
+    background: linear-gradient(to right, #00b140, #00ff7f);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-add:hover {
+    background: linear-gradient(to right, #00ff7f, #00b140);
+}
+
+/* CARD PREVIEW */
+.player-card {
+    width: 320px;
+    height: 460px;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.card-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.edit_player .player-photo {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    z-index: 3;
+}
+
+
+.edit_player .player-name {
+    position: absolute;
+    bottom: 177px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    z-index: 4;
+}
+
+body.edit_player form {
     max-width: 80%;
     margin: 30px auto;
     padding: 30px;
@@ -8,4 +162,23 @@ form {
     flex-direction: column;
     gap: 10px;
     color: black;
+}
+
+@media (max-width: 1100px) {
+    body.edit_player .container {
+        padding: 28px 24px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        justify-items: center;
+    }
+
+    .card-preview,
+    .form-grid > div:last-child,
+    body.edit_player form {
+        width: 100%;
+        max-width: 100%;
+    }
 }
