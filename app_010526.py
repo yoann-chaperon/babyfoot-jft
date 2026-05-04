@@ -5,7 +5,6 @@ from sqlalchemy import func, case, or_
 from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 from itertools import combinations
-from types import SimpleNamespace
 from datetime import datetime
 import datetime, os
 
@@ -35,7 +34,6 @@ class Player(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    mail = db.Column(db.String(200))
     photo = db.Column(db.String(200), default="/static/img/default.png")
     sexe = db.Column(db.String(1), default="M")
     actif = db.Column(db.Boolean, default=True)
@@ -124,7 +122,6 @@ with app.app_context():
         'ALTER TABLE player ADD COLUMN sexe TEXT DEFAULT "M"',
         'ALTER TABLE player ADD COLUMN actif BOOLEAN DEFAULT 1',
         'ALTER TABLE player ADD COLUMN force_team_b BOOLEAN DEFAULT 0',
-        'ALTER TABLE player ADD COLUMN mail TEXT',
         'ALTER TABLE player ADD COLUMN card_background TEXT',
         'ALTER TABLE player ADD COLUMN elo INTEGER DEFAULT 1000',
         'ALTER TABLE player ADD COLUMN dette FLOAT DEFAULT 0',
@@ -551,7 +548,9 @@ def index():
     
     # tu peux créer une liste filtrée si besoin (ici juste pour illustrer)
     joueurs_valides = [j for j in joueurs if j is not None]
-    active_club_players = Player.query.filter(
+    # Joueurs interclub actifs
+    interclub_actifs = Player.query.filter_by(membre_club=True, interclub=True, actif=True).all()
+    graph_players = Player.query.filter(
         Player.membre_club == True,
         Player.actif == True,
         or_(
@@ -560,98 +559,18 @@ def index():
         )
     ).all()
 
-    active_player_ids = {j.id for j in active_club_players}
-    season_matches = (
-        Match.query
-        .filter(Match.season_id == season.id)
-        .order_by(Match.date.asc(), Match.id.asc())
-        .all()
-        if season else []
-    )
-
-    season_stats = {
-        player.id: SimpleNamespace(
-            id=player.id,
-            name=player.name,
-            photo=player.photo,
-            atelier_duel=player.atelier_duel,
-            atelier_goal=player.atelier_goal,
-            matches=0,
-            matches_duel=0,
-            matches_goal=0,
-            wins=0,
-            losses=0,
-            duel=0,
-            goal=0,
-            elo=1000
-        )
-        for player in active_club_players
-    }
-
-    elo_history = {player.id: [1000] for player in active_club_players}
-    player_match_indices = {player.id: [] for player in active_club_players}
-    labels = []
-    skipped = 0
-
-    for i, match in enumerate(season_matches):
-        if (
-            match.playerA_id not in season_stats
-            or match.playerB_id not in season_stats
-            or not match.playerA
-            or not match.playerB
-        ):
-            skipped += 1
-            continue
-
-        stat_a = season_stats[match.playerA_id]
-        stat_b = season_stats[match.playerB_id]
-
-        stat_a.matches += 1
-        stat_b.matches += 1
-
-        if match.type == "DUEL":
-            stat_a.matches_duel += 1
-            stat_b.matches_duel += 1
-            stat_a.duel += match.scoreA
-            stat_b.duel += match.scoreB
-        elif match.type == "GOAL":
-            stat_a.matches_goal += 1
-            stat_b.matches_goal += 1
-            stat_a.goal += match.scoreA
-            stat_b.goal += match.scoreB
-
-        if match.scoreA > match.scoreB:
-            stat_a.wins += 1
-            stat_b.losses += 1
-        elif match.scoreB > match.scoreA:
-            stat_b.wins += 1
-            stat_a.losses += 1
-
-        update_elo(stat_a, stat_b, match.scoreA, match.scoreB)
-
-        elo_history[stat_a.id].append(stat_a.elo)
-        elo_history[stat_b.id].append(stat_b.elo)
-        player_match_indices[stat_a.id].append(i)
-        player_match_indices[stat_b.id].append(i)
-        labels.append(i + 1)
-
     # ================= CLASSEMENTS =================
 
-    joueurs_duel = [season_stats[j.id] for j in active_club_players if j.atelier_duel]
-    classement_duel = sorted(joueurs_duel, key=lambda j: (j.duel, j.elo, j.name), reverse=True)
+    joueurs_duel = [j for j in interclub_actifs if j.membre_club and j.atelier_duel]
+    classement_duel = sorted(joueurs_duel, key=lambda j: j.duel, reverse=True)
 
-    joueurs_goal = [season_stats[j.id] for j in active_club_players if j.atelier_goal]
-    classement_goal = sorted(joueurs_goal, key=lambda j: (j.goal, j.elo, j.name), reverse=True)
+    joueurs_goal = [j for j in interclub_actifs if j.membre_club and j.atelier_goal]
+    classement_goal = sorted(joueurs_goal, key=lambda j: j.goal, reverse=True)
 
-    joueurs_membre_club = [season_stats[j.id] for j in active_club_players]
+    joueurs_membre_club = [j for j in interclub_actifs if j.membre_club]
     classement_total = sorted(
         joueurs_membre_club,
-        key=lambda j: (j.duel + j.goal, j.elo, j.name),
-        reverse=True
-    )
-    classement_elo = sorted(
-        joueurs_membre_club,
-        key=lambda j: (j.elo, j.duel + j.goal, j.name),
+        key=lambda j: (j.duel + j.goal),
         reverse=True
     )
     legend = classement_total[0] if classement_total else None
@@ -725,26 +644,133 @@ def index():
     print("=" * 50)
     print("DIAGNOSTIC GRAPH ELO")
     print("=" * 50)
-    print(f"graph_players count : {len(active_club_players)}")
-    print(f"Noms : {[j.name for j in active_club_players]}")
+    print(f"graph_players count : {len(graph_players)}")
+    print(f"Noms : {[j.name for j in graph_players]}")
 
-    print(f"TOTAL matchs saison indexes : {len(season_matches)}")
-    print(f"Matchs simules : {len(labels)} | ignores : {skipped}")
+    # IDs par atelier
+    joueurs_goal_ids = {j.id for j in graph_players if j.atelier_goal}
+    joueurs_duel_ids = {j.id for j in graph_players if j.atelier_duel}
+    #season en cours
+    print(f"joueurs_goal_ids ({len(joueurs_goal_ids)}) : {joueurs_goal_ids}")
+    print(f"joueurs_duel_ids ({len(joueurs_duel_ids)}) : {joueurs_duel_ids}")
+
+    # Types réels en base
+    types_en_base = db.session.query(Match.type).distinct().all()
+    print(f"Types de matchs en base : {[t[0] for t in types_en_base]}")
+
+    sample = Match.query.limit(5).all()
+    for s in sample:
+        print(f"  Sample match {s.id} | type='{s.type}' | playerA={s.playerA_id} vs playerB={s.playerB_id}")
+
+    # Requêtes filtrées graph ELO
+    if not joueurs_goal_ids:
+        print("⚠️  joueurs_goal_ids est VIDE → matchs_goal_graph = []")
+        matchs_goal_graph = []
+    elif season:
+        matchs_goal_graph = (
+            Match.query
+            .filter(
+                Match.type == "GOAL",
+                Match.season_id == season.id,
+                Match.playerA_id.in_(joueurs_goal_ids),
+                Match.playerB_id.in_(joueurs_goal_ids)
+            )
+            .order_by(Match.date.asc())
+            .all()
+        )
+    else:
+        matchs_goal_graph = []
+
+    if not joueurs_duel_ids:
+        print("⚠️  joueurs_duel_ids est VIDE → matchs_duel_graph = []")
+        matchs_duel_graph = []
+    elif season:
+        matchs_duel_graph = (
+            Match.query
+            .filter(
+                Match.type == "DUEL",
+                Match.season_id == season.id,
+                Match.playerA_id.in_(joueurs_duel_ids),
+                Match.playerB_id.in_(joueurs_duel_ids)
+            )
+            .order_by(Match.date.asc())
+            .all()
+        )
+    else:
+        matchs_duel_graph = []
+
+    print(f"matchs_goal_graph trouvés : {len(matchs_goal_graph)}")
+    print(f"matchs_duel_graph trouvés : {len(matchs_duel_graph)}")
+
+    # Diagnostic si 0 résultats
+    if len(matchs_goal_graph) == 0:
+        test_goal = Match.query.filter(Match.type == "GOAL").limit(5).all()
+        print(f"⚠️  Test GOAL sans filtre joueurs : {len(test_goal)} matchs")
+        for t in test_goal:
+            print(f"    → id={t.id} | playerA={t.playerA_id} | playerB={t.playerB_id}")
+
+    if len(matchs_duel_graph) == 0:
+        test_duel = Match.query.filter(Match.type == "DUEL").limit(5).all()
+        print(f"⚠️  Test DUEL sans filtre joueurs : {len(test_duel)} matchs")
+        for t in test_duel:
+            print(f"    → id={t.id} | playerA={t.playerA_id} | playerB={t.playerB_id}")
+
+    # Fusion triée par date
+    matchs_all = sorted(chain(matchs_goal_graph, matchs_duel_graph), key=lambda m: m.date)
+    print(f"TOTAL matchs_all graph : {len(matchs_all)}")
+
+    # ================= INIT ELO =================
+    elo_history = {}
+    labels = []
+    player_match_indices = {j.id: [] for j in graph_players}
+
+    for j in graph_players:
+        elo_history[j.id] = [j.elo]
+
+    # ================= SIMULATION ELO =================
+    skipped = 0
+
+    for i, m in enumerate(matchs_all):
+
+        if not m.playerA or not m.playerB:
+            print(f"⚠️  Match {m.id} ignoré : playerA ou playerB manquant")
+            skipped += 1
+            continue
+
+        if m.playerA.id not in elo_history or m.playerB.id not in elo_history:
+            print(f"⚠️  Match {m.id} ignoré : {m.playerA.name} ou {m.playerB.name} hors graph_players")
+            skipped += 1
+            continue
+
+        class Temp:
+            def __init__(self, elo):
+                self.elo = elo
+
+        p1_temp = Temp(elo_history[m.playerA.id][-1])
+        p2_temp = Temp(elo_history[m.playerB.id][-1])
+
+        update_elo(p1_temp, p2_temp, m.scoreA, m.scoreB)
+
+        elo_history[m.playerA.id].append(p1_temp.elo)
+        elo_history[m.playerB.id].append(p2_temp.elo)
+
+        player_match_indices[m.playerA.id].append(i)
+        player_match_indices[m.playerB.id].append(i)
+
+        labels.append(i + 1)
+
+    print(f"Matchs simulés : {len(labels)} | ignorés : {skipped}")
 
     # Diagnostic ELO par joueur
-    for j in active_club_players:
+    for j in graph_players:
         hist = elo_history.get(j.id, [])
         nb_matchs = len(player_match_indices.get(j.id, []))
         print(f"  {j.name} → {nb_matchs} matchs | elo_history len={len(hist)} | dernier ELO={hist[-1] if hist else 'N/A'}")
 
     # ================= TOP PLAYERS =================
     top_players = sorted(
-        [j for j in active_club_players if len(elo_history.get(j.id, [])) > 1],
-        key=lambda j: (
-            season_stats[j.id].elo,
-            season_stats[j.id].duel + season_stats[j.id].goal,
-            j.name
-        ),
+        [j for j in graph_players if len(elo_history.get(j.id, [])) > 1],
+        key=lambda j: (j.duel + j.goal, j.elo, j.name),
         reverse=True
     )
     print(f"top_players : {[j.name for j in top_players]}")
@@ -773,7 +799,6 @@ def index():
         "index.html",
         duel=classement_duel,
         goal=classement_goal,
-        elo=classement_elo,
         classement_club=classement_total,
         legend=legend,
         meilleur_buteur=meilleur_buteur,
@@ -796,21 +821,6 @@ def admin():
     matches = Match.query.filter_by(season_id=season.id).order_by(Match.date.desc()).all() if season else []
     players_dict = {p.id: p for p in players}
     remaining_matches, duel_remaining, goal_remaining = get_remaining_matches_for_season(season)
-    dette_players = (
-        Player.query
-        .filter(Player.membre_club == True, Player.dette != 0)
-        .order_by(Player.dette.desc(), Player.name.asc())
-        .limit(12)
-        .all()
-    )
-    chbb_players = (
-        Player.query
-        .filter_by(membre_club=True, chbb=True)
-        .order_by(Player.name.asc())
-        .limit(12)
-        .all()
-    )
-    seasons = Season.query.order_by(Season.date_start.desc()).limit(8).all()
 
     return render_template(
         "admin.html",
@@ -819,11 +829,7 @@ def admin():
         players_dict=players_dict,
         remaining_matches=remaining_matches,
         duel_remaining=duel_remaining,
-        goal_remaining=goal_remaining,
-        dette_players=dette_players,
-        chbb_players=chbb_players,
-        seasons=seasons,
-        current_season=season
+        goal_remaining=goal_remaining
     )
 
 
@@ -1211,7 +1217,6 @@ def admin_new_player():
     if request.method == "POST":
 
         name = request.form.get("name")
-        mail = request.form.get("mail")
         sexe = request.form.get("sexe")
 
         membre_club = True
@@ -1246,7 +1251,6 @@ def admin_new_player():
 
         player = Player(
             name=name,
-            mail=mail,
             sexe=sexe,
             membre_club=membre_club,
             interclub=interclub,
@@ -1268,7 +1272,6 @@ def admin_new_player():
 
     dummy_player = Player(
         name="",
-        mail="",
         sexe="M",
         photo="/static/img/default.png",
         membre_club=True,
@@ -1294,7 +1297,6 @@ def edit_player(id):
     if request.method == "POST":
 
         player.name = request.form.get("name")
-        player.mail = request.form.get("mail")
         player.sexe = request.form.get("sexe")
         player.membre_club = True
         player.interclub = "interclub" in request.form
@@ -1443,14 +1445,8 @@ def edit_match(id):
 
     if request.method == "POST":
 
-        raw_scoreA = request.form.get("scoreA")
-        raw_scoreB = request.form.get("scoreB")
-
-        try:
-            scoreA = max(0, min(3, int(raw_scoreA)))
-            scoreB = max(0, min(3, int(raw_scoreB)))
-        except (TypeError, ValueError):
-            return "Scores manquants ou invalides", 400
+        scoreA = max(0, min(3, int(request.form.get("scoreA"))))
+        scoreB = max(0, min(3, int(request.form.get("scoreB"))))
 
         valid_scores = {(3, 0), (3, 1), (3, 2), (0, 3), (1, 3), (2, 3)}
         if (scoreA, scoreB) not in valid_scores:

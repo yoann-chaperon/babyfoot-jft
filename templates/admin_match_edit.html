@@ -7,25 +7,48 @@
     <h2>Modifier match</h2>
 
     <div class="match-edit-card">
+        <div class="match-type-badge match-type-{{ (match.type or '')|lower }}">
+            {{ match.type }}
+        </div>
 
         <form method="POST" class="score-form">
+            <div class="current-score-banner">
+                <span class="current-score-label">Score actuel</span>
+                <strong>{{ match.scoreA if match.scoreA is not none else "-" }} - {{ match.scoreB if match.scoreB is not none else "-" }}</strong>
+            </div>
 
             <div class="players">
 
                 <div class="player">
-                    <img src="{{ players_dict[match.playerA_id].photo }}">
-                    <h3>{{ players_dict[match.playerA_id].name }}</h3>
+                    <img src="{{ players_dict[match.playerA_id].photo if match.playerA_id in players_dict else '/static/img/default.png' }}">
+                    <h3>{{ players_dict[match.playerA_id].name if match.playerA_id in players_dict else "Joueur A" }}</h3>
 
-                    <input type="number" name="scoreA" value="{{ match.scoreA }}" min="0" max="3" required>
+                    <label>Score</label>
+                    <div class="score-picker" role="radiogroup" aria-label="Score joueur A">
+                        {% for score in range(0, 4) %}
+                        <label class="score-option">
+                            <input type="radio" name="scoreA" value="{{ score }}" {% if match.scoreA == score %}checked{% endif %} required>
+                            <span>{{ score }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
                 </div>
 
                 <div class="vs">VS</div>
 
                 <div class="player">
-                    <img src="{{ players_dict[match.playerB_id].photo }}">
-                    <h3>{{ players_dict[match.playerB_id].name }}</h3>
+                    <img src="{{ players_dict[match.playerB_id].photo if match.playerB_id in players_dict else '/static/img/default.png' }}">
+                    <h3>{{ players_dict[match.playerB_id].name if match.playerB_id in players_dict else "Joueur B" }}</h3>
 
-                    <input type="number" name="scoreB" value="{{ match.scoreB }}" min="0" max="3" required>
+                    <label>Score</label>
+                    <div class="score-picker" role="radiogroup" aria-label="Score joueur B">
+                        {% for score in range(0, 4) %}
+                        <label class="score-option">
+                            <input type="radio" name="scoreB" value="{{ score }}" {% if match.scoreB == score %}checked{% endif %} required>
+                            <span>{{ score }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
                 </div>
 
             </div>

@@ -33,6 +33,9 @@
             <!-- <input type="text" name="name" id="player_name_input"> -->
             <input type="text" name="name" required placeholder="Nom du joueur">
 
+            <label>Mail</label>
+            <input type="email" name="mail" value="{{ player.mail or '' }}" placeholder="mail@exemple.com">
+
             <label>Sexe</label>
             <select name="sexe">
                 <option value="M">Masculin</option>

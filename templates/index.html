@@ -115,13 +115,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for p in duel[:3] %}
+                        {% for p in elo[:3] %}
                         <tr
                             class="{% if loop.index == 1 %}medal-gold{% elif loop.index == 2 %}medal-silver{% elif loop.index == 3 %}medal-bronze{% endif %}">
                             <td class="classement">{{ loop.index }}</td>
                             <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
                             <td class="nbrMatchs">{{ p.matches }}</td>
-                            <td class="points">{{ p.wins - p.losses }}</td>
+                            <td class="points">{{ p.elo }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -131,12 +131,12 @@
                     <div class="scroll-wrapper">
                         <table class="ranking-table scroll-ranking">
                             <tbody>
-                                {% for p in duel[3:] %}
+                                {% for p in elo[3:] %}
                                 <tr>
                                     <td class="classement">{{ loop.index + 3 }}</td>
                                     <td class="player"><img src="{{ p.photo }}"><span>{{ p.name }}</span></td>
                                     <td class="nbrMatchs">{{ p.matches }}</td>
-                                    <td class="points">{{ p.wins - p.losses }}</td>
+                                    <td class="points">{{ p.elo }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
