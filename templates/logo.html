@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        /* ── Canvas transparent pour Plymouth ── */
+        #stage {
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── Particules scintillantes ── */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: twinkle var(--d) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(45deg);
+            }
+        }
+
+        /* ── Logo wrapper ── */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: relative;
+            z-index: 2;
+            animation: logoIn 0.6s cubic-bezier(.22, 1, .36, 1) both;
+        }
+
+        @keyframes logoIn {
+            from {
+                opacity: 0;
+                transform: scale(0.7);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ── Grand J ── */
+        .j-wrap {
+            position: relative;
+            animation: floatJ 4s ease-in-out infinite;
+            animation-delay: 0.6s;
+        }
+
+        @keyframes floatJ {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            40% {
+                transform: translateY(-7px) scale(1.03);
+            }
+
+            70% {
+                transform: translateY(3px) scale(0.98);
+            }
+        }
+
+        .j-letter {
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            font-size: 200px;
+            font-weight: 900;
+            color: #FFD700;
+            -webkit-text-stroke: 3px #B86000;
+            display: block;
+            line-height: 1;
+            animation: goldPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 18px #FF8C00) drop-shadow(0 0 40px #FF4500);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes goldPulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 18px #FF8C00) drop-shadow(0 0 40px #FF4500);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 15px #FFD700) drop-shadow(0 0 45px #FFD700) drop-shadow(0 0 90px #FF8C00) drop-shadow(0 0 140px #FF4500);
+            }
+        }
+
+        /* Balayage lumineux sur J */
+        .j-letter::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -130%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.75) 50%, transparent 70%);
+            animation: sweepJ 2.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sweepJ {
+            0% {
+                left: -130%;
+            }
+
+            100% {
+                left: 130%;
+            }
+        }
+
+        /* ── Colonne droite ── */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* AVENE — argent shimmer */
+        .avene {
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg,
+                    #fff 0%, #D0D0D0 25%, #fff 45%, #888 60%, #fff 75%, #C8C8C8 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: silverShimmer 2.8s linear infinite, silverPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes silverShimmer {
+            0% {
+                background-position: 100% center;
+            }
+
+            100% {
+                background-position: -200% center;
+            }
+        }
+
+        @keyframes silverPulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 30px rgba(200, 200, 200, 0.6));
+            }
+        }
+
+        /* ── Ligne FT + OOTBALL / ABLE ── */
+        .ft-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+        }
+
+        .ft-block {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            font-size: 50px;
+            font-weight: 900;
+            line-height: 1;
+            color: #FFD700;
+            -webkit-text-stroke: 2px #B86000;
+            animation: goldPulse 2s ease-in-out infinite;
+            animation-delay: 0.25s;
+            filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 18px #FF8C00);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Balayage sur FT */
+        .ft-block::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -130%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+            animation: sweepJ 3.1s ease-in-out infinite;
+            animation-delay: 0.4s;
+            pointer-events: none;
+        }
+
+        .words-block {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding-top: 5px;
+        }
+
+        .word-line {
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg,
+                    #fff 0%, #C0C0C0 30%, #fff 50%, #888 70%, #fff 90%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: silverShimmer 3.2s linear infinite, silverPulse 2s ease-in-out infinite;
+            animation-delay: 0.4s;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stage">
+
+        <!-- Scintillement particules -->
+        <div id="particles" style="position:absolute;inset:0;pointer-events:none;z-index:1;"></div>
+
+        <!-- Logo -->
+        <div class="logo">
+
+            <div class="j-wrap">
+                <span class="j-letter">J</span>
+            </div>
+
+            <div class="right-col">
+                <div class="avene">AVENE</div>
+                <div class="ft-row">
+                    <div class="ft-block">
+                        <span>F</span>
+                        <span>T</span>
+                    </div>
+                    <div class="words-block">
+                        <div class="word-line">OOTBALL</div>
+                        <div class="word-line">ABLE</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* ── 30 particules étoilées ── */
+        const container = document.getElementById('particles');
+        const pts = [
+            [8, 15, 1.8, 0.0, '#FFD700', 3], [90, 10, 2.2, 0.3, '#ffffff', 2], [22, 72, 1.5, 0.6, '#FFD700', 2],
+            [80, 62, 2.5, 0.1, '#ffffff', 3], [50, 5, 1.9, 0.9, '#FFD700', 2], [65, 88, 2.1, 0.4, '#ffffff', 2],
+            [5, 48, 1.6, 0.7, '#FFD700', 3], [93, 38, 2.3, 0.2, '#ffffff', 2], [37, 28, 1.7, 0.8, '#FFD700', 2],
+            [72, 22, 2.0, 0.5, '#ffffff', 3], [44, 80, 1.4, 1.1, '#FFD700', 2], [18, 58, 2.4, 0.15, '#ffffff', 2],
+            [85, 75, 1.9, 0.65, '#FFD700', 3], [56, 12, 1.6, 0.35, '#ffffff', 2], [28, 92, 2.2, 0.75, '#FFD700', 2],
+            [70, 45, 1.8, 0.55, '#ffffff', 3], [14, 30, 2.0, 0.85, '#FFD700', 2], [96, 55, 1.5, 0.25, '#ffffff', 2],
+            [40, 65, 2.3, 0.45, '#FFD700', 3], [62, 8, 1.7, 0.95, '#ffffff', 2], [3, 82, 2.1, 0.15, '#FFD700', 2],
+            [88, 30, 1.6, 0.7, '#ffffff', 3], [30, 18, 2.4, 0.5, '#FFD700', 2], [75, 90, 1.9, 0.3, '#ffffff', 2],
+            [52, 40, 2.2, 0.8, '#FFD700', 3], [10, 65, 1.5, 0.2, '#ffffff', 2], [83, 18, 2.0, 0.6, '#FFD700', 2],
+            [47, 95, 1.8, 0.4, '#ffffff', 3], [20, 42, 2.3, 1.0, '#FFD700', 2], [60, 70, 1.7, 0.1, '#ffffff', 2],
+        ];
+
+        pts.forEach(([l, t, d, delay, col, sz]) => {
+            const el = document.createElement('div');
+            el.className = 'star';
+            el.style.cssText =
+                `left:${l}%;top:${t}%;` +
+                `--d:${d}s;--delay:${delay}s;` +
+                `width:${sz}px;height:${sz}px;` +
+                `background:${col};`;
+            container.appendChild(el);
+        });
+    </script>
+</body>
+
+</html>
