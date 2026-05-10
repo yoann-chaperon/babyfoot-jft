@@ -89,13 +89,32 @@ sleep 1
 
 def schedule_admin_stop():
     log_file = os.path.join(app.root_path, "admin_stop.log")
+    app_pgid = os.getpgid(os.getpid())
     command = """
 sleep 1
 {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Demande d'arret du programme apres backup.db"
+
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak kill com.google.Chrome || true
+    elif [ -x /usr/bin/flatpak ]; then
+        /usr/bin/flatpak kill com.google.Chrome || true
+    fi
+
     pkill -TERM -f '/var/lib/flatpak/exports/bin/com.google.Chrome' || true
     pkill -TERM -f 'com.google.Chrome' || true
+    pkill -TERM -f '/app/.*chrome' || true
+
     sleep 1
+    pkill -KILL -f '/var/lib/flatpak/exports/bin/com.google.Chrome' || true
+    pkill -KILL -f 'com.google.Chrome' || true
+    pkill -KILL -f '/app/.*chrome' || true
+
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Arret du groupe programme $APP_PGID"
+    kill -TERM -- "-$APP_PGID" || true
+    sleep 1
+    pkill -TERM -f "$PROJECT_DIR/run.sh" || true
+    pkill -TERM -f "$PROJECT_DIR/app.py" || true
     pkill -TERM -f '[p]ython3 app.py' || true
 } >> "$ADMIN_STOP_LOG" 2>&1
 """
@@ -103,7 +122,12 @@ sleep 1
         ["bash", "-lc", command],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        env={**os.environ, "ADMIN_STOP_LOG": log_file},
+        env={
+            **os.environ,
+            "ADMIN_STOP_LOG": log_file,
+            "APP_PGID": str(app_pgid),
+            "PROJECT_DIR": app.root_path
+        },
         start_new_session=True
     )
 
