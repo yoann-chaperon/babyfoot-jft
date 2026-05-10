@@ -88,8 +88,82 @@
 
                 </form>
             </div>
+
         </div>
     </div>
 
+    <div class="fut-card season-mail-card">
+        <h2>📬 Mail fin de saison</h2>
+
+        {% if current_season and remaining_matches %}
+        <p class="season-message">
+            Envoi disponible quand la saison est terminée.
+            Il reste {{ duel_remaining|length }} match(s) DUEL et {{ goal_remaining|length }} match(s) GOAL.
+        </p>
+        {% else %}
+        <p class="season-message">
+            Les joueurs cochés recevront un bilan personnalisé avec comparaison à la saison précédente.
+        </p>
+        {% endif %}
+
+        <form method="POST"
+              action="/admin/season/send-mails"
+              class="season-mail-form"
+              onsubmit="return confirm('Envoyer les bilans de saison aux joueurs sélectionnés ?')">
+
+            <div class="season-mail-table-scroll">
+                <table class="admin-table season-mail-table">
+                    <thead>
+                        <tr>
+                            <th>OK</th>
+                            <th>Joueur</th>
+                            <th>Mail</th>
+                            <th>Duel</th>
+                            <th>Goal</th>
+                            <th>Total</th>
+                            <th>Préc.</th>
+                            <th>Δ</th>
+                            <th>V/D</th>
+                            <th>ELO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in season_mail_rows %}
+                        <tr>
+                            <td>
+                                <input type="checkbox"
+                                       name="player_ids"
+                                       value="{{ row.player.id }}"
+                                       checked
+                                       {% if not row.has_mail %}disabled{% endif %}>
+                            </td>
+                            <td>{{ row.player.name }}</td>
+                            <td>
+                                {% if row.player.mail %}
+                                {{ row.player.mail }}
+                                {% else %}
+                                <span class="mail-missing">mail manquant</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.current.duel }}</td>
+                            <td>{{ row.current.goal }}</td>
+                            <td><b>{{ row.current.total }}</b></td>
+                            <td>{{ row.previous.total }}</td>
+                            <td class="{% if row.delta_total > 0 %}delta-up{% elif row.delta_total < 0 %}delta-down{% else %}delta-flat{% endif %}">
+                                {% if row.delta_total > 0 %}+{% endif %}{{ row.delta_total }}
+                            </td>
+                            <td>{{ row.current.wins }}/{{ row.current.losses }}</td>
+                            <td>{{ row.current.elo }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn-fut btn-mail" {% if not can_send_season_mails %}disabled{% endif %}>
+                📬 Envoyer les bilans
+            </button>
+        </form>
+    </div>
 </div>
 {% endblock %}

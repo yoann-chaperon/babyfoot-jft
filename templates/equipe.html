@@ -1,150 +1,100 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-teams">
+{% set totalA = teamA | sum(attribute='total') %}
+{% set totalB = teamB | sum(attribute='total') %}
 
-    <h1 class="teams-title">ÉQUIPE INTERCLUB</h1>
-
-    <div class="power-bar">
-
-        <div class="power teamA-power">
-            TEAM A POWER :
-            <b>
-                {% set totalA = teamA | sum(attribute='duel') + teamA | sum(attribute='goal') %}
-                {{ totalA }}
-            </b>
+<div class="teams-page">
+    <section class="teams-hero">
+        <div>
+            <p class="teams-kicker">Classement total interclub</p>
+            <h1>Equipes FIFA Neon</h1>
+            <p class="teams-period">{{ period_label }}</p>
         </div>
 
-        <div class="power teamB-power">
-            TEAM B POWER :
-            <b>
-                {% set totalB = teamB | sum(attribute='duel') + teamB | sum(attribute='goal') %}
-                {{ totalB }}
-            </b>
+        <div class="teams-scoreboard">
+            <div class="score-tile score-a">
+                <span>Team A</span>
+                <strong>{{ totalA }}</strong>
+                <small>Top 1-8</small>
+            </div>
+            <div class="score-tile score-b">
+                <span>Team B</span>
+                <strong>{{ totalB }}</strong>
+                <small>Top 9-16</small>
+            </div>
         </div>
+    </section>
 
+    {% if season_names %}
+    <div class="season-strip">
+        {% for season_name in season_names %}
+        <span>{{ season_name }}</span>
+        {% endfor %}
     </div>
+    {% endif %}
 
+    <section class="teams-arena">
+        <div class="team-zone team-a">
+            <div class="team-header">
+                <span class="team-badge">A</span>
+                <div>
+                    <h2>Equipe A</h2>
+                    <p>Les 8 meilleurs du classement total</p>
+                </div>
+            </div>
 
-    <div class="arena">
-
-        <!-- TEAM A -->
-
-        <div class="team-column team-a slide-left">
-
-            <h2>🔥 ÉQUIPE A</h2>
-
-            <table class="team-table">
-
-                <tr>
-
-                    {% for p in teamA %}
-
-                    <td>
-
-                        <a href="/player/{{ p.id }}" class="player-link">
-
-                            <div class="fifa-card">
-                                <img src="/static/img/cards/gold.png" class="card-bg">
-                                <div class="rank">#{{ loop.index }}</div>
-                                <img src="{{ p.photo }}" class="player-photo">
-                                <div class="player-name">
-                                    {{ p.name }}
-                                </div>
-                                <div class="stats">
-                                    <div class="stat">
-                                        <span>Duel: {{ p.duel }} pts</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span>Goal: {{ p.goal }} pts</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span>Gagner: {{ p.wins }}</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span>Perdu : {{ p.losses }}</span>
-                                    </div>
-                                </div>
-                                <div class="points">
-                                    {{ p.duel + p.goal }} pts
-                                </div>
-                                <div class="block glow"></div>
-                            </div>
-                        </a>
-                    </td>
-
-                    {% endfor %}
-
-                </tr>
-
-            </table>
-
+            <div class="players-grid">
+                {% for p in teamA %}
+                <a href="/player/{{ p.id }}" class="player-link">
+                    <article class="fifa-card neon-gold">
+                        <img src="/static/img/cards/gold.png" class="card-bg" alt="">
+                        <div class="rank">#{{ p.rank }}</div>
+                        <img src="{{ p.photo }}" class="player-photo" alt="{{ p.name }}">
+                        <div class="player-name">{{ p.name }}</div>
+                        <div class="points">{{ p.total }} pts</div>
+                        <div class="stats">
+                            <span>DUEL <b>{{ p.duel }}</b></span>
+                            <span>GOAL <b>{{ p.goal }}</b></span>
+                            <span>WIN <b>{{ p.wins }}</b></span>
+                            <span>LOSE <b>{{ p.losses }}</b></span>
+                        </div>
+                        <div class="block glow"></div>
+                    </article>
+                </a>
+                {% endfor %}
+            </div>
         </div>
 
+        <div class="team-zone team-b">
+            <div class="team-header">
+                <span class="team-badge">B</span>
+                <div>
+                    <h2>Equipe B</h2>
+                    <p>Du 9e au 16e du classement total</p>
+                </div>
+            </div>
 
-        <!-- TEAM B -->
-
-        <div class="team-column team-b slide-right">
-
-            <h2>⚡ ÉQUIPE B</h2>
-
-            <table class="team-table">
-
-                <tr>
-
-                    {% for p in teamB[:8] %}
-
-                    <td>
-
-                        <a href="/player/{{ p.id }}" class="player-link">
-
-                            <div class="fifa-card">
-
-                                <img src="/static/img/cards/argent.png" class="card-bg">
-
-                                <div class="rank">#{{ loop.index }}</div>
-
-                                <img src="{{ p.photo }}" class="player-photo">
-
-                                <div class="player-name">{{ p.name }}</div>
-
-                                <div class="stats">
-
-                                    <div class="stat">
-                                        <span>Duel: {{ p.duel }} pts</span>
-                                    </div>
-
-                                    <div class="stat">
-                                        <span>Goal: {{ p.goal }} pts</span>
-                                    </div>
-
-                                    <div class="stat">
-                                        <span>Gagner: {{ p.wins }}</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span>Perdu: {{ p.losses }}</span>
-                                    </div>
-
-                                </div>
-
-                                <div class="points">
-                                    {{ p.duel + p.goal }} pts
-                                </div>
-                            </div>
-
-                        </a>
-
-                    </td>
-
-                    {% endfor %}
-
-                </tr>
-
-            </table>
-
+            <div class="players-grid">
+                {% for p in teamB %}
+                <a href="/player/{{ p.id }}" class="player-link">
+                    <article class="fifa-card neon-blue">
+                        <img src="/static/img/cards/argent.png" class="card-bg" alt="">
+                        <div class="rank">#{{ p.rank }}</div>
+                        <img src="{{ p.photo }}" class="player-photo" alt="{{ p.name }}">
+                        <div class="player-name">{{ p.name }}</div>
+                        <div class="points">{{ p.total }} pts</div>
+                        <div class="stats">
+                            <span>DUEL <b>{{ p.duel }}</b></span>
+                            <span>GOAL <b>{{ p.goal }}</b></span>
+                            <span>WIN <b>{{ p.wins }}</b></span>
+                            <span>LOSE <b>{{ p.losses }}</b></span>
+                        </div>
+                    </article>
+                </a>
+                {% endfor %}
+            </div>
         </div>
-
-    </div>
+    </section>
 </div>
-
 {% endblock %}

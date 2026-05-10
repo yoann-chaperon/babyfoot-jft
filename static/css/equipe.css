@@ -1,101 +1,242 @@
-/* background-equipe  */
-.container-teams {
-    background-image: url("/static/img/background/background-10.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 100vw;
-    min-height: 100vh;
+body.equipe {
+    background:
+        radial-gradient(circle at 18% 10%, rgba(0, 255, 204, 0.18), transparent 30%),
+        radial-gradient(circle at 84% 0%, rgba(255, 214, 72, 0.18), transparent 32%),
+        linear-gradient(135deg, #061018 0%, #101525 46%, #071016 100%);
+    color: #f6fbff;
 }
 
-/* titre */
-
-.teams-title {
-    text-align: center;
-    font-size: 40px;
-    margin-bottom: 30px;
-    margin-top: 0px;
-    letter-spacing: 4px;
-    color: white;
-    padding-top: 20px;
+body.equipe .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
-.team-a h2 {
-    color: gold;
+.teams-page {
+    position: relative;
+    min-height: calc(100vh - 88px);
+    padding: 28px clamp(16px, 3vw, 42px) 48px;
+    overflow: hidden;
 }
 
-/* arena layout */
+.teams-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
 
-.arena {
+.teams-hero,
+.season-strip,
+.teams-arena {
+    position: relative;
+    z-index: 1;
+}
+
+.teams-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.teams-kicker {
+    margin: 0 0 6px;
+    color: #4df8ff;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+}
+
+.teams-hero h1 {
+    margin: 0;
+    color: #ffffff;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: clamp(34px, 5vw, 72px);
+    line-height: 0.95;
+    text-shadow:
+        0 0 12px rgba(77, 248, 255, 0.8),
+        0 0 30px rgba(255, 214, 72, 0.45);
+}
+
+.teams-period {
+    margin: 10px 0 0;
+    color: rgba(246, 251, 255, 0.78);
+    font-weight: 700;
+}
+
+.teams-scoreboard {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(132px, 1fr));
+    gap: 12px;
+}
+
+.score-tile {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 8px;
+    padding: 14px 16px;
+    min-width: 132px;
+    background: rgba(8, 13, 25, 0.78);
+    box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.06);
+}
+
+.score-tile span,
+.score-tile small {
     display: block;
-    height: 100%;
+    color: rgba(246, 251, 255, 0.72);
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
 }
 
-/* colonnes */
-
-.team-column {
-    border-radius: 15px;
-    height: 500px;
-    overflow: auto;
-
+.score-tile strong {
+    display: block;
+    margin: 3px 0;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 34px;
+    line-height: 1;
 }
 
-/* team A */
+.score-a strong {
+    color: #ffd94f;
+    text-shadow: 0 0 18px rgba(255, 217, 79, 0.75);
+}
+
+.score-b strong {
+    color: #70f7ff;
+    text-shadow: 0 0 18px rgba(112, 247, 255, 0.75);
+}
+
+.season-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.season-strip span {
+    border: 1px solid rgba(77, 248, 255, 0.35);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: #dffcff;
+    background: rgba(77, 248, 255, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.teams-arena {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+.team-zone {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    padding: 18px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+        rgba(4, 10, 20, 0.84);
+    backdrop-filter: blur(8px);
+}
 
 .team-a {
-    background: #1e1d16;
-    box-shadow: 0 0 40px rgba(231, 187, 11, 0.5);
-    margin-bottom: 20px;
+    box-shadow: 0 0 38px rgba(255, 217, 79, 0.22);
 }
-
-/* team B */
 
 .team-b {
-
-    background: linear-gradient(135deg, silver, #c0c0c0);
-
-    box-shadow: 0 0 40px rgba(192, 192, 192, 0.5);
-
+    box-shadow: 0 0 38px rgba(77, 248, 255, 0.2);
 }
 
-.team-column h2 {
-
-    text-align: center;
+.team-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     margin-bottom: 16px;
-    font-size: 30px;
-
 }
 
-/* grille cards */
-
-.team-table {
-    width: 100%;
-    border-collapse: collapse;
+.team-badge {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: #071016;
+    background: #ffd94f;
+    box-shadow: 0 0 24px rgba(255, 217, 79, 0.6);
 }
 
-.team-table td {
-    border: none;
-    text-align: center;
+.team-b .team-badge {
+    background: #70f7ff;
+    box-shadow: 0 0 24px rgba(112, 247, 255, 0.6);
 }
 
-/* fifa card */
+.team-header h2 {
+    margin: 0;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 28px;
+}
+
+.team-header p {
+    margin: 3px 0 0;
+    color: rgba(246, 251, 255, 0.68);
+    font-weight: 700;
+}
+
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+    gap: 18px;
+}
+
+.player-link {
+    color: inherit;
+    text-decoration: none;
+}
+
 .fifa-card {
     position: relative;
-    width: 204px;
-    height: 300px;
+    width: min(100%, 245px);
+    aspect-ratio: 245 / 360;
     margin: 0 auto;
-    overflow: hidden;
-    text-align: center;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    isolation: isolate;
+    transition: transform 0.22s ease, filter 0.22s ease;
 }
 
-/* Team A cards larger */
-.team-b .fifa-card,
-.team-a .fifa-card {
-    width: 245px;
-    height: 360px;
-    margin-left: 0px;
-    margin-right: 0px;
+.fifa-card:hover {
+    transform: translateY(-7px) scale(1.03);
+}
+
+.fifa-card::before {
+    content: "";
+    position: absolute;
+    inset: 12px 18px;
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0.82;
+}
+
+.neon-gold::before {
+    box-shadow:
+        0 0 20px rgba(255, 217, 79, 0.7),
+        0 0 44px rgba(255, 217, 79, 0.35);
+}
+
+.neon-blue::before {
+    box-shadow:
+        0 0 20px rgba(112, 247, 255, 0.72),
+        0 0 44px rgba(112, 247, 255, 0.34);
 }
 
 .card-bg {
@@ -104,159 +245,99 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-    border-radius: 12px;
+    filter: saturate(1.2) contrast(1.04);
 }
 
 .rank {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    color: gold;
-    z-index: 1;
+    top: 22px;
+    left: 31px;
+    z-index: 2;
+    color: #101018;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.neon-blue .rank {
+    color: #062336;
 }
 
 .player-photo {
     position: absolute;
-    top: 63px;
+    top: 64px;
     left: 50%;
+    z-index: 2;
+    width: 70%;
+    max-height: 156px;
+    object-fit: contain;
     transform: translateX(-50%);
-    width: 174px;
-    z-index: 1;
+    filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55));
 }
 
 .player-name {
     position: absolute;
-    bottom: 142px;
-    left: 0;
-    right: 0;
-    font-size: 22px;
-    font-weight: bold;
-    color: gold;
-    z-index: 1;
+    right: 26px;
+    bottom: 127px;
+    left: 26px;
+    z-index: 2;
+    color: #101018;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: clamp(16px, 1.4vw, 21px);
+    font-weight: 800;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.stats {
-    position: absolute;
-    bottom: 82px;
-    left: 0;
-    right: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    color: gold;
-    font-weight: bold;
-    z-index: 1;
-    padding: 0 34px;
-}
-
-.stat span {
-    display: block;
-    font-size: 13px;
-    line-height: 2.2;
-}
-
-.stat b {
-    display: block;
-    font-size: 10px;
+.neon-blue .player-name,
+.neon-blue .points,
+.neon-blue .stats {
+    color: #062336;
 }
 
 .points {
     position: absolute;
-    bottom: 57px;
-    left: 0;
-    right: 0;
-    font-size: 18px;
-    font-weight: bold;
-    color: gold;
-    z-index: 1;
+    right: 28px;
+    bottom: 101px;
+    left: 28px;
+    z-index: 2;
+    color: #101018;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    text-align: center;
 }
 
-/* Team B card text colors */
-.team-b .player-name,
-.team-b .stats,
-.team-b .points,
-.team-b .rank {
-    color: #0d3176;
+.stats {
+    position: absolute;
+    right: 31px;
+    bottom: 50px;
+    left: 31px;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    color: #101018;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1)
-    }
-
-    50% {
-        transform: scale(1.2)
-    }
-
-    100% {
-        transform: scale(1)
-    }
+.stats span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    font-family: Orbitron, Arial, sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    text-align: center;
 }
 
-/* animation entrée */
-
-.slide-left {
-    animation: slideLeft 1s ease;
-}
-
-.slide-right {
-    animation: slideRight 1s ease;
-}
-
-@keyframes slideLeft {
-    from {
-        transform: translateX(-200px);
-        opacity: 0
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1
-    }
-}
-
-@keyframes slideRight {
-    from {
-        transform: translateX(200px);
-        opacity: 0
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1
-    }
-}
-
-/* hover cards */
-.fifa-card:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px gold;
-    transition: 0.3s;
-}
-
-/* power bar */
-.power-bar {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-
-.teamA-power {
-    color: gold;
-}
-
-.teamB-power {
-    color: silver;
-}
-
-.player-link {
-    text-decoration: none;
-    color: inherit;
+.stats b {
+    font-size: 15px;
 }
 
 /* ANIMATION CARDS TEAM A */
-.block {
+.team-a .block {
     position: absolute;
     top: -35px;
     left: 19px;
@@ -265,11 +346,11 @@
     border-radius: 28px;
     background: rgba(255, 255, 255, 0.1);
     clip-path: polygon(40% 16%, 54% 15%, 100% 24%, 100% 91%, 55% 100%, 45% 100%, 0% 91%, 0% 25%);
-    z-index: -110;
+    z-index: -2;
 }
 
-.glow::before,
-.glow::after {
+.team-a .glow::before,
+.team-a .glow::after {
     content: '';
     position: absolute;
     top: 10px;
@@ -277,7 +358,6 @@
     right: -1px;
     bottom: -1px;
     border-radius: 36px;
-
     background: conic-gradient(
         #48ff00,
         #00ffd5,
@@ -286,17 +366,14 @@
         #ff00c8,
         #48ff00
     );
-
     width: calc(100% + 2px);
     height: calc(100% - 4px);
-
     animation: rotateGlow 6s linear infinite;
-
     filter: blur(3px);
-    z-index: -1000;
+    z-index: -3;
 }
 
-.glow::after {
+.team-a .glow::after {
     animation: rotateGlow 2s linear infinite;
 }
 
@@ -304,7 +381,41 @@
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 820px) {
+    .teams-hero {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .teams-scoreboard {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    }
+
+    .team-zone {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .teams-page {
+        padding-inline: 12px;
+    }
+
+    .teams-scoreboard {
+        grid-template-columns: 1fr;
+    }
+
+    .players-grid {
+        grid-template-columns: 1fr;
     }
 }

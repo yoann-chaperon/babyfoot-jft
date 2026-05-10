@@ -7,7 +7,9 @@ from werkzeug.utils import secure_filename
 from itertools import combinations
 from types import SimpleNamespace
 from datetime import datetime
+from email.message import EmailMessage
 import datetime, os, shutil, subprocess
+import smtplib
 
 # ----------------------------
 # ANCHOR CONFIG
@@ -238,6 +240,101 @@ def generate_teams():
 
 def get_current_season():
     return Season.query.filter_by(active=True).first()
+
+
+def get_competition_period(today=None):
+    today = today or datetime.datetime.now()
+    start_year = today.year if today.month >= 9 else today.year - 1
+    start = datetime.datetime(start_year, 9, 1)
+    end = datetime.datetime(start_year + 1, 7, 31, 23, 59, 59)
+
+    return start, end
+
+
+def season_in_competition_period(season, period_start, period_end):
+    season_start = season.date_start or period_start
+    season_end = season.date_end or season_start
+
+    return season_start <= period_end and season_end >= period_start
+
+
+def build_period_interclub_ranking():
+    period_start, period_end = get_competition_period()
+    seasons = [
+        season for season in Season.query.order_by(Season.date_start.asc()).all()
+        if season_in_competition_period(season, period_start, period_end)
+    ]
+    season_ids = [season.id for season in seasons]
+
+    players = Player.query.filter_by(membre_club=True, actif=True, interclub=True).all()
+    ranking_by_player = {
+        player.id: SimpleNamespace(
+            id=player.id,
+            name=player.name,
+            photo=player.photo,
+            elo=player.elo or 0,
+            force_team_b=player.force_team_b,
+            duel=0,
+            goal=0,
+            wins=0,
+            losses=0,
+            matches=0,
+            total=0
+        )
+        for player in players
+    }
+
+    archived_stats = (
+        PlayerSeasonStats.query
+        .filter(PlayerSeasonStats.season_id.in_(season_ids))
+        .all()
+        if season_ids else []
+    )
+
+    active_season_ids = {season.id for season in seasons if season.active}
+    archived_active_pairs = set()
+
+    for stat in archived_stats:
+        player_total = ranking_by_player.get(stat.player_id)
+        if not player_total:
+            continue
+
+        archived_active_pairs.add((stat.player_id, stat.season_id))
+        player_total.duel += stat.duel or 0
+        player_total.goal += stat.goal or 0
+        player_total.wins += stat.wins or 0
+        player_total.losses += stat.losses or 0
+        player_total.matches += stat.matches or 0
+
+    if active_season_ids:
+        for player in players:
+            if any((player.id, season_id) in archived_active_pairs for season_id in active_season_ids):
+                continue
+
+            player_total = ranking_by_player[player.id]
+            player_total.duel += player.duel or 0
+            player_total.goal += player.goal or 0
+            player_total.wins += player.wins or 0
+            player_total.losses += player.losses or 0
+            player_total.matches += player.matches or 0
+
+    for player_total in ranking_by_player.values():
+        player_total.total = player_total.duel + player_total.goal
+
+    ranking = sorted(
+        ranking_by_player.values(),
+        key=lambda player: (player.total, player.elo, player.name),
+        reverse=True
+    )
+
+    for index, player_total in enumerate(ranking, start=1):
+        player_total.rank = index
+
+    return {
+        "ranking": ranking,
+        "period_label": f"{period_start.strftime('%d/%m/%Y')} - {period_end.strftime('%d/%m/%Y')}",
+        "season_names": [season.name for season in seasons]
+    }
 
 
 def get_played_pairs_for_season(season):
@@ -566,6 +663,152 @@ def build_player_season_delta(player):
         "previous_label": "Saison derniere",
         "metrics": metrics
     }
+
+
+def get_latest_previous_stat(player_id):
+    return (
+        PlayerSeasonStats.query
+        .filter_by(player_id=player_id)
+        .order_by(PlayerSeasonStats.season_id.desc())
+        .first()
+    )
+
+
+def get_player_current_rank(player, key):
+    if key == "duel":
+        players = Player.query.filter(Player.membre_club == True, Player.actif == True, Player.atelier_duel == True).all()
+        ranking = sorted(players, key=lambda p: (p.duel or 0, p.elo or 0, p.name), reverse=True)
+    elif key == "goal":
+        players = Player.query.filter(Player.membre_club == True, Player.actif == True, Player.atelier_goal == True).all()
+        ranking = sorted(players, key=lambda p: (p.goal or 0, p.elo or 0, p.name), reverse=True)
+    elif key == "elo":
+        players = Player.query.filter_by(membre_club=True, actif=True).all()
+        ranking = sorted(players, key=lambda p: (p.elo or 0, p.name), reverse=True)
+    else:
+        players = Player.query.filter_by(membre_club=True, actif=True).all()
+        ranking = sorted(players, key=lambda p: ((p.duel or 0) + (p.goal or 0), p.elo or 0, p.name), reverse=True)
+
+    return next((index for index, ranked_player in enumerate(ranking, start=1) if ranked_player.id == player.id), None)
+
+
+def build_season_mail_rows():
+    players = Player.query.filter_by(membre_club=True, actif=True).order_by(Player.name.asc()).all()
+    rows = []
+
+    for player in players:
+        previous = get_latest_previous_stat(player.id)
+        current_total = (player.duel or 0) + (player.goal or 0)
+        previous_total = ((previous.duel or 0) + (previous.goal or 0)) if previous else 0
+        rows.append({
+            "player": player,
+            "current": {
+                "duel": player.duel or 0,
+                "goal": player.goal or 0,
+                "total": current_total,
+                "wins": player.wins or 0,
+                "losses": player.losses or 0,
+                "matches": player.matches or 0,
+                "elo": player.elo or 1000
+            },
+            "previous": {
+                "duel": previous.duel if previous else 0,
+                "goal": previous.goal if previous else 0,
+                "total": previous_total,
+                "wins": previous.wins if previous else 0,
+                "losses": previous.losses if previous else 0,
+                "matches": previous.matches if previous else 0,
+                "elo": previous.elo if previous else 1000
+            },
+            "delta_total": current_total - previous_total,
+            "has_mail": bool(player.mail)
+        })
+
+    return rows
+
+
+def build_player_season_email(player, current, previous, season_name):
+    total_delta = current["total"] - previous["total"]
+    win_rate = round((current["wins"] / current["matches"]) * 100) if current["matches"] else 0
+    rank_total = get_player_current_rank(player, "total")
+
+    if total_delta > 0:
+        intro = "Grosse saison, ca sent la poignee qui chauffe et le mental qui monte en puissance."
+        objective = "Objectif prochaine saison : garder cette dynamique et viser encore quelques points de plus au total."
+    elif total_delta < 0:
+        intro = "Saison combative, avec quelques coups de baby qui ont surement traverse la table un peu trop vite."
+        objective = "Objectif prochaine saison : reprendre confiance, viser plus de regularite et gratter les points match apres match."
+    else:
+        intro = "Saison solide et stable, version mur en beton avec une petite touche de suspense."
+        objective = "Objectif prochaine saison : transformer cette stabilite en progression nette, surtout sur les matchs serres."
+
+    html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #1f2933;">
+        <h2 style="color:#0f4c81;">Salut {player.name}, bilan de saison {season_name}</h2>
+        <p>{intro}</p>
+        <p>Voici ton recap perso, sans VAR mais avec beaucoup de respect pour les roulettes bien senties.</p>
+        <table style="border-collapse: collapse; width: 100%; max-width: 680px;">
+            <thead>
+                <tr style="background:#ffd54a;">
+                    <th style="padding:10px; border:1px solid #ddd;">Stat</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Saison</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Saison precedente</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Evolution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="padding:8px; border:1px solid #ddd;">DUEL</td><td style="padding:8px; border:1px solid #ddd;">{current["duel"]}</td><td style="padding:8px; border:1px solid #ddd;">{previous["duel"]}</td><td style="padding:8px; border:1px solid #ddd;">{current["duel"] - previous["duel"]:+}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;">GOAL</td><td style="padding:8px; border:1px solid #ddd;">{current["goal"]}</td><td style="padding:8px; border:1px solid #ddd;">{previous["goal"]}</td><td style="padding:8px; border:1px solid #ddd;">{current["goal"] - previous["goal"]:+}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;">TOTAL</td><td style="padding:8px; border:1px solid #ddd;"><b>{current["total"]}</b></td><td style="padding:8px; border:1px solid #ddd;">{previous["total"]}</td><td style="padding:8px; border:1px solid #ddd;"><b>{total_delta:+}</b></td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;">Victoires</td><td style="padding:8px; border:1px solid #ddd;">{current["wins"]}</td><td style="padding:8px; border:1px solid #ddd;">{previous["wins"]}</td><td style="padding:8px; border:1px solid #ddd;">{current["wins"] - previous["wins"]:+}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;">Defaites</td><td style="padding:8px; border:1px solid #ddd;">{current["losses"]}</td><td style="padding:8px; border:1px solid #ddd;">{previous["losses"]}</td><td style="padding:8px; border:1px solid #ddd;">{current["losses"] - previous["losses"]:+}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;">ELO</td><td style="padding:8px; border:1px solid #ddd;">{current["elo"]}</td><td style="padding:8px; border:1px solid #ddd;">{previous["elo"]}</td><td style="padding:8px; border:1px solid #ddd;">{current["elo"] - previous["elo"]:+}</td></tr>
+            </tbody>
+        </table>
+        <p><b>Classement total actuel :</b> #{rank_total or "-"}</p>
+        <p><b>Taux de victoire :</b> {win_rate}%</p>
+        <p>{objective}</p>
+        <p>Bravo pour la saison, et prepare les poignets : la prochaine arrive.</p>
+        <p style="color:#666;">Javen Football Table</p>
+    </body>
+    </html>
+    """
+    text = (
+        f"Salut {player.name}, bilan de saison {season_name}\n\n"
+        f"{intro}\n\n"
+        f"Total: {current['total']} ({total_delta:+} vs saison precedente)\n"
+        f"DUEL: {current['duel']} ({current['duel'] - previous['duel']:+})\n"
+        f"GOAL: {current['goal']} ({current['goal'] - previous['goal']:+})\n"
+        f"Victoires: {current['wins']} | Defaites: {current['losses']} | ELO: {current['elo']}\n\n"
+        f"{objective}\n\n"
+        "Bravo pour la saison, et prepare les poignets : la prochaine arrive.\n"
+    )
+
+    return text, html
+
+
+def send_season_email(player, current, previous, season_name):
+    gmail_user = os.environ.get("GMAIL_USER", "javenfootballtable@gmail.com")
+    gmail_password = os.environ.get("GMAIL_APP_PASSWORD") or os.environ.get("GMAIL_PASSWORD")
+
+    if not gmail_password:
+        raise RuntimeError("Variable GMAIL_APP_PASSWORD manquante")
+    if not player.mail:
+        raise RuntimeError(f"Adresse mail manquante pour {player.name}")
+
+    text, html = build_player_season_email(player, current, previous, season_name)
+    message = EmailMessage()
+    message["Subject"] = f"Bilan de saison JFT - {season_name}"
+    message["From"] = gmail_user
+    message["To"] = player.mail
+    message.set_content(text)
+    message.add_alternative(html, subtype="html")
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login(gmail_user, gmail_password)
+        smtp.send_message(message)
+
+
 # ----------------------------
 # ROUTES
 # ----------------------------
@@ -902,33 +1145,23 @@ def toggle_player(id):
 # ANCHOR composition équipes
 @app.route("/equipe")
 def equipe():
-
-    players = Player.query.filter_by(membre_club=True, actif=True).all()
-
-    players_sorted = sorted(
-        players,
-        key=lambda p: p.duel + p.goal,
-        reverse=True
-    )
-
-    interclub_players = [p for p in players_sorted if p.interclub]
-
-    teamA = [
-        p for p in interclub_players
-        if (p.duel + p.goal) >= 35 and not p.force_team_b
+    period_ranking = build_period_interclub_ranking()
+    interclub_players = period_ranking["ranking"]
+    teamA = [player for player in interclub_players if not player.force_team_b][:8]
+    teamA_ids = {player.id for player in teamA}
+    forced_team_b = [player for player in interclub_players if player.force_team_b]
+    teamB_pool = forced_team_b + [
+        player for player in interclub_players
+        if player.id not in teamA_ids and not player.force_team_b
     ]
-
-    if len(teamA) < 8:
-        teamA = interclub_players[:8]
-
-    teamB = [p for p in interclub_players if p not in teamA]
-    club_players = [p for p in players_sorted if not p.interclub]
+    teamB = teamB_pool[:8]
 
     return render_template(
         "equipe.html",
         teamA=teamA,
         teamB=teamB,
-        club_players=club_players
+        period_label=period_ranking["period_label"],
+        season_names=period_ranking["season_names"]
     )
 
 
@@ -1760,6 +1993,8 @@ def admin_season():
         .first()
     )
     remaining_matches, duel_remaining, goal_remaining = get_remaining_matches_for_season(current)
+    season_mail_rows = build_season_mail_rows()
+    can_send_season_mails = bool(current) and not remaining_matches
 
     return render_template(
         "admin_season.html",
@@ -1770,8 +2005,50 @@ def admin_season():
         top_elo=top_elo,
         remaining_matches=remaining_matches,
         duel_remaining=duel_remaining,
-        goal_remaining=goal_remaining
+        goal_remaining=goal_remaining,
+        season_mail_rows=season_mail_rows,
+        can_send_season_mails=can_send_season_mails
     )
+
+
+@app.route("/admin/season/send-mails", methods=["POST"])
+def send_season_mails():
+    current = Season.query.filter_by(active=True).first()
+    remaining_matches, _, _ = get_remaining_matches_for_season(current)
+
+    if not current or remaining_matches:
+        return redirect("/admin/season")
+
+    selected_ids = [int(player_id) for player_id in request.form.getlist("player_ids")]
+    rows = build_season_mail_rows()
+    rows_by_id = {row["player"].id: row for row in rows}
+    sent_count = 0
+    errors = []
+
+    for player_id in selected_ids:
+        row = rows_by_id.get(player_id)
+        if not row:
+            continue
+
+        try:
+            send_season_email(
+                row["player"],
+                row["current"],
+                row["previous"],
+                current.name
+            )
+            sent_count += 1
+        except Exception as e:
+            errors.append(f"{row['player'].name}: {e}")
+
+    if errors:
+        return (
+            f"{sent_count} mail(s) envoye(s). Erreurs : " + " | ".join(errors),
+            500 if sent_count == 0 else 207
+        )
+
+    return redirect("/admin/season")
+
 
 # ANCHOR admin new season
 @app.route("/admin/season/new", methods=["POST"])
