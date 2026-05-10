@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from itertools import combinations
 from types import SimpleNamespace
 from datetime import datetime
-import datetime, os
+import datetime, os, shutil, subprocess
 
 # ----------------------------
 # ANCHOR CONFIG
@@ -27,6 +27,32 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
+
+
+def backup_database():
+    db.session.remove()
+
+    db_file = os.path.join(app.instance_path, "babyfoot.db")
+    backup_dir = os.path.join(app.root_path, "backups")
+    date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    backup_file = os.path.join(backup_dir, f"babyfoot_{date}.db")
+
+    os.makedirs(backup_dir, exist_ok=True)
+
+    if not os.path.isfile(db_file):
+        raise FileNotFoundError(db_file)
+
+    shutil.copy2(db_file, backup_file)
+    return backup_file
+
+
+def schedule_poweroff():
+    subprocess.Popen(
+        ["bash", "-lc", "sleep 2; pkill -TERM -f '[p]ython3 app.py'; sudo poweroff"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True
+    )
 
 # ----------------------------
 # ANCHOR MODELES
@@ -332,6 +358,7 @@ def build_player_history_rows(player_id, match_type, season_columns):
 
 
 def build_player_season_chart(player):
+    total_rank_scale_max = 22
     seasons = Season.query.order_by(Season.date_start.asc()).all()
     archived_stats = PlayerSeasonStats.query.filter_by(player_id=player.id).all()
     archived_by_season = {stat.season_id: stat for stat in archived_stats}
@@ -385,6 +412,8 @@ def build_player_season_chart(player):
         if rank:
             max_rank = max(max_rank, rank)
 
+    rank_scale_max = max(total_rank_scale_max, max_rank)
+
     return {
         "labels": labels,
         "duel": duel_values,
@@ -392,7 +421,8 @@ def build_player_season_chart(player):
         "elo": elo_values,
         "total": total_values,
         "total_rank": total_rank_values,
-        "rank_max": max_rank
+        "rank_max": max_rank,
+        "rank_scale_max": rank_scale_max
     }
 
 
@@ -825,6 +855,17 @@ def admin():
         seasons=seasons,
         current_season=season
     )
+
+
+@app.route("/system/poweroff", methods=["POST"])
+def system_poweroff():
+    try:
+        backup_database()
+        schedule_poweroff()
+    except Exception as e:
+        return f"Erreur arrêt système : {e}", 500
+
+    return "Backup créé. Arrêt du système en cours..."
 
 
 # ANCHOR players

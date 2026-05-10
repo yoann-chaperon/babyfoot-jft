@@ -33,6 +33,7 @@ body {
 
 .menu {
     display: flex;
+    align-items: center;
     gap: 10px;
 }
 
@@ -53,6 +54,23 @@ body {
 .btn:hover {
     background: linear-gradient(#4c76a8, #2d4c73);
     transform: translateY(-2px);
+}
+
+.poweroff-form {
+    margin: 0;
+}
+
+.btn-power {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+    min-width: 42px;
+    background: linear-gradient(#a83232, #5b1717);
+}
+
+.btn-power:hover {
+    background: linear-gradient(#d14a4a, #7b2020);
 }
 
 /* ANCHOR CSS ULTRA FUT PLAYER */

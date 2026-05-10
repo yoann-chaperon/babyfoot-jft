@@ -551,6 +551,12 @@
 
     if (seasonChartCanvas && seasonChartData.labels.length > 0) {
         const chartCtx = seasonChartCanvas.getContext("2d")
+        const rankScaleMax = seasonChartData.rank_scale_max || 22
+        const rankAxisMax = rankScaleMax + 1
+        const totalRankBars = (seasonChartData.total_rank || []).map(rank => {
+            if (rank === null || rank === undefined) return null
+            return rankAxisMax - rank
+        })
         const valueLabelPlugin = {
             id: "valueLabelPlugin",
             afterDatasetsDraw(chart) {
@@ -562,13 +568,14 @@
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index]
                         if (value === null || value === undefined) return
+                        const displayValue = dataset.rankLabels ? `#${dataset.rankLabels[index]}` : String(value)
 
                         ctx.save()
                         ctx.fillStyle = dataset.borderColor
                         ctx.font = "bold 11px Orbitron"
                         ctx.textAlign = "center"
                         ctx.textBaseline = "bottom"
-                        ctx.fillText(String(value), bar.x, bar.y - 6)
+                        ctx.fillText(displayValue, bar.x, bar.y - 6)
                         ctx.restore()
                     })
                 })
@@ -615,6 +622,16 @@
                         borderWidth: 1,
                         borderRadius: 8,
                         yAxisID: "yStats"
+                    },
+                    {
+                        label: "CLASSEMENT TOTAL",
+                        data: totalRankBars,
+                        rankLabels: seasonChartData.total_rank,
+                        backgroundColor: "rgba(255, 255, 255, 0.72)",
+                        borderColor: "#ffffff",
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        yAxisID: "yRank"
                     }
                 ]
             },
@@ -636,6 +653,19 @@
                             font: {
                                 family: "Orbitron",
                                 size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label(context) {
+                                const dataset = context.dataset
+                                if (dataset.rankLabels) {
+                                    const rank = dataset.rankLabels[context.dataIndex]
+                                    return `${dataset.label}: #${rank}`
+                                }
+
+                                return `${dataset.label}: ${context.parsed.y}`
                             }
                         }
                     }
@@ -672,6 +702,23 @@
                         beginAtZero: true,
                         ticks: {
                             color: "#ffd54a"
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    },
+                    yRank: {
+                        type: "linear",
+                        position: "right",
+                        min: 0,
+                        max: rankAxisMax,
+                        ticks: {
+                            color: "#ffffff",
+                            stepSize: 1,
+                            callback(value) {
+                                if (value <= 0 || value >= rankAxisMax) return ""
+                                return `#${rankAxisMax - value}`
+                            }
                         },
                         grid: {
                             drawOnChartArea: false

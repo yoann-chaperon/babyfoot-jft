@@ -34,6 +34,10 @@
             <a href="/players" class="btn">👤 Joueurs</a>
             <a href="/equipe" class="btn">👥 Équipes</a>
             <a href="/admin" class="btn">👤 Admin</a>
+            <form class="poweroff-form" method="POST" action="/system/poweroff"
+                onsubmit="return confirm('Créer un backup de babyfoot.db puis éteindre la machine ?')">
+                <button type="submit" class="btn btn-power" title="Backup puis arrêt">⏻</button>
+            </form>
         </nav>
     </header>
 
