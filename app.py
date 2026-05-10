@@ -49,10 +49,27 @@ def backup_database():
 
 
 def schedule_poweroff():
+    log_file = os.path.join(app.root_path, "poweroff.log")
+    command = """
+sleep 1
+{
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Demande d'arret apres backup"
+    if sudo -n /usr/sbin/poweroff; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - sudo poweroff lance"
+    elif systemctl --no-ask-password poweroff; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - systemctl poweroff lance"
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - ECHEC: autoriser sudo poweroff sans mot de passe pour l'utilisateur jft"
+    fi
+    sleep 1
+    pkill -TERM -f '[p]ython3 app.py'
+} >> "$POWEROFF_LOG" 2>&1
+"""
     subprocess.Popen(
-        ["bash", "-lc", "sleep 2; pkill -TERM -f '[p]ython3 app.py'; sudo poweroff"],
+        ["bash", "-lc", command],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        env={**os.environ, "POWEROFF_LOG": log_file},
         start_new_session=True
     )
 
