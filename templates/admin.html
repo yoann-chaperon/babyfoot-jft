@@ -14,6 +14,10 @@
         <a href="/admin/match/list" class="btn btn-edit">📝 Modifier score</a>
         <a href="/admin/dettes" class="btn btn-add">💶 Dettes</a>
         <a href="/admin/chbb/login" class="btn btn-edit">🍻 CHBB</a>
+        <form class="admin-stop-form" method="POST" action="/admin/stop-program"
+            onsubmit="return confirm('Créer backup.db puis fermer Chrome et arrêter le programme ?')">
+            <button type="submit" class="btn btn-delete">⏻ Arrêter programme</button>
+        </form>
     </div>
 
     <!-- ---------------- PLANNING RESTANT ---------------- -->

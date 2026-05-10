@@ -75,9 +75,18 @@ body.admin .container {
 
 .admin-actions {
     display: grid;
-    grid-template-columns: repeat(6, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 14px;
     margin-bottom: 36px;
+}
+
+.admin-stop-form {
+    display: flex;
+}
+
+.admin-stop-form .btn {
+    width: 100%;
+    cursor: pointer;
 }
 
 .btn {

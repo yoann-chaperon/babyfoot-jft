@@ -48,6 +48,19 @@ def backup_database():
     return backup_file
 
 
+def create_shutdown_backup():
+    db.session.remove()
+
+    db_file = os.path.join(app.instance_path, "babyfoot.db")
+    backup_file = os.path.join(app.root_path, "backup.db")
+
+    if not os.path.isfile(db_file):
+        raise FileNotFoundError(db_file)
+
+    shutil.copy2(db_file, backup_file)
+    return backup_file
+
+
 def schedule_poweroff():
     log_file = os.path.join(app.root_path, "poweroff.log")
     command = """
@@ -70,6 +83,27 @@ sleep 1
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         env={**os.environ, "POWEROFF_LOG": log_file},
+        start_new_session=True
+    )
+
+
+def schedule_admin_stop():
+    log_file = os.path.join(app.root_path, "admin_stop.log")
+    command = """
+sleep 1
+{
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Demande d'arret du programme apres backup.db"
+    pkill -TERM -f '/var/lib/flatpak/exports/bin/com.google.Chrome' || true
+    pkill -TERM -f 'com.google.Chrome' || true
+    sleep 1
+    pkill -TERM -f '[p]ython3 app.py' || true
+} >> "$ADMIN_STOP_LOG" 2>&1
+"""
+    subprocess.Popen(
+        ["bash", "-lc", command],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        env={**os.environ, "ADMIN_STOP_LOG": log_file},
         start_new_session=True
     )
 
@@ -1126,6 +1160,17 @@ def system_poweroff():
         return f"Erreur arrêt système : {e}", 500
 
     return "Backup créé. Arrêt du système en cours..."
+
+
+@app.route("/admin/stop-program", methods=["POST"])
+def admin_stop_program():
+    try:
+        create_shutdown_backup()
+        schedule_admin_stop()
+    except Exception as e:
+        return f"Erreur arrêt programme : {e}", 500
+
+    return "backup.db créé. Fermeture de Chrome et arrêt du programme en cours..."
 
 
 # ANCHOR players
